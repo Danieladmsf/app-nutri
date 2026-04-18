@@ -1,26 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Search, UserPlus, MoreVertical, Phone, MapPin, ArrowRight, Filter, Download, Edit2, Pause, Trash2, X } from 'lucide-react';
-import { clientsMock } from '../data/mockDatabase';
+import { subscribeToClients, saveClient, deleteClient } from '../services/firestore';
 
 const ClientList = () => {
-  const [clients, setClients] = useState(clientsMock.map(c => ({
+  const [clients, setClients] = useState([]);
     id: c.id,
-    name: c.name,
-    phone: c.whatsapp || c.phone,
-    address: c.address,
-    status: c.status,
-    lastVisit: c.lastVisitDate ? c.lastVisitDate.split('-').reverse().join('/') : '—',
-    tags: c.tags || [],
-    tier: c.tier,
-    contact: c.contact,
-    contactRole: c.contactRole,
-    contactRole: c.contactRole,
-    lastReportStatus: c.lastReportStatus
-  })));
-
   const [activeMenu, setActiveMenu] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
+  const [formData, setFormData] = useState({ name: '', phone: '', contactRole: '', address: '' });
+
+  // Firestore Subscription
+  useEffect(() => {
+    const unsubscribe = subscribeToClients((data) => {
+      // Map data appropriately for the UI if needed
+      setClients(data);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -29,19 +26,54 @@ const ClientList = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const handleToggleStatus = (id) => {
-    setClients(prev => prev.map(c => c.id === id ? { ...c, status: c.status === 'Ativo' ? 'Pausado' : 'Ativo' } : c));
+  const handleToggleStatus = async (client) => {
+    try {
+      await saveClient(client, { status: client.status === 'Ativo' ? 'Pausado' : 'Ativo' });
+      setActiveMenu(null);
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao alterar status');
+    }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir este cliente?')) {
-      setClients(prev => prev.filter(c => c.id !== id));
+      try {
+        await deleteClient(id);
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao excluir');
+      }
     }
   };
 
   const openEditModal = (client = null) => {
     setEditingClient(client);
+    if(client) {
+      setFormData({ name: client.name || '', phone: client.phone || client.whatsapp || '', contactRole: client.contactRole || '', address: client.address || '' });
+    } else {
+      setFormData({ name: '', phone: '', contactRole: '', address: '' });
+    }
     setIsModalOpen(true);
+  };
+
+  const handleSaveClient = async () => {
+    if(!formData.name) return alert('Nome é obrigatório');
+    try {
+      const payload = {
+        ...formData,
+        status: editingClient?.status || 'Ativo',
+        tags: editingClient?.tags || [],
+        tier: editingClient?.tier || 'Standard',
+      };
+      if (editingClient?.id) payload.id = editingClient.id;
+      
+      await saveClient(payload);
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao salvar cliente');
+    }
   };
 
   return (
@@ -120,13 +152,13 @@ const ClientList = () => {
                 </td>
                 <td className="desktop-only" style={{ padding: '1rem' }}>
                   <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'nowrap' }}>
-                    {client.tags.slice(0, 3).map(tag => (
+                    {(client.tags || []).slice(0, 3).map(tag => (
                       <span key={tag} style={{ fontSize: '0.6rem', background: 'var(--bg-deep)', padding: '0.15rem 0.4rem', border: '1px solid var(--border-dim)', borderRadius: '3px', whiteSpace: 'nowrap' }}>
                         {tag}
                       </span>
                     ))}
-                    {client.tags.length > 3 && (
-                      <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>+{client.tags.length - 3}</span>
+                    {(client.tags?.length || 0) > 3 && (
+                      <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>+{(client.tags?.length || 0) - 3}</span>
                     )}
                   </div>
                 </td>
@@ -146,7 +178,7 @@ const ClientList = () => {
                        <button onClick={() => openEditModal(client)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', padding: '0.5rem', textAlign: 'left', fontSize: '0.75rem', cursor: 'pointer', color: 'var(--text-main)' }}>
                          <Edit2 size={14} /> Editar Cliente
                        </button>
-                       <button onClick={() => handleToggleStatus(client.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', padding: '0.5rem', textAlign: 'left', fontSize: '0.75rem', cursor: 'pointer', color: 'var(--text-main)' }}>
+                       <button onClick={() => handleToggleStatus(client)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', padding: '0.5rem', textAlign: 'left', fontSize: '0.75rem', cursor: 'pointer', color: 'var(--text-main)' }}>
                          <Pause size={14} /> {client.status === 'Ativo' ? 'Pausar Agenda' : 'Reativar Agenda'}
                        </button>
                        <div style={{ height: '1px', background: 'var(--border-dim)', margin: '0.3rem 0' }}></div>
@@ -183,26 +215,26 @@ const ClientList = () => {
              <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Nome da Empresa / Cliente</label>
-                  <input type="text" defaultValue={editingClient?.name} placeholder="Ex: Cozinha Matriz" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
+                  <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ex: Cozinha Matriz" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Contato (WhatsApp)</label>
-                    <input type="text" defaultValue={editingClient?.phone} placeholder="(00) 00000-0000" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
+                    <input type="text" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="(00) 00000-0000" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Cargo</label>
-                    <input type="text" defaultValue={editingClient?.contactRole} placeholder="Ex: Gerente Geral" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
+                    <input type="text" value={formData.contactRole} onChange={e => setFormData({...formData, contactRole: e.target.value})} placeholder="Ex: Gerente Geral" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Endereço Completo</label>
-                  <input type="text" defaultValue={editingClient?.address} placeholder="Ex: Av. Paulista, 1500 - Bela Vista" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
+                  <input type="text" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} placeholder="Ex: Av. Paulista, 1500 - Bela Vista" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
                 </div>
              </div>
              <div style={{ padding: '1rem 1.5rem', background: 'var(--bg-deep)', borderTop: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                <button onClick={() => setIsModalOpen(false)} className="btn" style={{ padding: '0.8rem 1.5rem' }}>Cancelar</button>
-               <button onClick={() => setIsModalOpen(false)} className="btn btn-primary" style={{ padding: '0.8rem 1.5rem' }}>Salvar Cliente</button>
+               <button onClick={handleSaveClient} className="btn btn-primary" style={{ padding: '0.8rem 1.5rem' }}>Salvar Cliente</button>
              </div>
           </div>
         </div>

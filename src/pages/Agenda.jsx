@@ -85,7 +85,7 @@ const parseDurationToMinutes = (durationStr) => {
   return mins;
 };
 
-import { visitsMock as initialVisitsMock } from '../data/mockDatabase';
+import { subscribeToVisits } from '../services/firestore';
 
 const Agenda = () => {
   const navigate = useNavigate();
@@ -96,44 +96,13 @@ const Agenda = () => {
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedVisits, setSelectedVisits] = useState([]);
-  const [visitsData, setVisitsData] = useState(initialVisitsMock);
+  const [visitsData, setVisitsData] = useState({});
 
   useEffect(() => {
-    const handleSaveSchedule = (e) => {
-       const { newDate, visits, rescheduleType } = e.detail;
-       if (!newDate || !visits) return;
-       
-       setVisitsData(prev => {
-         const newState = { ...prev };
-         const visitsArray = Array.isArray(visits) ? visits : [visits];
-         
-         // Remove from origins
-         Object.keys(newState).forEach(date => {
-            newState[date] = newState[date].filter(v => !visitsArray.find(mv => mv.id === v.id));
-         });
-         
-         // Add to destination
-         if (!newState[newDate]) newState[newDate] = [];
-         visitsArray.forEach(v => {
-            newState[newDate].push({ 
-                ...v, 
-                time: '12:00', // Mocking same time, logic can expand later
-                rescheduleType 
-            }); 
-         });
-         return newState;
-       });
-
-       setIsSelectMode(false);
-       setSelectedVisits([]);
-       setSelectedDate(newDate);
-       
-       // Force week jump if necessary
-       setWeekStartObj(newDate); 
-    };
-
-    window.addEventListener('saveSchedule', handleSaveSchedule);
-    return () => window.removeEventListener('saveSchedule', handleSaveSchedule);
+    const unsub = subscribeToVisits((data) => {
+      setVisitsData(data);
+    });
+    return () => unsub();
   }, []);
 
   const toggleVisitSelection = (visit) => {
@@ -142,7 +111,7 @@ const Agenda = () => {
     } else {
        setSelectedVisits([...selectedVisits, visit]);
     }
-  }
+  };
 
   const weekDays = generateWeekDays(weekStartObj);
   const activeVisits = visitsData[selectedDate] || [];
