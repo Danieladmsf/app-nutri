@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, Layout, Share2, Tag, Trash2 } from 'lucide-react';
-import { INSPECTION_CATEGORIES } from '../constants/inspectionPoints';
+import { useAppContext } from '../contexts/AppContext';
 
 const ReportGenerator = () => {
+  const { categories: INSPECTION_CATEGORIES, profile } = useAppContext();
   const [client, setClient] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedShortcuts, setSelectedShortcuts] = useState([]);
@@ -26,10 +27,12 @@ const ReportGenerator = () => {
       setReport({
         title: "RELATÓRIO DE CONFORMIDADE #042",
         date: "18 ABRIL 2026",
+        auditor: profile.name || 'Auditor não identificado',
+        crm: profile.crm || '—',
         diagnosis: `Identificadas ${selectedShortcuts.length} não conformidades críticas durante a auditoria operacional.`,
         recommendations: [
           ...selectedShortcuts.map(s => s.text),
-          "Realizar treinamento de reciclagrem com a equipe operante.",
+          "Realizar treinamento de reciclagem com a equipe operante.",
           "Agendar re-inspeção em 7 dias."
         ],
         tips: notes || "A manutenção dos padrões higiênico-sanitários é vital para a segurança alimentar."
@@ -152,6 +155,9 @@ const ReportGenerator = () => {
                     <div>
                        <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>{report.title}</h3>
                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>GERADO EM {report.date}</div>
+                       <div style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: 700, marginTop: '0.2rem' }}>
+                         {report.auditor} • {report.crm}
+                       </div>
                     </div>
                  </div>
                  <button className="btn" style={{ padding: '0.4rem' }}><Download size={16}/></button>

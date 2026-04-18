@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Save, Plus, Trash2, Camera, GripVertical, ChevronRight, Calendar, User, Sparkles, Clock, X, AlertTriangle } from 'lucide-react';
+import { useAppContext } from '../contexts/AppContext';
 
 // ─── Default Data ───
 const DEFAULT_WORK_DAYS = {
@@ -465,24 +466,20 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState('agenda');
   const [isSaving, setIsSaving] = useState(false);
 
-  // Agenda State
-  const [workDays, setWorkDays] = useState(DEFAULT_WORK_DAYS);
-  const [workStart, setWorkStart] = useState('07:00');
-  const [workEnd, setWorkEnd] = useState('18:00');
-  const [slotDuration, setSlotDuration] = useState('1h');
-
-  // Profile State
-  const [profile, setProfile] = useState({
-    name: '', email: '', whatsapp: '', crm: '', photo: '', bio: ''
-  });
-
-  // Laudo IA State
-  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  // All state now comes from the global AppContext (shared + persisted in localStorage)
+  const {
+    workDays, setWorkDays,
+    workStart, setWorkStart,
+    workEnd, setWorkEnd,
+    slotDuration, setSlotDuration,
+    profile, setProfile,
+    categories, setCategories,
+  } = useAppContext();
 
   const handleSave = () => {
     setIsSaving(true);
     setTimeout(() => setIsSaving(false), 1200);
-    // Future: persist to Firestore
+    // Data already auto-persists via AppContext useEffect
   };
 
   const tabs = [
