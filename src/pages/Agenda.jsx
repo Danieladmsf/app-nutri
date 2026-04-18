@@ -242,12 +242,28 @@ const Agenda = () => {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '5rem' }} className="reveal-staggered">
            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
               <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Visitas Agendadas</h3>
-              <button 
-                onClick={() => { setIsSelectMode(!isSelectMode); setSelectedVisits([]); }} 
-                className="btn" 
-                style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', background: isSelectMode ? 'var(--primary)' : 'transparent', border: isSelectMode ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: isSelectMode ? 'white' : 'var(--text-main)' }}>
-                {isSelectMode ? 'Cancelar Seleção' : 'Reagendar'}
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                 {isSelectMode && activeVisits.length > 0 && (
+                   <button 
+                     onClick={() => {
+                        if (selectedVisits.length === activeVisits.length) {
+                           setSelectedVisits([]);
+                        } else {
+                           setSelectedVisits([...activeVisits]);
+                        }
+                     }}
+                     className="btn"
+                     style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', background: 'transparent', border: '1px solid var(--border-dim)', color: 'var(--text-main)' }}>
+                     {selectedVisits.length === activeVisits.length ? 'Desmarcar Todos' : 'Selecionar Todos'}
+                   </button>
+                 )}
+                 <button 
+                   onClick={() => { setIsSelectMode(!isSelectMode); setSelectedVisits([]); }} 
+                   className="btn" 
+                   style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', background: isSelectMode ? 'var(--primary)' : 'transparent', border: isSelectMode ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: isSelectMode ? 'white' : 'var(--text-main)' }}>
+                   {isSelectMode ? 'Cancelar Seleção' : 'Reagendar'}
+                 </button>
+              </div>
            </div>
            
            {activeVisits.length > 0 ? activeVisits.map((visit) => {
