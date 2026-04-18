@@ -44,7 +44,7 @@ const Dashboard = () => {
         <section className="card" style={{ padding: '0' }}>
           <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
              <h3 style={{ fontSize: '0.9rem', fontWeight: 700 }}>SUA ROTA DE HOJE (SEGUNDA-FEIRA)</h3>
-             <Link to="/agenda" style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'none' }}>VER ROTA COMPLETA</Link>
+             <Link to="/" style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'none' }}>VER ROTA COMPLETA</Link>
           </div>
           <div style={{ width: '100%' }}>
             {[
