@@ -6,7 +6,7 @@ const Dashboard = () => {
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
       
       {/* SaaS Stat Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+      <div className="stat-grid-responsive" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
         {[
           { label: 'Visitas Hoje', value: '03', detail: '+1 desde ontem', icon: <Calendar size={16}/>, color: 'var(--primary)' },
           { label: 'Laudos Pendentes', value: '05', detail: '2 urgentes', icon: <Clock size={16}/>, color: 'var(--secondary)' },
@@ -43,18 +43,19 @@ const Dashboard = () => {
                 padding: '1.2rem 2rem', 
                 borderBottom: idx === 2 ? 'none' : '1px solid var(--border-dim)',
                 display: 'grid',
-                gridTemplateColumns: '80px 1fr 1fr 100px 40px',
+                gridTemplateColumns: '60px 1fr auto',
+                gap: '1rem',
                 alignItems: 'center',
                 fontSize: '0.85rem'
               }}>
                 <div style={{ fontWeight: 600, color: 'var(--primary)' }}>{item.time}</div>
-                <div style={{ fontWeight: 600 }}>{item.name}</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.type}</div>
+                <div>
+                   <div style={{ fontWeight: 600 }}>{item.name}</div>
+                   <div className="desktop-only" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.type}</div>
+                </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: item.status === 'Confirmado' ? 'var(--primary)' : 'var(--secondary)' }}></div>
-                   <span style={{ fontSize: '0.75rem' }}>{item.status}</span>
                 </div>
-                <ChevronRight size={16} color="var(--border-dim)" />
               </div>
             ))}
           </div>

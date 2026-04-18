@@ -32,15 +32,15 @@ const ClientList = () => {
       </div>
 
       {/* Data Grid Table */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+      <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem', minWidth: '600px' }}>
           <thead>
             <tr style={{ background: 'var(--bg-deep)', borderBottom: '1px solid var(--border-dim)' }}>
               <th style={{ padding: '1.2rem 2rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.7rem' }}>CLIENTE</th>
-              <th style={{ padding: '1.2rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.7rem' }}>CONTATO & ENDEREÇO</th>
+              <th className="desktop-only" style={{ padding: '1.2rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.7rem' }}>CONTATO & ENDEREÇO</th>
               <th style={{ padding: '1.2rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.7rem' }}>ÚLTIMA VISITA</th>
               <th style={{ padding: '1.2rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.7rem' }}>STATUS</th>
-              <th style={{ padding: '1.2rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.7rem' }}>TAGS</th>
+              <th className="desktop-only" style={{ padding: '1.2rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.7rem' }}>TAGS</th>
               <th style={{ padding: '1.2rem 2rem', textAlign: 'right' }}></th>
             </tr>
           </thead>
@@ -51,7 +51,7 @@ const ClientList = () => {
                    <div style={{ fontWeight: 600 }}>{client.name}</div>
                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ID: #{client.id}00342</div>
                 </td>
-                <td style={{ padding: '1.2rem' }}>
+                <td className="desktop-only" style={{ padding: '1.2rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
                     <Phone size={12} color="var(--primary)" /> {client.phone}
                   </div>
@@ -72,7 +72,7 @@ const ClientList = () => {
                     {client.status.toUpperCase()}
                   </span>
                 </td>
-                <td style={{ padding: '1.2rem' }}>
+                <td className="desktop-only" style={{ padding: '1.2rem' }}>
                   <div style={{ display: 'flex', gap: '0.4rem' }}>
                     {client.tags.map(tag => (
                       <span key={tag} style={{ fontSize: '0.65rem', background: 'var(--bg-deep)', padding: '0.2rem 0.5rem', border: '1px solid var(--border-dim)' }}>
