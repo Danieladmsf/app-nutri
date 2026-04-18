@@ -39,6 +39,27 @@ const shiftWeek = (startDateStr, daysToShift) => {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+const generateMonthCalendar = (year, month) => {
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month, 0);
+  const daysInMonth = lastDay.getDate();
+  const startDayOfWeek = firstDay.getDay(); 
+
+  const days = [];
+  for (let i = 0; i < startDayOfWeek; i++) {
+    days.push(null);
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    const mm = String(month).padStart(2, '0');
+    const dd = String(i).padStart(2, '0');
+    days.push({
+       date: i,
+       fullDate: `${year}-${mm}-${dd}`
+    });
+  }
+  return days;
+};
+
 const initialVisitsMock = {
   '2026-04-14': [],
   '2026-04-15': [
@@ -168,13 +189,51 @@ const Agenda = () => {
       </div>
 
       {viewMode === 'mensal' ? (
-        <div className="reveal-staggered" style={{ padding: '6rem 2rem', textAlign: 'center', background: 'var(--bg-surface)', border: '1px dashed var(--border-dim)', borderRadius: 'var(--radius-md)', flex: 1 }}>
-           <Calendar size={48} style={{ opacity: 0.2, margin: '0 auto 1.5rem', color: 'var(--text-main)' }} />
-           <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Módulo de Visão Mensal</h3>
-           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto' }}>
-              O calendário expandido de planejamento será liberado na próxima etapa do desenvolvimento. Por enquanto, utilize a <strong>Agenda Diária</strong> para as operações de campo.
-           </p>
-           <button onClick={() => setViewMode('diaria')} className="btn btn-primary" style={{ marginTop: '2rem' }}>Voltar para a Agenda Diária</button>
+        <div className="reveal-staggered" style={{ padding: '1rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', flex: 1 }}>
+           <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1.5rem', textAlign: 'center' }}>Abril de 2026</h3>
+           
+           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem', marginBottom: '0.5rem' }}>
+             {['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d => (
+                <div key={d} style={{ textAlign: 'center', fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)' }}>{d}</div>
+             ))}
+           </div>
+           
+           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem' }}>
+             {generateMonthCalendar(2026, 4).map((dayObj, i) => {
+                if (!dayObj) return <div key={`empty-${i}`} style={{ background: 'transparent' }} />;
+                
+                const dayVisits = visitsData[dayObj.fullDate] || [];
+                const fixed = dayVisits.filter(v => v.isRecurring).length;
+                const pontual = dayVisits.filter(v => !v.isRecurring && !v.rescheduleType).length;
+                const rescheduled = dayVisits.filter(v => v.rescheduleType).length;
+                const isSelected = selectedDate === dayObj.fullDate;
+
+                return (
+                   <div 
+                     key={dayObj.fullDate} 
+                     onClick={() => {
+                        setViewMode('diaria');
+                        setSelectedDate(dayObj.fullDate);
+                        setWeekStartObj(dayObj.fullDate);
+                     }}
+                     style={{ 
+                       background: isSelected ? 'rgba(27,61,47,0.05)' : 'var(--bg-deep)', 
+                       border: '1px solid',
+                       borderColor: isSelected ? 'var(--primary)' : 'var(--border-dim)', 
+                       borderRadius: '8px', padding: '0.5rem', minHeight: '80px',
+                       cursor: 'pointer', display: 'flex', flexDirection: 'column',
+                       transition: 'all 0.2s ease'
+                     }}>
+                      <div style={{ fontWeight: 800, fontSize: '1rem', marginBottom: 'auto', color: isSelected ? 'var(--primary)' : 'var(--text-main)' }}>{dayObj.date}</div>
+                      <div style={{ display: 'flex', gap: '2px', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                         {fixed > 0 && <span style={{ background: 'rgba(27,61,47,0.1)', color: 'var(--primary)', fontSize: '0.6rem', padding: '2px 4px', borderRadius: '4px', fontWeight: 700 }}>{fixed} Fx</span>}
+                         {pontual > 0 && <span style={{ background: 'rgba(212,163,115,0.1)', color: 'var(--secondary)', fontSize: '0.6rem', padding: '2px 4px', borderRadius: '4px', fontWeight: 700 }}>{pontual} Pt</span>}
+                         {rescheduled > 0 && <span style={{ background: '#fff9ed', color: '#b27a00', fontSize: '0.6rem', padding: '2px 4px', borderRadius: '4px', border: '1px dashed currentColor', fontWeight: 700 }}>{rescheduled} Ex</span>}
+                      </div>
+                   </div>
+                )
+             })}
+           </div>
         </div>
       ) : (
         <>
