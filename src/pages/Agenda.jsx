@@ -57,6 +57,23 @@ const Agenda = () => {
   return (
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
       
+      {/* Header Toolbar */}
+      <div className="flex-toolbar" style={{ gap: '1rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', flex: 1 }} className="full-width-mobile">
+          <div className="card" style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-surface)', padding: '0.2rem', borderRadius: 'var(--radius-md)' }}>
+             <button className="btn" style={{ border: 'none', background: 'var(--bg-deep)', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+               Agenda Diária
+             </button>
+             <button className="btn" style={{ border: 'none', background: 'transparent', color: 'var(--text-muted)' }}>
+               Visão Mensal (Rotas)
+             </button>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '1rem' }} className="full-width-mobile">
+          <button className="btn full-width-mobile"><Building size={16} /> Ver Estabelecimentos</button>
+        </div>
+      </div>
+
       {/* Week Selector Bar */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
         
@@ -121,7 +138,6 @@ const Agenda = () => {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', gap: '1rem' }} className="reveal-staggered">
            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
               <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Visitas Agendadas</h3>
-              <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem' }}><Plus size={14}/> Nova</button>
            </div>
            
            {activeVisits.length > 0 ? activeVisits.map((visit) => {
@@ -210,13 +226,20 @@ const Agenda = () => {
              </div>
 
              {/* Actions Footers */}
-             <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-surface)' }}>
+             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-surface)', display: 'flex', gap: '1rem' }}>
+                 <button 
+                   onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))} 
+                   className="btn" 
+                   style={{ flex: 1, justifyContent: 'center', padding: '1rem' }}
+                 >
+                    Reagendar
+                 </button>
                  <button 
                    onClick={() => navigate('/laudos')} 
                    className="btn btn-primary" 
-                   style={{ width: '100%', justifyContent: 'center', padding: '1rem' }}
+                   style={{ flex: 2, justifyContent: 'center', padding: '1rem' }}
                  >
-                    <FileText size={16} /> INICIAR AUDITORIA IA
+                    <FileText size={16} /> AUDITORIA IA
                  </button>
              </div>
           </div>
@@ -248,13 +271,20 @@ const Agenda = () => {
                 </div>
              </div>
 
-             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-surface)', paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
+             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-surface)', paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))', display: 'flex', gap: '1rem' }}>
+                 <button 
+                   onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))} 
+                   className="btn" 
+                   style={{ flex: 1, justifyContent: 'center', padding: '1rem' }}
+                 >
+                    Reagendar
+                 </button>
                  <button 
                    onClick={() => navigate('/laudos')} 
                    className="btn btn-primary" 
-                   style={{ width: '100%', justifyContent: 'center', padding: '1rem' }}
+                   style={{ flex: 2, justifyContent: 'center', padding: '1rem' }}
                  >
-                    <FileText size={16} /> INICIAR AUDITORIA IA
+                    <FileText size={16} /> AUDITORIA IA
                  </button>
              </div>
           </div>

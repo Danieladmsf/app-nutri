@@ -1,7 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
+import ScheduleModal from './ScheduleModal';
 
 const Layout = ({ children }) => {
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [scheduleData, setScheduleData] = useState(null);
+
+  useEffect(() => {
+    const handleOpen = (e) => {
+      setScheduleData(e.detail || null);
+      setIsScheduleModalOpen(true);
+    };
+    window.addEventListener('openScheduleModal', handleOpen);
+    return () => window.removeEventListener('openScheduleModal', handleOpen);
+  }, []);
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-deep)' }}>
       <Sidebar />
@@ -18,7 +31,13 @@ const Layout = ({ children }) => {
             </h1>
             <div style={{ display: 'flex', gap: '1rem' }}>
                <button className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.7rem' }}>FILTRAR</button>
-               <button className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.7rem' }}>+ NOVA VISITA</button>
+               <button 
+                 onClick={() => { setScheduleData(null); setIsScheduleModalOpen(true); }}
+                 className="btn btn-primary" 
+                 style={{ padding: '0.5rem 1rem', fontSize: '0.7rem' }}
+               >
+                 + NOVA VISITA
+               </button>
             </div>
           </div>
         </header>
@@ -27,6 +46,12 @@ const Layout = ({ children }) => {
           {children}
         </div>
       </main>
+
+      <ScheduleModal 
+        isOpen={isScheduleModalOpen} 
+        onClose={() => setIsScheduleModalOpen(false)} 
+        initialData={scheduleData} 
+      />
     </div>
   );
 };

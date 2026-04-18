@@ -1,0 +1,152 @@
+import React, { useState, useEffect } from 'react';
+import { X, Calendar, Clock, AlertTriangle, RefreshCcw } from 'lucide-react';
+
+const ScheduleModal = ({ isOpen, onClose, initialData }) => {
+  // Modes: 'create', 'reschedule'
+  const mode = initialData ? 'reschedule' : 'create';
+  
+  const [client, setClient] = useState('');
+  const [date, setDate] = useState('');
+  const [timeSection, setTimeSection] = useState('08:00 - 10:00');
+  const [visitType, setVisitType] = useState('Auditoria Completa');
+  
+  // Create state
+  const [isRecurring, setIsRecurring] = useState(true);
+  
+  // Reschedule state
+  const [rescheduleType, setRescheduleType] = useState('provisional'); // provisional | permanent
+  const [reason, setReason] = useState('');
+
+  // Auto-fill if editing/rescheduling
+  useEffect(() => {
+    if (initialData) {
+      setClient(initialData.client || '');
+      setDate(initialData.date || '2026-04-15');
+      setTimeSection(initialData.time || '10:00 - 12:00');
+    }
+  }, [initialData, isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.6)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} className="reveal-staggered">
+      <div className="card" style={{ width: '100%', maxWidth: '500px', background: 'var(--bg-surface)', padding: 0, borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+        
+        {/* Header */}
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-deep)' }}>
+           <div>
+             <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>
+               {mode === 'create' ? 'Agendar Nova Visita' : 'Reagendamento de Rota'}
+             </h3>
+             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+               {mode === 'create' ? 'Insira a visita no sistema' : 'Ajuste a rota existente'}
+             </p>
+           </div>
+           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20}/></button>
+        </div>
+
+        {/* Content Body */}
+        <div style={{ padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          
+          {mode === 'reschedule' && (
+            <div style={{ padding: '1rem', background: 'rgba(212, 163, 115, 0.05)', border: '1px solid rgba(212, 163, 115, 0.3)', borderRadius: 'var(--radius-md)', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+              <AlertTriangle size={20} color="var(--secondary)" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <strong style={{ fontSize: '0.8rem', color: 'var(--secondary)', display: 'block', marginBottom: '0.3rem' }}>Cliente: {client}</strong>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-main)', lineHeight: '1.4' }}>
+                  Esta visita estava previamente agendada e faz parte da rotina fixa do cliente. Escolha abaixo como deseja prosseguir com a alteração.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Form Fields */}
+          {mode === 'create' && (
+            <div>
+              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Cliente / Estabelecimento</label>
+              <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem' }}>
+                <option>Selecione um cliente...</option>
+                <option>Cozinha Industrial Matriz</option>
+                <option>Supermercado Nova Era</option>
+              </select>
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+             <div>
+                <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Nova Data</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid var(--border-dim)', padding: '0.8rem', borderRadius: '4px', background: 'var(--bg-deep)' }}>
+                  <Calendar size={16} color="var(--text-muted)" />
+                  <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ border: 'none', background: 'transparent', width: '100%', fontSize: '0.8rem', outline: 'none' }} />
+                </div>
+             </div>
+             <div>
+                <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Horário (Slot)</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid var(--border-dim)', padding: '0.8rem', borderRadius: '4px', background: 'var(--bg-deep)' }}>
+                  <Clock size={16} color="var(--text-muted)" />
+                  <input type="text" value={timeSection} onChange={e => setTimeSection(e.target.value)} style={{ border: 'none', background: 'transparent', width: '100%', fontSize: '0.8rem', outline: 'none' }} />
+                </div>
+             </div>
+          </div>
+
+          <div>
+             <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Objetivo Principal</label>
+             <select value={visitType} onChange={e => setVisitType(e.target.value)} style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem' }}>
+               <option>Auditoria Completa</option>
+               <option>Treinamento de Equipe</option>
+               <option>Checklist Operacional</option>
+             </select>
+          </div>
+
+          {/* Conditional Controls */}
+          <div style={{ borderTop: '1px solid var(--border-dim)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
+            
+            {mode === 'create' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <input type="checkbox" id="recorrencia" checked={isRecurring} onChange={e => setIsRecurring(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--primary)' }} />
+                <label htmlFor="recorrencia" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Tornar esta visita FIXA na rotina desta semana?</label>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                 <label className="stat-label">Tipo de Reagendamento</label>
+                 
+                 <label style={{ display: 'flex', gap: '1rem', padding: '1rem', border: '1px solid', borderColor: rescheduleType === 'provisional' ? 'var(--primary)' : 'var(--border-dim)', borderRadius: 'var(--radius-md)', background: rescheduleType === 'provisional' ? 'rgba(27,61,47,0.05)' : 'var(--bg-deep)', cursor: 'pointer' }}>
+                   <input type="radio" name="reschedule" checked={rescheduleType === 'provisional'} onChange={() => setRescheduleType('provisional')} style={{ marginTop: '2px', accentColor: 'var(--primary)' }} />
+                   <div>
+                     <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>Provisório ou Excepcional</div>
+                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem', lineHeight: '1.4' }}>Move apenas a visita desta semana (ex: Devido a Feriado). Semana que vem ela volta ao dia normal.</div>
+                   </div>
+                 </label>
+
+                 <label style={{ display: 'flex', gap: '1rem', padding: '1rem', border: '1px solid', borderColor: rescheduleType === 'permanent' ? 'var(--primary)' : 'var(--border-dim)', borderRadius: 'var(--radius-md)', background: rescheduleType === 'permanent' ? 'rgba(27,61,47,0.05)' : 'var(--bg-deep)', cursor: 'pointer' }}>
+                   <input type="radio" name="reschedule" checked={rescheduleType === 'permanent'} onChange={() => setRescheduleType('permanent')} style={{ marginTop: '2px', accentColor: 'var(--primary)' }} />
+                   <div>
+                     <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>Definitivo na Rotina</div>
+                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem', lineHeight: '1.4' }}>A partir de agora, o dia/horário padrão deste cliente foi oficialmente alterado.</div>
+                   </div>
+                 </label>
+
+                 <div>
+                   <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Motivo (Opcional)</label>
+                   <input type="text" placeholder="Feriado nacional, pedido do gerente, etc..." style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem' }} />
+                 </div>
+              </div>
+            )}
+
+          </div>
+
+        </div>
+
+        {/* Footer Actions */}
+        <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-deep)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button className="btn" onClick={onClose}>Cancelar</button>
+          <button className="btn btn-primary" onClick={onClose}>
+            {mode === 'create' ? 'Salvar Agendamento' : 'Confirmar Reagendamento'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ScheduleModal;
