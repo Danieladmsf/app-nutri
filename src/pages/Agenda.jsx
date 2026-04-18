@@ -80,43 +80,7 @@ const parseDurationToMinutes = (durationStr) => {
   return mins;
 };
 
-const initialVisitsMock = {
-  '2026-04-14': [],
-  '2026-04-15': [
-     { id: 1, time: '08:00', duration: '2h', client: 'Cozinha Industrial Matriz', address: 'Av. Paulista, 1500 - Bela Vista', 
-       status: 'Em aberto',
-       isRecurring: true, // É da rotina fixa
-       clientData: { 
-         contact: 'João Silva / Gerente Geral', 
-         lastVisitDate: '01 ABR 2026', 
-         lastReportStatus: 'Atenção Necessária',
-         historicIssues: 'Problemas recorrentes no uso da touca de proteção e ausência de etiquetas de abertura nos laticínios.' 
-       } 
-     },
-     { id: 2, time: '14:30', duration: '1h 30m', client: 'Supermercado Nova Era', address: 'Rua Augusta, 400 - Consolação',
-       status: 'Em aberto',
-       isRecurring: false, // Visita solicitada/pontual
-       clientData: {
-         contact: 'Mariana Oliveira / Chefe de Setor',
-         lastVisitDate: '28 MAR 2026',
-         lastReportStatus: 'Conforme',
-         historicIssues: 'Historicamente excelente, porém solicitou suporte térmico no freezer 3. Visita técnica.'
-       }
-     }
-  ],
-  '2026-04-16': [
-     { id: 3, time: '09:00', duration: '3h', client: 'Refeitório São João', address: 'Av. do Estado, 3000',
-       status: 'Em aberto',
-       isRecurring: true,
-       clientData: {
-         contact: 'Carlos Eduardo',
-         lastVisitDate: '15 MAR 2026',
-         lastReportStatus: 'Crítico',
-         historicIssues: 'Equipe foi advertida pela falta sistemática de luvas de malha de aço no setor de carnes.'
-       }
-     }
-  ]
-};
+import { visitsMock as initialVisitsMock } from '../data/mockDatabase';
 
 const Agenda = () => {
   const navigate = useNavigate();

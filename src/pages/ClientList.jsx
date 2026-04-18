@@ -1,13 +1,21 @@
 import React from 'react';
 import { Search, UserPlus, MoreVertical, Phone, MapPin, ArrowRight, Filter, Download } from 'lucide-react';
+import { clientsMock } from '../data/mockDatabase';
 
 const ClientList = () => {
-  const clients = [
-    { id: 1, name: 'João Silva', phone: '11 99999 0001', address: 'Rua das Flores, 123', status: 'Ativo', lastVisit: '10/04/2026', tags: ['PCD', 'Hipertenso'] },
-    { id: 2, name: 'Maria Oliveira', phone: '11 99999 0002', address: 'Av. Paulista, 1500', status: 'Ativo', lastVisit: '15/04/2026', tags: ['Idoso'] },
-    { id: 3, name: 'Pedro Santos', phone: '11 99999 0003', address: 'Rua Augusta, 400', status: 'Inativo', lastVisit: '01/03/2026', tags: [] },
-    { id: 4, name: 'Ana Costa', phone: '11 98888 1122', address: 'Rua Bela Cintra, 900', status: 'Ativo', lastVisit: '18/04/2026', tags: ['Atleta'] },
-  ];
+  const clients = clientsMock.map(c => ({
+    id: c.id,
+    name: c.name,
+    phone: c.whatsapp || c.phone,
+    address: c.address,
+    status: c.status,
+    lastVisit: c.lastVisitDate ? c.lastVisitDate.split('-').reverse().join('/') : '—',
+    tags: c.tags || [],
+    tier: c.tier,
+    contact: c.contact,
+    contactRole: c.contactRole,
+    lastReportStatus: c.lastReportStatus
+  }));
 
   return (
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -104,7 +112,7 @@ const ClientList = () => {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-         <div>Mostrando 4 de 128 clientes</div>
+         <div>Mostrando {clients.length} clientes</div>
          <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button className="btn" style={{ padding: '0.4rem 0.8rem' }}>Anterior</button>
             <button className="btn" style={{ padding: '0.4rem 0.8rem', background: 'var(--primary)', color: 'white' }}>Próximo</button>
