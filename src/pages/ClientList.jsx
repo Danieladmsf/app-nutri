@@ -8,7 +8,7 @@ const ClientList = () => {
   const [activeMenu, setActiveMenu] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
-  const [formData, setFormData] = useState({ name: '', phone: '', contactRole: '', address: '', tagsText: '' });
+  const [formData, setFormData] = useState({ name: '', phone: '', contactRole: '', address: '' });
 
   // Firestore Subscription
   useEffect(() => {
@@ -54,11 +54,10 @@ const ClientList = () => {
         name: client.name || '', 
         phone: client.phone || client.whatsapp || '', 
         contactRole: client.contactRole || '', 
-        address: client.address || '',
-        tagsText: client.tags ? client.tags.join(', ') : ''
+        address: client.address || ''
       });
     } else {
-      setFormData({ name: '', phone: '', contactRole: '', address: '', tagsText: '' });
+      setFormData({ name: '', phone: '', contactRole: '', address: '' });
     }
     setIsModalOpen(true);
   };
@@ -72,7 +71,6 @@ const ClientList = () => {
         contactRole: formData.contactRole,
         address: formData.address,
         status: editingClient?.status || 'Ativo',
-        tags: formData.tagsText.split(',').map(t => t.trim()).filter(Boolean),
         tier: editingClient?.tier || 'Standard',
       };
       if (editingClient?.id) payload.id = editingClient.id;
@@ -127,7 +125,6 @@ const ClientList = () => {
               <th className="desktop-only" style={{ padding: '1rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>CONTATO</th>
               <th style={{ padding: '1rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>VISITA</th>
               <th style={{ padding: '1rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>STATUS</th>
-              <th className="desktop-only" style={{ padding: '1rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>TAGS</th>
               <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}></th>
             </tr>
           </thead>
@@ -158,18 +155,6 @@ const ClientList = () => {
                   }}>
                     {client.status.toUpperCase()}
                   </span>
-                </td>
-                <td className="desktop-only" style={{ padding: '1rem' }}>
-                  <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'nowrap' }}>
-                    {(client.tags || []).slice(0, 3).map(tag => (
-                      <span key={tag} style={{ fontSize: '0.6rem', background: 'var(--bg-deep)', padding: '0.15rem 0.4rem', border: '1px solid var(--border-dim)', borderRadius: '3px', whiteSpace: 'nowrap' }}>
-                        {tag}
-                      </span>
-                    ))}
-                    {(client.tags?.length || 0) > 3 && (
-                      <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>+{(client.tags?.length || 0) - 3}</span>
-                    )}
-                  </div>
                 </td>
                 <td style={{ padding: '1rem 1.5rem', textAlign: 'right', position: 'relative' }}>
                    <button 
@@ -239,10 +224,6 @@ const ClientList = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Endereço Completo</label>
                   <input type="text" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} placeholder="Ex: Av. Paulista, 1500 - Bela Vista" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Tags (separadas por vírgula)</label>
-                  <input type="text" value={formData.tagsText} onChange={e => setFormData({...formData, tagsText: e.target.value})} placeholder="Ex: Indústria, Alta Demanda, ANVISA" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
                 </div>
              </div>
              <div style={{ padding: '1rem 1.5rem', background: 'var(--bg-deep)', borderTop: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
