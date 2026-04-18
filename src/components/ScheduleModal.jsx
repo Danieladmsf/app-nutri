@@ -53,9 +53,15 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
               <AlertTriangle size={20} color="var(--secondary)" style={{ flexShrink: 0, marginTop: '2px' }} />
               <div>
                 <strong style={{ fontSize: '0.8rem', color: 'var(--secondary)', display: 'block', marginBottom: '0.3rem' }}>Cliente: {client}</strong>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-main)', lineHeight: '1.4' }}>
-                  Esta visita estava previamente agendada e faz parte da rotina fixa do cliente. Escolha abaixo como deseja prosseguir com a alteração.
-                </p>
+                {initialData?.isRecurring ? (
+                   <p style={{ fontSize: '0.75rem', color: 'var(--text-main)', lineHeight: '1.4' }}>
+                     Esta visita estava previamente agendada e faz parte da rotina fixa do cliente. Escolha abaixo como deseja prosseguir com a alteração.
+                   </p>
+                ) : (
+                   <p style={{ fontSize: '0.75rem', color: 'var(--text-main)', lineHeight: '1.4' }}>
+                     Esta é uma solicitação <strong>Pontual</strong> de visita/auditoria (não faz parte da rotina fixa). Reagendá-la fará apenas a troca isolada da data.
+                   </p>
+                )}
               </div>
             </div>
           )}
@@ -108,23 +114,31 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                 <label className="stat-label">Tipo de Reagendamento</label>
-                 
-                 <label style={{ display: 'flex', gap: '1rem', padding: '1rem', border: '1px solid', borderColor: rescheduleType === 'provisional' ? 'var(--primary)' : 'var(--border-dim)', borderRadius: 'var(--radius-md)', background: rescheduleType === 'provisional' ? 'rgba(27,61,47,0.05)' : 'var(--bg-deep)', cursor: 'pointer' }}>
-                   <input type="radio" name="reschedule" checked={rescheduleType === 'provisional'} onChange={() => setRescheduleType('provisional')} style={{ marginTop: '2px', accentColor: 'var(--primary)' }} />
-                   <div>
-                     <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>Provisório ou Excepcional</div>
-                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem', lineHeight: '1.4' }}>Move apenas a visita desta semana (ex: Devido a Feriado). Semana que vem ela volta ao dia normal.</div>
-                   </div>
-                 </label>
+                 {!initialData?.isRecurring ? (
+                    <div style={{ padding: '0.5rem 0' }}>
+                       <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>Modo de Reagendamento: Simples (Visita Solicitada)</span>
+                    </div>
+                 ) : (
+                    <>
+                       <label className="stat-label">Tipo de Reagendamento da Rotina FIXA</label>
+                       
+                       <label style={{ display: 'flex', gap: '1rem', padding: '1rem', border: '1px solid', borderColor: rescheduleType === 'provisional' ? 'var(--primary)' : 'var(--border-dim)', borderRadius: 'var(--radius-md)', background: rescheduleType === 'provisional' ? 'rgba(27,61,47,0.05)' : 'var(--bg-deep)', cursor: 'pointer' }}>
+                         <input type="radio" name="reschedule" checked={rescheduleType === 'provisional'} onChange={() => setRescheduleType('provisional')} style={{ marginTop: '2px', accentColor: 'var(--primary)' }} />
+                         <div>
+                           <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>Provisório ou Excepcional</div>
+                           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem', lineHeight: '1.4' }}>Move apenas a visita desta semana (ex: Devido a Feriado). Semana que vem ela volta ao dia normal.</div>
+                         </div>
+                       </label>
 
-                 <label style={{ display: 'flex', gap: '1rem', padding: '1rem', border: '1px solid', borderColor: rescheduleType === 'permanent' ? 'var(--primary)' : 'var(--border-dim)', borderRadius: 'var(--radius-md)', background: rescheduleType === 'permanent' ? 'rgba(27,61,47,0.05)' : 'var(--bg-deep)', cursor: 'pointer' }}>
-                   <input type="radio" name="reschedule" checked={rescheduleType === 'permanent'} onChange={() => setRescheduleType('permanent')} style={{ marginTop: '2px', accentColor: 'var(--primary)' }} />
-                   <div>
-                     <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>Definitivo na Rotina</div>
-                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem', lineHeight: '1.4' }}>A partir de agora, o dia/horário padrão deste cliente foi oficialmente alterado.</div>
-                   </div>
-                 </label>
+                       <label style={{ display: 'flex', gap: '1rem', padding: '1rem', border: '1px solid', borderColor: rescheduleType === 'permanent' ? 'var(--primary)' : 'var(--border-dim)', borderRadius: 'var(--radius-md)', background: rescheduleType === 'permanent' ? 'rgba(27,61,47,0.05)' : 'var(--bg-deep)', cursor: 'pointer' }}>
+                         <input type="radio" name="reschedule" checked={rescheduleType === 'permanent'} onChange={() => setRescheduleType('permanent')} style={{ marginTop: '2px', accentColor: 'var(--primary)' }} />
+                         <div>
+                           <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>Definitivo na Rotina</div>
+                           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem', lineHeight: '1.4' }}>A partir de agora, o dia/horário padrão deste cliente foi oficialmente alterado.</div>
+                         </div>
+                       </label>
+                    </>
+                 )}
 
                  <div>
                    <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Motivo (Opcional)</label>

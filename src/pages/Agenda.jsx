@@ -44,6 +44,7 @@ const visitsMock = {
   '2026-04-15': [
      { id: 1, time: '08:00', duration: '2h', client: 'Cozinha Industrial Matriz', address: 'Av. Paulista, 1500 - Bela Vista', 
        status: 'Em aberto',
+       isRecurring: true, // É da rotina fixa
        clientData: { 
          contact: 'João Silva / Gerente Geral', 
          lastVisitDate: '01 ABR 2026', 
@@ -53,17 +54,19 @@ const visitsMock = {
      },
      { id: 2, time: '14:30', duration: '1h 30m', client: 'Supermercado Nova Era', address: 'Rua Augusta, 400 - Consolação',
        status: 'Em aberto',
+       isRecurring: false, // Visita solicitada/pontual
        clientData: {
          contact: 'Mariana Oliveira / Chefe de Setor',
          lastVisitDate: '28 MAR 2026',
          lastReportStatus: 'Conforme',
-         historicIssues: 'Historicamente excelente, porém na última visita notou-se gelo excessivo no fundo do freezer 3. Checar manutenção.'
+         historicIssues: 'Historicamente excelente, porém solicitou suporte térmico no freezer 3. Visita técnica.'
        }
      }
   ],
   '2026-04-16': [
      { id: 3, time: '09:00', duration: '3h', client: 'Refeitório São João', address: 'Av. do Estado, 3000',
        status: 'Em aberto',
+       isRecurring: true,
        clientData: {
          contact: 'Carlos Eduardo',
          lastVisitDate: '15 MAR 2026',
@@ -200,7 +203,10 @@ const Agenda = () => {
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>{visit.duration}</div>
                  </div>
                  <div>
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.3rem' }}>{visit.client}</h4>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                       {visit.client} 
+                       {visit.isRecurring === false && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(212,163,115,0.1)', color: 'var(--secondary)', borderRadius: '4px', border: '1px solid currentColor' }}>PONTUAL</span>}
+                    </h4>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                        <MapPin size={12} /> {visit.address}
                     </div>
@@ -231,7 +237,12 @@ const Agenda = () => {
                   </div>
                   <div>
                     <h4 style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedVisit.client}</h4>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>{selectedVisit.status.toUpperCase()}</div>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem' }}>
+                       <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--bg-deep)', borderRadius: '4px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedVisit.status.toUpperCase()}</span>
+                       <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: selectedVisit.isRecurring ? 'rgba(27,61,47,0.1)' : 'rgba(212,163,115,0.1)', color: selectedVisit.isRecurring ? 'var(--primary)' : 'var(--secondary)', borderRadius: '4px', fontWeight: 700 }}>
+                          {selectedVisit.isRecurring ? 'ROTINA FIXA' : 'VISITA PONTUAL'}
+                       </span>
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-main)' }}>
