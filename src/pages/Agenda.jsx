@@ -168,10 +168,9 @@ const Agenda = () => {
       </header>
 
       {viewMode === 'mensal' ? (
-        <div className="reveal-staggered agenda-hero-layout" style={{ flex: 1, alignItems: 'flex-start' }}>
+        <div className="reveal-staggered agenda-hero-layout" style={{ flex: 1, width: '100%' }}>
            
-           {/* Sidebar: Mini Calendar */}
-           <div className="agenda-sidebar">
+              <div className="agenda-sidebar" style={{ width: '100%' }}>
               <div>
                  <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem' }}>Mês Base</h3>
                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.2rem', marginBottom: '0.5rem' }}>
@@ -194,7 +193,7 @@ const Agenda = () => {
                               setSelectedVisit(null);
                            }}
                            style={{ 
-                             aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                             height: '35px', width: '35px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center',
                              background: isSelected ? 'var(--primary)' : 'transparent', 
                              color: isSelected ? 'white' : 'var(--text-main)',
                              borderRadius: '50%', fontSize: '0.75rem', fontWeight: isSelected ? 800 : 500,
@@ -243,7 +242,7 @@ const Agenda = () => {
            </div>
 
            {/* Hourly Grid View */}
-           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
              {/* Header Day */}
              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-dim)' }}>
                 <div>
