@@ -143,7 +143,10 @@ const ClientList = () => {
                     <MapPin size={11} style={{ flexShrink: 0 }} /> {client.address.split(' - ')[0]}
                   </div>
                 </td>
-                <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.75rem' }}>{client.lastVisit}</td>
+                <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.75rem' }}>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>Última visita:</div>
+                  <div style={{ fontWeight: 600 }}>{client.lastVisitDate || '—'}</div>
+                </td>
                 <td style={{ padding: '1rem', whiteSpace: 'nowrap' }}>
                   <span style={{ 
                     padding: '0.25rem 0.6rem', 
