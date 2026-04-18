@@ -216,9 +216,6 @@ const Agenda = () => {
                 </button>
              </div>
 
-             <div className="desktop-only" style={{ width: '1px', height: '20px', background: 'var(--border-dim)', margin: '0 0.5rem' }}></div>
-
-             <button className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}>FILTRAR</button>
              <button 
                onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: null }))}
                className="btn btn-primary" 
