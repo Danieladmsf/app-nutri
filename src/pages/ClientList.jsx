@@ -4,7 +4,7 @@ import { subscribeToClients, saveClient, deleteClient } from '../services/firest
 
 const ClientList = () => {
   const [clients, setClients] = useState([]);
-    id: c.id,
+
   const [activeMenu, setActiveMenu] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
