@@ -207,7 +207,7 @@ const Agenda = () => {
                 onClick={() => { setIsSelectMode(!isSelectMode); setSelectedVisits([]); }} 
                 className="btn" 
                 style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', background: isSelectMode ? 'var(--primary)' : 'transparent', border: isSelectMode ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: isSelectMode ? 'white' : 'var(--text-main)' }}>
-                {isSelectMode ? 'Cancelar Seleção' : 'Reagendar em Lote'}
+                {isSelectMode ? 'Cancelar Seleção' : 'Reagendar'}
               </button>
            </div>
            
