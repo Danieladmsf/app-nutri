@@ -80,29 +80,29 @@ const AgendaSettings = ({ workDays, setWorkDays, workStart, setWorkStart, workEn
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
           Selecione os dias da semana em que você realiza visitas. A Agenda e o Calendário só exibirão rotas para esses dias.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem' }}>
           {Object.entries(dayLabels).map(([key, label]) => (
             <button
               key={key}
               onClick={() => setWorkDays(prev => ({ ...prev, [key]: !prev[key] }))}
               style={{
-                padding: '1rem', borderRadius: 'var(--radius-md)',
+                padding: '0.6rem 0.4rem', borderRadius: 'var(--radius-md)',
                 border: '1px solid', borderColor: workDays[key] ? 'var(--primary)' : 'var(--border-dim)',
                 background: workDays[key] ? 'rgba(27,61,47,0.08)' : 'var(--bg-deep)',
                 color: workDays[key] ? 'var(--primary)' : 'var(--text-muted)',
-                fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.2s',
-                display: 'flex', alignItems: 'center', gap: '0.5rem'
+                fontWeight: 700, fontSize: '0.7rem', cursor: 'pointer', transition: 'all 0.2s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem'
               }}
             >
               <div style={{
-                width: '18px', height: '18px', borderRadius: '4px',
+                width: '14px', height: '14px', borderRadius: '3px',
                 border: '2px solid', borderColor: workDays[key] ? 'var(--primary)' : 'var(--border-dim)',
                 background: workDays[key] ? 'var(--primary)' : 'transparent',
                 display: 'grid', placeItems: 'center', flexShrink: 0
               }}>
-                {workDays[key] && <span style={{ color: 'white', fontSize: '0.6rem', fontWeight: 900 }}>✓</span>}
+                {workDays[key] && <span style={{ color: 'white', fontSize: '0.5rem', fontWeight: 900 }}>✓</span>}
               </div>
-              {label}
+              {label.slice(0, 3)}
             </button>
           ))}
         </div>
