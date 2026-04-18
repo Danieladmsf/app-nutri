@@ -20,11 +20,20 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
   // Auto-fill if editing/rescheduling
   useEffect(() => {
     if (initialData) {
-      setClient(initialData.client || '');
-      setDate(initialData.date || '2026-04-15');
-      setTimeSection(initialData.time || '10:00 - 12:00');
+      if (Array.isArray(initialData)) {
+         setClient(`Lote de ${initialData.length} Cliente(s) selecionado(s)`);
+         setDate(initialData[0]?.fullDate || '2026-04-15');
+         setTimeSection('--:--');
+      } else {
+         setClient(initialData.client || '');
+         setDate(initialData.date || '2026-04-15');
+         setTimeSection(initialData.time || '10:00 - 12:00');
+      }
     }
   }, [initialData, isOpen]);
+
+  const isBatchMode = Array.isArray(initialData);
+  const isTargetRecurring = isBatchMode ? true : initialData?.isRecurring;
 
   if (!isOpen) return null;
 
@@ -53,9 +62,11 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
               <AlertTriangle size={20} color="var(--secondary)" style={{ flexShrink: 0, marginTop: '2px' }} />
               <div>
                 <strong style={{ fontSize: '0.8rem', color: 'var(--secondary)', display: 'block', marginBottom: '0.3rem' }}>Cliente: {client}</strong>
-                {initialData?.isRecurring ? (
+                {isTargetRecurring ? (
                    <p style={{ fontSize: '0.75rem', color: 'var(--text-main)', lineHeight: '1.4' }}>
-                     Esta visita estava previamente agendada e faz parte da rotina fixa do cliente. Escolha abaixo como deseja prosseguir com a alteração.
+                     {isBatchMode 
+                       ? 'Estas visitas selecionadas sofrerão alteração na agenda. Escolha abaixo como deseja prosseguir com o reagendamento.' 
+                       : 'Esta visita estava previamente agendada e faz parte da rotina fixa do cliente. Escolha abaixo como deseja prosseguir com a alteração.'}
                    </p>
                 ) : (
                    <p style={{ fontSize: '0.75rem', color: 'var(--text-main)', lineHeight: '1.4' }}>
@@ -114,7 +125,7 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                 {!initialData?.isRecurring ? (
+                 {!isTargetRecurring ? (
                     <div style={{ padding: '0.5rem 0' }}>
                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>Modo de Reagendamento: Simples (Visita Solicitada)</span>
                     </div>

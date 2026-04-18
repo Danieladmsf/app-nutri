@@ -83,6 +83,16 @@ const Agenda = () => {
   const [weekStartObj, setWeekStartObj] = useState('2026-04-12'); // O domingo base
   const [selectedDate, setSelectedDate] = useState('2026-04-15');
   const [selectedVisit, setSelectedVisit] = useState(null);
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedVisits, setSelectedVisits] = useState([]);
+
+  const toggleVisitSelection = (visit) => {
+    if (selectedVisits.find(v => v.id === visit.id)) {
+       setSelectedVisits(selectedVisits.filter(v => v.id !== visit.id));
+    } else {
+       setSelectedVisits([...selectedVisits, visit]);
+    }
+  }
 
   const weekDays = generateWeekDays(weekStartObj);
   const activeVisits = visitsMock[selectedDate] || [];
@@ -190,29 +200,44 @@ const Agenda = () => {
       <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
         
         {/* Agenda List Column */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }} className="reveal-staggered">
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '5rem' }} className="reveal-staggered">
            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
               <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Visitas Agendadas</h3>
+              <button 
+                onClick={() => { setIsSelectMode(!isSelectMode); setSelectedVisits([]); }} 
+                className="btn" 
+                style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem', background: isSelectMode ? 'var(--primary)' : 'transparent', border: isSelectMode ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: isSelectMode ? 'white' : 'var(--text-main)' }}>
+                {isSelectMode ? 'Cancelar Seleção' : 'Reagendar em Lote'}
+              </button>
            </div>
            
            {activeVisits.length > 0 ? activeVisits.map((visit) => {
              const isSelected = selectedVisit?.id === visit.id;
+             const isChecked = selectedVisits.some(v => v.id === visit.id);
              return (
                <div 
                  key={visit.id}
-                 onClick={() => setSelectedVisit(visit)}
+                 onClick={() => {
+                    if (isSelectMode) toggleVisitSelection(visit);
+                    else setSelectedVisit(visit);
+                 }}
                  style={{ 
-                   background: isSelected ? 'rgba(27, 61, 47, 0.05)' : 'var(--bg-surface)', 
+                   background: (isSelected || isChecked) ? 'rgba(27, 61, 47, 0.05)' : 'var(--bg-surface)', 
                    border: '1px solid',
-                   borderColor: isSelected ? 'var(--primary)' : 'var(--border-dim)',
-                   borderLeft: isSelected ? '4px solid var(--primary)' : '1px solid var(--border-dim)',
+                   borderColor: (isSelected || isChecked) ? 'var(--primary)' : 'var(--border-dim)',
+                   borderLeft: (isSelected || isChecked) ? '4px solid var(--primary)' : '1px solid var(--border-dim)',
                    borderRadius: 'var(--radius-md)',
                    padding: '1.2rem',
                    cursor: 'pointer',
-                   display: 'grid', gridTemplateColumns: '80px 1fr 40px', alignItems: 'center',
+                   display: 'grid', gridTemplateColumns: isSelectMode ? '30px 80px 1fr 40px' : '80px 1fr 40px', alignItems: 'center',
                    transition: 'all 0.2s ease',
                  }}
                >
+                 {isSelectMode && (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                       <input type="checkbox" checked={isChecked} readOnly style={{ width: '18px', height: '18px', accentColor: 'var(--primary)', cursor: 'pointer' }} />
+                    </div>
+                 )}
                  <div>
                     <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--primary)' }}>{visit.time}</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>{visit.duration}</div>
@@ -238,6 +263,18 @@ const Agenda = () => {
                 <h4 style={{ fontSize: '0.9rem', fontWeight: 700 }}>Nenhuma visita agendada</h4>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Aproveite o dia livre para emitir relatórios ou criar uma nova rotina.</p>
              </div>
+           )}
+
+           {/* Mass Action Floating Button */}
+           {isSelectMode && selectedVisits.length > 0 && (
+              <div style={{ position: 'sticky', bottom: '1rem', marginTop: 'auto', zIndex: 10 }}>
+                <button 
+                  onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisits }))}
+                  className="btn btn-primary reveal-staggered" 
+                  style={{ width: '100%', padding: '1.2rem', justifyContent: 'center', boxShadow: '0 8px 24px rgba(27,61,47,0.2)' }}>
+                  Reagendar {selectedVisits.length} visita{selectedVisits.length > 1 ? 's' : ''} em lote
+                </button>
+              </div>
            )}
         </div>
 
