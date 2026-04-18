@@ -21,9 +21,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Layout><Dashboard /></Layout>} />
+        <Route path="/" element={<Layout><Agenda /></Layout>} />
         <Route path="/clientes" element={<Layout><ClientList /></Layout>} />
-        <Route path="/agenda" element={<Layout><Agenda /></Layout>} />
+        <Route path="/indicadores" element={<Layout><Dashboard /></Layout>} />
         <Route path="/laudos" element={<Layout><ReportGenerator /></Layout>} />
         <Route path="/config" element={<Placeholder title="Configurações" />} />
       </Routes>

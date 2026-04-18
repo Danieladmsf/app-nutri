@@ -41,16 +41,16 @@ const Sidebar = () => {
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0 1rem' }}>
           <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 800, padding: '0 1rem 0.5rem', letterSpacing: '0.1em' }}>MENU PRINCIPAL</div>
           <NavLink to="/" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-            <LayoutDashboard size={16} /> Dashboard
+            <Calendar size={16} /> Agenda & Rotinas
           </NavLink>
           <NavLink to="/clientes" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
             <Users size={16} /> Clientes
           </NavLink>
-          <NavLink to="/agenda" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-            <Calendar size={16} /> Agenda
-          </NavLink>
           <NavLink to="/laudos" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
             <FileText size={16} /> Laudos IA
+          </NavLink>
+          <NavLink to="/indicadores" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+            <LayoutDashboard size={16} /> Indicadores Gerais
           </NavLink>
           
           <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 800, padding: '1.5rem 1rem 0.5rem', letterSpacing: '0.1em' }}>SISTEMA</div>
@@ -98,20 +98,20 @@ const Sidebar = () => {
         paddingBottom: 'env(safe-area-inset-bottom)'
       }}>
         <NavLink to="/" className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`} style={mobileNavLinkStyle}>
-          <LayoutDashboard size={20} />
-          <span style={{ fontSize: '10px', marginTop: '4px' }}>Início</span>
+          <Calendar size={20} />
+          <span style={{ fontSize: '10px', marginTop: '4px' }}>Rotinas</span>
         </NavLink>
         <NavLink to="/clientes" className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`} style={mobileNavLinkStyle}>
           <Users size={20} />
           <span style={{ fontSize: '10px', marginTop: '4px' }}>Clientes</span>
         </NavLink>
-        <NavLink to="/agenda" className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`} style={mobileNavLinkStyle}>
-          <Calendar size={20} />
-          <span style={{ fontSize: '10px', marginTop: '4px' }}>Agenda</span>
-        </NavLink>
         <NavLink to="/laudos" className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`} style={mobileNavLinkStyle}>
           <FileText size={20} />
           <span style={{ fontSize: '10px', marginTop: '4px' }}>Laudos</span>
+        </NavLink>
+        <NavLink to="/indicadores" className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`} style={mobileNavLinkStyle}>
+          <LayoutDashboard size={20} />
+          <span style={{ fontSize: '10px', marginTop: '4px' }}>Métricas</span>
         </NavLink>
       </div>
     </>
