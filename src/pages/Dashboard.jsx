@@ -6,7 +6,7 @@ const Dashboard = () => {
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
       
       {/* SaaS Stat Grid */}
-      <div className="stat-grid-responsive" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+      <div className="grid-stats">
         {[
           { label: 'Visitas Hoje', value: '03', detail: '+1 desde ontem', icon: <Calendar size={16}/>, color: 'var(--primary)' },
           { label: 'Laudos Pendentes', value: '05', detail: '2 urgentes', icon: <Clock size={16}/>, color: 'var(--secondary)' },
@@ -25,7 +25,7 @@ const Dashboard = () => {
       </div>
 
       {/* Structured Management Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+      <div className="grid-responsive-2col">
         
         {/* Active Agenda Table */}
         <section className="card" style={{ padding: '0' }}>

@@ -7,12 +7,12 @@ const Layout = ({ children }) => {
       <Sidebar />
       {/* Remove giant Ana watermark for software feel */}
       
-      <main style={{ flex: 1, marginLeft: '280px', padding: '2rem 3rem', position: 'relative' }}>
+      <main className="app-main">
         <header style={{ marginBottom: '2.5rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
           <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem', fontWeight: 600 }}>
              <span>ANA NUTRI</span> <span>/</span> <span style={{ color: 'var(--text-main)' }}>DASHBOARD</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="flex-toolbar">
             <h1 style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
               Visão Geral do <span className="serif" style={{ fontStyle: 'italic', fontWeight: 400 }}>Escritório</span>
             </h1>

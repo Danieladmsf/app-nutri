@@ -13,8 +13,8 @@ const ClientList = () => {
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
       {/* SaaS Toolbar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
+      <div className="flex-toolbar">
+        <div style={{ display: 'flex', gap: '1rem', flex: 1 }} className="full-width-mobile">
           <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.6rem 1.2rem', background: 'var(--bg-surface)', flex: 1, maxWidth: '400px' }}>
             <Search size={16} color="var(--text-muted)" />
             <input 
@@ -25,9 +25,9 @@ const ClientList = () => {
           </div>
           <button className="btn"><Filter size={16} /> Filtros</button>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="btn"><Download size={16} /> Exportar CSV</button>
-          <button className="btn btn-primary"><UserPlus size={16} /> Novo Cliente</button>
+        <div style={{ display: 'flex', gap: '1rem' }} className="full-width-mobile">
+          <button className="btn full-width-mobile"><Download size={16} /> Exportar CSV</button>
+          <button className="btn btn-primary full-width-mobile"><UserPlus size={16} /> Novo Cliente</button>
         </div>
       </div>
 

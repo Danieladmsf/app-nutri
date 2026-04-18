@@ -42,14 +42,14 @@ const ReportGenerator = () => {
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
       
       {/* SaaS Editor Toolbar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', background: 'var(--bg-surface)', padding: '1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', flexWrap: 'wrap', gap: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      <div className="flex-toolbar" style={{ marginBottom: '1.5rem', background: 'var(--bg-surface)', padding: '1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }} className="full-width-mobile">
            <button className="btn desktop-only" style={{ padding: '0.4rem' }}><ChevronLeft size={16}/></button>
            <h2 style={{ fontSize: '0.9rem', fontWeight: 700 }}>AUDITORIA INDUSTRIAL</h2>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem' }} className="full-width-mobile">
            <button className="btn desktop-only"><Share2 size={16} /> Compartilhar</button>
-           <button className="btn btn-primary" onClick={handleGenerate} disabled={isGenerating}>
+           <button className="btn btn-primary full-width-mobile" onClick={handleGenerate} disabled={isGenerating}>
              {isGenerating ? <RefreshCcw size={14} className="spin" /> : <Sparkles size={14} />}
              GERAR LAUDO
            </button>
@@ -172,14 +172,14 @@ const ReportGenerator = () => {
               </div>
 
               <div style={{ marginTop: '3rem', padding: '1rem 0', borderTop: '1px solid var(--border-dim)' }}>
-                 <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>ENVIAR AO ESTABELECIMENTO</button>
+                 <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>ENVIAR LAUDO</button>
               </div>
             </div>
           ) : (
             <div style={{ margin: 'auto', textAlign: 'center', opacity: 0.3, padding: '3rem' }}>
-               <Layout size={48} style={{ marginBottom: '1.5rem' }} />
+               <Layout size={48} style={{ marginBottom: '1.5rem', display: 'inline-block' }} />
                <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>PREVISUALIZAÇÃO DO LAUDO</div>
-               <div style={{ fontSize: '0.7rem' }}>Use os atalhos ou as notas para gerar a análise</div>
+               <div style={{ fontSize: '0.7rem' }}>Use os atalhos ou notas para gerar</div>
             </div>
           )}
         </section>
