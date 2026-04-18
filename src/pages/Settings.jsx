@@ -464,10 +464,10 @@ const LaudoIASettings = ({ categories, setCategories }) => {
 // ─── Main Settings Page ───
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('agenda');
-  const [isSaving, setIsSaving] = useState(false);
 
-  // All state now comes from the global AppContext (shared + persisted in localStorage)
+  // All state comes from AppContext (shared + auto-persisted to Firestore)
   const {
+    isLoading, isSynced,
     workDays, setWorkDays,
     workStart, setWorkStart,
     workEnd, setWorkEnd,
@@ -476,17 +476,20 @@ const Settings = () => {
     categories, setCategories,
   } = useAppContext();
 
-  const handleSave = () => {
-    setIsSaving(true);
-    setTimeout(() => setIsSaving(false), 1200);
-    // Data already auto-persists via AppContext useEffect
-  };
-
   const tabs = [
     { id: 'agenda', label: 'Agendamento & Rotina', icon: <Calendar size={16} /> },
     { id: 'perfil', label: 'Perfil do Usuário', icon: <User size={16} /> },
     { id: 'laudo', label: 'Laudo IA', icon: <Sparkles size={16} /> },
   ];
+
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', gap: '1rem', color: 'var(--text-muted)' }}>
+        <Clock size={20} className="spin" />
+        <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Carregando configurações...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -497,15 +500,10 @@ const Settings = () => {
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
             Configurações
           </h1>
-          <button
-            onClick={handleSave}
-            className="btn btn-primary"
-            style={{ padding: '0.5rem 1.5rem', fontSize: '0.75rem' }}
-            disabled={isSaving}
-          >
-            {isSaving ? <Clock size={14} className="spin" /> : <Save size={14} />}
-            {isSaving ? 'Salvando...' : 'Salvar Alterações'}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.7rem', fontWeight: 600, color: isSynced ? 'var(--primary)' : 'var(--text-muted)' }}>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: isSynced ? 'var(--primary)' : 'var(--secondary)', transition: 'background 0.3s' }}></div>
+            {isSynced ? 'Salvo na nuvem' : 'Salvando...'}
+          </div>
         </div>
       </header>
 

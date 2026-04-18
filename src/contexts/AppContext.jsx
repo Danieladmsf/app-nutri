@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { db } from '../firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 // ─── Default Values ───
 const DEFAULT_WORK_DAYS = {
@@ -45,21 +47,8 @@ const DEFAULT_PROFILE = {
   name: '', email: '', whatsapp: '', crm: '', photo: '', bio: ''
 };
 
-// ─── LocalStorage helpers ───
-const STORAGE_KEY = 'ana_nutri_settings';
-
-const loadFromStorage = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-};
-
-const saveToStorage = (data) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch { /* silently fail */ }
-};
+// ─── Firestore doc path (single-user for now) ───
+const SETTINGS_DOC = 'settings/main';
 
 // ─── Context ───
 const AppContext = createContext(null);
@@ -71,26 +60,78 @@ export const useAppContext = () => {
 };
 
 export const AppProvider = ({ children }) => {
-  const stored = loadFromStorage();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSynced, setIsSynced] = useState(false);
 
   // Agenda & Rotina
-  const [workDays, setWorkDays] = useState(stored?.workDays || DEFAULT_WORK_DAYS);
-  const [workStart, setWorkStart] = useState(stored?.workStart || '07:00');
-  const [workEnd, setWorkEnd] = useState(stored?.workEnd || '18:00');
-  const [slotDuration, setSlotDuration] = useState(stored?.slotDuration || '1h');
+  const [workDays, setWorkDays] = useState(DEFAULT_WORK_DAYS);
+  const [workStart, setWorkStart] = useState('07:00');
+  const [workEnd, setWorkEnd] = useState('18:00');
+  const [slotDuration, setSlotDuration] = useState('1h');
 
   // Perfil
-  const [profile, setProfile] = useState(stored?.profile || DEFAULT_PROFILE);
+  const [profile, setProfile] = useState(DEFAULT_PROFILE);
 
   // Laudo IA Categories
-  const [categories, setCategories] = useState(stored?.categories || DEFAULT_CATEGORIES);
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
 
-  // Persist on change
+  // ─── Load from Firestore on mount ───
   useEffect(() => {
-    saveToStorage({ workDays, workStart, workEnd, slotDuration, profile, categories });
-  }, [workDays, workStart, workEnd, slotDuration, profile, categories]);
+    const loadSettings = async () => {
+      try {
+        const snap = await getDoc(doc(db, SETTINGS_DOC));
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.workDays) setWorkDays(data.workDays);
+          if (data.workStart) setWorkStart(data.workStart);
+          if (data.workEnd) setWorkEnd(data.workEnd);
+          if (data.slotDuration) setSlotDuration(data.slotDuration);
+          if (data.profile) setProfile(data.profile);
+          if (data.categories) setCategories(data.categories);
+          console.log('✅ Settings loaded from Firestore');
+        } else {
+          console.log('📦 No settings found — using defaults, will save on first change');
+        }
+      } catch (err) {
+        console.warn('⚠️ Firestore load failed, using local defaults:', err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  // ─── Save to Firestore (debounced) ───
+  const saveToFirestore = useCallback(async (data) => {
+    try {
+      await setDoc(doc(db, SETTINGS_DOC), {
+        ...data,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+      setIsSynced(true);
+      console.log('💾 Settings saved to Firestore');
+    } catch (err) {
+      setIsSynced(false);
+      console.warn('⚠️ Firestore save failed:', err.message);
+    }
+  }, []);
+
+  // ─── Auto-save on changes (with debounce) ───
+  useEffect(() => {
+    if (isLoading) return; // Don't save initial load
+    
+    const timeout = setTimeout(() => {
+      saveToFirestore({ workDays, workStart, workEnd, slotDuration, profile, categories });
+    }, 1500); // 1.5s debounce
+
+    setIsSynced(false);
+    return () => clearTimeout(timeout);
+  }, [workDays, workStart, workEnd, slotDuration, profile, categories, isLoading, saveToFirestore]);
 
   const value = {
+    isLoading,
+    isSynced,
+
     // Agenda settings
     workDays, setWorkDays,
     workStart, setWorkStart,
