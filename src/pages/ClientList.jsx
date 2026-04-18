@@ -8,7 +8,7 @@ const ClientList = () => {
   const [activeMenu, setActiveMenu] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
-  const [formData, setFormData] = useState({ name: '', phone: '', contactRole: '', address: '' });
+  const [formData, setFormData] = useState({ name: '', phone: '', contactRole: '', address: '', tagsText: '' });
 
   // Firestore Subscription
   useEffect(() => {
@@ -50,9 +50,15 @@ const ClientList = () => {
   const openEditModal = (client = null) => {
     setEditingClient(client);
     if(client) {
-      setFormData({ name: client.name || '', phone: client.phone || client.whatsapp || '', contactRole: client.contactRole || '', address: client.address || '' });
+      setFormData({ 
+        name: client.name || '', 
+        phone: client.phone || client.whatsapp || '', 
+        contactRole: client.contactRole || '', 
+        address: client.address || '',
+        tagsText: client.tags ? client.tags.join(', ') : ''
+      });
     } else {
-      setFormData({ name: '', phone: '', contactRole: '', address: '' });
+      setFormData({ name: '', phone: '', contactRole: '', address: '', tagsText: '' });
     }
     setIsModalOpen(true);
   };
@@ -61,9 +67,12 @@ const ClientList = () => {
     if(!formData.name) return alert('Nome é obrigatório');
     try {
       const payload = {
-        ...formData,
+        name: formData.name,
+        phone: formData.phone,
+        contactRole: formData.contactRole,
+        address: formData.address,
         status: editingClient?.status || 'Ativo',
-        tags: editingClient?.tags || [],
+        tags: formData.tagsText.split(',').map(t => t.trim()).filter(Boolean),
         tier: editingClient?.tier || 'Standard',
       };
       if (editingClient?.id) payload.id = editingClient.id;
@@ -230,6 +239,10 @@ const ClientList = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Endereço Completo</label>
                   <input type="text" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} placeholder="Ex: Av. Paulista, 1500 - Bela Vista" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Tags (separadas por vírgula)</label>
+                  <input type="text" value={formData.tagsText} onChange={e => setFormData({...formData, tagsText: e.target.value})} placeholder="Ex: Indústria, Alta Demanda, ANVISA" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
                 </div>
              </div>
              <div style={{ padding: '1rem 1.5rem', background: 'var(--bg-deep)', borderTop: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
