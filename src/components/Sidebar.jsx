@@ -113,6 +113,10 @@ const Sidebar = () => {
           <LayoutDashboard size={20} />
           <span style={{ fontSize: '10px', marginTop: '4px' }}>Métricas</span>
         </NavLink>
+        <NavLink to="/config" className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`} style={mobileNavLinkStyle}>
+          <Settings size={20} />
+          <span style={{ fontSize: '10px', marginTop: '4px' }}>Config</span>
+        </NavLink>
       </div>
     </>
   );
