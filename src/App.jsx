@@ -4,18 +4,8 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import ReportGenerator from './pages/ReportGenerator';
 import ClientList from './pages/ClientList';
-
 import Agenda from './pages/Agenda';
-
-// Placeholder pages
-const Placeholder = ({ title }) => (
-  <Layout>
-    <div className="card">
-      <h2>{title}</h2>
-      <p>Esta funcionalidade está sendo implementada.</p>
-    </div>
-  </Layout>
-);
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -25,7 +15,7 @@ function App() {
         <Route path="/clientes" element={<Layout><ClientList /></Layout>} />
         <Route path="/indicadores" element={<Layout><Dashboard /></Layout>} />
         <Route path="/laudos" element={<Layout><ReportGenerator /></Layout>} />
-        <Route path="/config" element={<Placeholder title="Configurações" />} />
+        <Route path="/config" element={<Layout><Settings /></Layout>} />
       </Routes>
     </Router>
   );
