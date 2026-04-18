@@ -165,7 +165,12 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
         {/* Footer Actions */}
         <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-deep)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <button className="btn" onClick={onClose}>Cancelar</button>
-          <button className="btn btn-primary" onClick={onClose}>
+          <button className="btn btn-primary" onClick={() => {
+              window.dispatchEvent(new CustomEvent('saveSchedule', { 
+                  detail: { newDate: date, visits: initialData } 
+              }));
+              onClose();
+          }}>
             {mode === 'create' ? 'Salvar Agendamento' : 'Confirmar Reagendamento'}
           </button>
         </div>
@@ -173,5 +178,6 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
     </div>
   );
 };
+
 
 export default ScheduleModal;

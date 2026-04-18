@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Calendar, Clock, MapPin, X, FileText, FileCheck, ArrowRight, Building, Plus } from 'lucide-react';
 
@@ -39,7 +39,7 @@ const shiftWeek = (startDateStr, daysToShift) => {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-const visitsMock = {
+const initialVisitsMock = {
   '2026-04-14': [],
   '2026-04-15': [
      { id: 1, time: '08:00', duration: '2h', client: 'Cozinha Industrial Matriz', address: 'Av. Paulista, 1500 - Bela Vista', 
@@ -85,6 +85,41 @@ const Agenda = () => {
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedVisits, setSelectedVisits] = useState([]);
+  const [visitsData, setVisitsData] = useState(initialVisitsMock);
+
+  useEffect(() => {
+    const handleSaveSchedule = (e) => {
+       const { newDate, visits } = e.detail;
+       if (!newDate || !visits) return;
+       
+       setVisitsData(prev => {
+         const newState = { ...prev };
+         const visitsArray = Array.isArray(visits) ? visits : [visits];
+         
+         // Remove from origins
+         Object.keys(newState).forEach(date => {
+            newState[date] = newState[date].filter(v => !visitsArray.find(mv => mv.id === v.id));
+         });
+         
+         // Add to destination
+         if (!newState[newDate]) newState[newDate] = [];
+         visitsArray.forEach(v => {
+            newState[newDate].push({ ...v, time: '12:00' }); // Mocking same time, logic can expand later
+         });
+         return newState;
+       });
+
+       setIsSelectMode(false);
+       setSelectedVisits([]);
+       setSelectedDate(newDate);
+       
+       // Force week jump if necessary
+       setWeekStartObj(newDate); 
+    };
+
+    window.addEventListener('saveSchedule', handleSaveSchedule);
+    return () => window.removeEventListener('saveSchedule', handleSaveSchedule);
+  }, []);
 
   const toggleVisitSelection = (visit) => {
     if (selectedVisits.find(v => v.id === visit.id)) {
@@ -95,7 +130,7 @@ const Agenda = () => {
   }
 
   const weekDays = generateWeekDays(weekStartObj);
-  const activeVisits = visitsMock[selectedDate] || [];
+  const activeVisits = visitsData[selectedDate] || [];
 
   const handlePrevWeek = () => {
     setWeekStartObj(prev => shiftWeek(prev, -7));
@@ -158,7 +193,7 @@ const Agenda = () => {
         }}>
           {weekDays.map((day) => {
             const isActive = selectedDate === day.fullDate;
-            const hasVisits = visitsMock[day.fullDate]?.length > 0;
+            const hasVisits = visitsData[day.fullDate]?.length > 0;
             return (
               <button 
                 key={day.id}
@@ -246,9 +281,9 @@ const Agenda = () => {
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                        {visit.client} 
                        {visit.isRecurring === false && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(212,163,115,0.1)', color: 'var(--secondary)', borderRadius: '4px', border: '1px solid currentColor' }}>PONTUAL</span>}
-                       {visit.isRecurring === true && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(27,61,47,0.1)', color: 'var(--primary)', borderRadius: '4px', border: '1px solid currentColor' }}>ROTINA FIXA</span>}
                     </h4>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+
                        <MapPin size={12} /> {visit.address}
                     </div>
                  </div>
