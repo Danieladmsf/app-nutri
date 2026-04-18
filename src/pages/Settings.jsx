@@ -83,7 +83,7 @@ const AgendaSettings = ({ workDays, setWorkDays, workStart, setWorkStart, workEn
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
           Selecione os dias da semana em que você realiza visitas. A Agenda e o Calendário só exibirão rotas para esses dias.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '0.5rem' }}>
           {Object.entries(dayLabels).map(([key, label]) => (
             <button
               key={key}
@@ -455,7 +455,7 @@ const Settings = () => {
 
       {/* Header */}
       <header style={{ marginBottom: '2rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
-        <div className="flex-toolbar" style={{ gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '1rem', alignItems: 'center' }}>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
             Configurações
           </h1>
@@ -470,14 +470,14 @@ const Settings = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
 
         {/* Tab Navigation — horizontal on top */}
-        <div style={{ display: 'flex', gap: '0', borderBottom: '1px solid var(--border-dim)' }}>
+        <div className="days-horizontal-scroll" style={{ display: 'flex', gap: '0', borderBottom: '1px solid var(--border-dim)', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.8rem 1.5rem',
+                display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0,
+                padding: '0.8rem 1.5rem', whiteSpace: 'nowrap',
                 background: 'transparent',
                 border: 'none', borderBottom: '2px solid',
                 borderBottomColor: activeTab === tab.id ? 'var(--primary)' : 'transparent',
