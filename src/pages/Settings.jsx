@@ -130,31 +130,6 @@ const AgendaSettings = ({ workDays, setWorkDays, workStart, setWorkStart, workEn
         </div>
       </section>
 
-      {/* Slot Duration */}
-      <section>
-        <h3 style={{ fontSize: '0.9rem', fontWeight: 800, marginBottom: '0.5rem' }}>Duração Padrão da Visita</h3>
-        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-          Tempo padrão reservado para cada visita ao criar novos agendamentos.
-        </p>
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          {['30 min', '45 min', '1h', '1h30', '2h'].map(opt => (
-            <button
-              key={opt}
-              onClick={() => setSlotDuration(opt)}
-              style={{
-                padding: '0.6rem 1.2rem', borderRadius: 'var(--radius-md)',
-                border: '1px solid', borderColor: slotDuration === opt ? 'var(--primary)' : 'var(--border-dim)',
-                background: slotDuration === opt ? 'rgba(27,61,47,0.08)' : 'var(--bg-deep)',
-                color: slotDuration === opt ? 'var(--primary)' : 'var(--text-muted)',
-                fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.2s'
-              }}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
-      </section>
-
       {/* Notifications */}
       <section>
         <h3 style={{ fontSize: '0.9rem', fontWeight: 800, marginBottom: '0.5rem' }}>Notificações de Rota</h3>
