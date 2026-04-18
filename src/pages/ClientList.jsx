@@ -52,38 +52,38 @@ const ClientList = () => {
 
       {/* Data Grid Table */}
       <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem', minWidth: '600px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8rem', minWidth: '800px', tableLayout: 'auto' }}>
           <thead>
             <tr style={{ background: 'var(--bg-deep)', borderBottom: '1px solid var(--border-dim)' }}>
-              <th style={{ padding: '1.2rem 2rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.7rem' }}>CLIENTE</th>
-              <th className="desktop-only" style={{ padding: '1.2rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.7rem' }}>CONTATO & ENDEREÇO</th>
-              <th style={{ padding: '1.2rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.7rem' }}>ÚLTIMA VISITA</th>
-              <th style={{ padding: '1.2rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.7rem' }}>STATUS</th>
-              <th className="desktop-only" style={{ padding: '1.2rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.7rem' }}>TAGS</th>
-              <th style={{ padding: '1.2rem 2rem', textAlign: 'right' }}></th>
+              <th style={{ padding: '1rem 1.5rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>CLIENTE</th>
+              <th className="desktop-only" style={{ padding: '1rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>CONTATO</th>
+              <th style={{ padding: '1rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>VISITA</th>
+              <th style={{ padding: '1rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>STATUS</th>
+              <th className="desktop-only" style={{ padding: '1rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>TAGS</th>
+              <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}></th>
             </tr>
           </thead>
           <tbody>
             {clients.map((client) => (
               <tr key={client.id} style={{ borderBottom: '1px solid var(--border-dim)', transition: 'background 0.2s' }} className="table-row-hover">
-                <td style={{ padding: '1.2rem 2rem' }}>
-                   <div style={{ fontWeight: 600 }}>{client.name}</div>
-                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ID: #{client.id}00342</div>
+                <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                   <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{client.name}</div>
+                   <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{client.contactRole}</div>
                 </td>
-                <td className="desktop-only" style={{ padding: '1.2rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                    <Phone size={12} color="var(--primary)" /> {client.phone}
+                <td className="desktop-only" style={{ padding: '1rem', whiteSpace: 'nowrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.15rem', fontSize: '0.75rem' }}>
+                    <Phone size={11} color="var(--primary)" style={{ flexShrink: 0 }} /> {client.phone}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                    <MapPin size={12} /> {client.address}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+                    <MapPin size={11} style={{ flexShrink: 0 }} /> {client.address.split(' - ')[0]}
                   </div>
                 </td>
-                <td style={{ padding: '1.2rem' }}>{client.lastVisit}</td>
-                <td style={{ padding: '1.2rem' }}>
+                <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.75rem' }}>{client.lastVisit}</td>
+                <td style={{ padding: '1rem', whiteSpace: 'nowrap' }}>
                   <span style={{ 
-                    padding: '0.3rem 0.8rem', 
+                    padding: '0.25rem 0.6rem', 
                     borderRadius: '100px', 
-                    fontSize: '0.7rem', 
+                    fontSize: '0.65rem', 
                     fontWeight: 700,
                     background: client.status === 'Ativo' ? 'rgba(27, 61, 47, 0.1)' : 'rgba(0, 0, 0, 0.05)',
                     color: client.status === 'Ativo' ? 'var(--primary)' : 'var(--text-muted)'
@@ -91,18 +91,21 @@ const ClientList = () => {
                     {client.status.toUpperCase()}
                   </span>
                 </td>
-                <td className="desktop-only" style={{ padding: '1.2rem' }}>
-                  <div style={{ display: 'flex', gap: '0.4rem' }}>
-                    {client.tags.map(tag => (
-                      <span key={tag} style={{ fontSize: '0.65rem', background: 'var(--bg-deep)', padding: '0.2rem 0.5rem', border: '1px solid var(--border-dim)' }}>
+                <td className="desktop-only" style={{ padding: '1rem' }}>
+                  <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'nowrap' }}>
+                    {client.tags.slice(0, 3).map(tag => (
+                      <span key={tag} style={{ fontSize: '0.6rem', background: 'var(--bg-deep)', padding: '0.15rem 0.4rem', border: '1px solid var(--border-dim)', borderRadius: '3px', whiteSpace: 'nowrap' }}>
                         {tag}
                       </span>
                     ))}
+                    {client.tags.length > 3 && (
+                      <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>+{client.tags.length - 3}</span>
+                    )}
                   </div>
                 </td>
-                <td style={{ padding: '1.2rem 2rem', textAlign: 'right' }}>
+                <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                      <MoreVertical size={18} />
+                      <MoreVertical size={16} />
                    </button>
                 </td>
               </tr>
