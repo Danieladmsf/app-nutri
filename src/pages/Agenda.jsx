@@ -109,9 +109,6 @@ const Agenda = () => {
              </button>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }} className="full-width-mobile">
-          <button className="btn full-width-mobile"><Building size={16} /> Ver Estabelecimentos</button>
-        </div>
       </div>
 
       {/* Week Selector Bar */}
