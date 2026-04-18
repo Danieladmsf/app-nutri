@@ -211,12 +211,12 @@ const ClientList = () => {
                   <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Nome da Empresa / Cliente</label>
                   <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ex: Cozinha Matriz" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
                 </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Contato (WhatsApp)</label>
                     <input type="text" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="(00) 00000-0000" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Cargo</label>
                     <input type="text" value={formData.contactRole} onChange={e => setFormData({...formData, contactRole: e.target.value})} placeholder="Ex: Gerente Geral" className="form-input" style={{ padding: '0.8rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)', color: 'var(--text-main)' }}/>
                   </div>
