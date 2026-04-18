@@ -92,7 +92,7 @@ const Agenda = () => {
   }
 
   return (
-    <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
+    <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column' }}>
       
       {/* Header Toolbar */}
       <div className="flex-toolbar" style={{ gap: '1rem', marginBottom: '2rem' }}>
@@ -169,10 +169,10 @@ const Agenda = () => {
       </div>
 
       {/* Content Area: List vs Side Panel */}
-      <div style={{ display: 'flex', gap: '2rem', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
         
         {/* Agenda List Column */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', gap: '1rem' }} className="reveal-staggered">
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }} className="reveal-staggered">
            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
               <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Visitas Agendadas</h3>
            </div>
@@ -221,7 +221,7 @@ const Agenda = () => {
 
         {/* Desktop Context Drawer / Side Panel */}
         {selectedVisit && (
-          <div className="card desktop-only reveal-staggered" style={{ width: '400px', display: 'flex', flexDirection: 'column', padding: 0 }}>
+          <div className="card desktop-only reveal-staggered" style={{ width: '400px', display: 'flex', flexDirection: 'column', padding: 0, position: 'sticky', top: '100px' }}>
              {/* Header */}
              <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-dim)', background: 'rgba(27, 61, 47, 0.05)', position: 'relative' }}>
                 <button onClick={() => setSelectedVisit(null)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16}/></button>
@@ -240,7 +240,7 @@ const Agenda = () => {
              </div>
 
              {/* Content */}
-             <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+             <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                
                {/* CRM Info */}
                <div>
