@@ -271,35 +271,34 @@ const Agenda = () => {
 
               {/* Seletor de Visitas Lote Sidebar */}
               <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-dim)' }}>
-                <h3 style={{ fontSize: '0.85rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Ações em Lote</h3>
-                <button 
-                  onClick={() => { setIsSelectMode(!isSelectMode); setSelectedVisits([]); }} 
-                  className="btn" 
-                  style={{ width: '100%', justifyContent: 'center', fontSize: '0.85rem', padding: '0.8rem', background: isSelectMode ? 'var(--primary)' : 'transparent', border: isSelectMode ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: isSelectMode ? 'white' : 'var(--text-main)' }}>
-                  {isSelectMode ? 'Cancelar Seleção' : 'Selecionar Múltiplas'}
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                  <h3 style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', margin: 0 }}>Ações em Lote</h3>
+                  <button 
+                    onClick={() => { setIsSelectMode(!isSelectMode); setSelectedVisits([]); }} 
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, color: isSelectMode ? '#c0392b' : 'var(--primary)', padding: 0 }}>
+                    {isSelectMode ? '✕ Cancelar' : 'Ativar'}
+                  </button>
+                </div>
                 {isSelectMode && (
-                   <button 
-                     onClick={() => {
-                        const acts = visitsData[selectedDate] || [];
-                        if (selectedVisits.length === acts.length) {
-                           setSelectedVisits([]);
-                        } else {
-                           setSelectedVisits([...acts]);
-                        }
-                     }}
-                     className="btn"
-                     style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem', fontSize: '0.85rem', padding: '0.8rem', background: 'transparent', border: '1px solid var(--border-dim)', color: 'var(--text-main)' }}>
-                     {selectedVisits.length === (visitsData[selectedDate] || []).length && selectedVisits.length > 0 ? 'Desmarcar Todos' : 'Selecionar Todo o Dia'}
-                   </button>
-                )}
-                {isSelectMode && selectedVisits.length > 0 && (
-                   <button 
-                     onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisits }))}
-                     className="btn btn-primary reveal-staggered" 
-                     style={{ width: '100%', padding: '0.8rem', justifyContent: 'center', marginTop: '1rem', boxShadow: '0 8px 24px rgba(27,61,47,0.2)' }}>
-                     Reagendar {selectedVisits.length} visita{selectedVisits.length > 1 ? 's' : ''}
-                   </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <button 
+                      onClick={() => {
+                         const acts = visitsData[selectedDate] || [];
+                         if (selectedVisits.length === acts.length) setSelectedVisits([]);
+                         else setSelectedVisits([...acts]);
+                      }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', padding: 0, textAlign: 'left' }}>
+                      {selectedVisits.length === (visitsData[selectedDate] || []).length && selectedVisits.length > 0 ? '☑ Desmarcar todos' : '☐ Selecionar todo o dia'}
+                    </button>
+                    {selectedVisits.length > 0 && (
+                       <button 
+                         onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisits }))}
+                         className="btn btn-primary reveal-staggered" 
+                         style={{ width: '100%', padding: '0.7rem', justifyContent: 'center', fontSize: '0.8rem' }}>
+                         Reagendar {selectedVisits.length} visita{selectedVisits.length > 1 ? 's' : ''}
+                       </button>
+                    )}
+                  </div>
                 )}
               </div>
            </div>
