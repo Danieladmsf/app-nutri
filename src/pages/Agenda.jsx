@@ -2,15 +2,42 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Calendar, Clock, MapPin, X, FileText, FileCheck, ArrowRight, Building, Plus } from 'lucide-react';
 
-const weekDaysMock = [
-  { id: '12', dayStr: 'Domingo', date: '12', month: 'ABR', fullDate: '2026-04-12' },
-  { id: '13', dayStr: 'Segunda', date: '13', month: 'ABR', fullDate: '2026-04-13' },
-  { id: '14', dayStr: 'Terça', date: '14', month: 'ABR', fullDate: '2026-04-14' },
-  { id: '15', dayStr: 'Quarta', date: '15', month: 'ABR', fullDate: '2026-04-15' },
-  { id: '16', dayStr: 'Quinta', date: '16', month: 'ABR', fullDate: '2026-04-16' },
-  { id: '17', dayStr: 'Sexta', date: '17', month: 'ABR', fullDate: '2026-04-17' },
-  { id: '18', dayStr: 'Sábado', date: '18', month: 'ABR', fullDate: '2026-04-18' }
-];
+const generateWeekDays = (startDateStr) => {
+  const parts = startDateStr.split('-');
+  const start = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0); // Bloqueando ao meio-dia para evitar bug de fuso horário
+  
+  const days = [];
+  const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+  const monthNames = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+  
+  for(let i = 0; i < 7; i++) {
+    const current = new Date(start);
+    current.setDate(start.getDate() + i);
+    
+    const yyyy = current.getFullYear();
+    const mm = String(current.getMonth() + 1).padStart(2, '0');
+    const dd = String(current.getDate()).padStart(2, '0');
+    
+    days.push({
+      id: `${yyyy}${mm}${dd}`,
+      dayStr: dayNames[current.getDay()],
+      date: dd,
+      month: monthNames[current.getMonth()],
+      fullDate: `${yyyy}-${mm}-${dd}`
+    });
+  }
+  return days;
+}
+
+const shiftWeek = (startDateStr, daysToShift) => {
+  const parts = startDateStr.split('-');
+  const d = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+  d.setDate(d.getDate() + daysToShift);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
 
 const visitsMock = {
   '2026-04-14': [],
@@ -49,10 +76,20 @@ const visitsMock = {
 
 const Agenda = () => {
   const navigate = useNavigate();
+  const [weekStartObj, setWeekStartObj] = useState('2026-04-12'); // O domingo base
   const [selectedDate, setSelectedDate] = useState('2026-04-15');
   const [selectedVisit, setSelectedVisit] = useState(null);
 
+  const weekDays = generateWeekDays(weekStartObj);
   const activeVisits = visitsMock[selectedDate] || [];
+
+  const handlePrevWeek = () => {
+    setWeekStartObj(prev => shiftWeek(prev, -7));
+  }
+
+  const handleNextWeek = () => {
+    setWeekStartObj(prev => shiftWeek(prev, 7));
+  }
 
   return (
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
@@ -78,12 +115,12 @@ const Agenda = () => {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-          <button className="btn" style={{ padding: '0.4rem', border: '1px solid var(--border-dim)' }}><ChevronLeft size={16} /></button>
+          <button onClick={handlePrevWeek} className="btn" style={{ padding: '0.4rem', border: '1px solid var(--border-dim)' }}><ChevronLeft size={16} /></button>
           <div className="card" style={{ padding: '0.5rem 2rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-surface)' }}>
              <Calendar size={16} color="var(--primary)" />
-             Semana 16 <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.75rem', marginLeft: '0.5rem' }}>12/04 - 18/04</span>
+             Semana Atual <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.75rem', marginLeft: '0.5rem' }}>{weekDays[0].date}/{weekDays[0].month} - {weekDays[6].date}/{weekDays[6].month}</span>
           </div>
-          <button className="btn" style={{ padding: '0.4rem', border: '1px solid var(--border-dim)' }}><ChevronRight size={16} /></button>
+          <button onClick={handleNextWeek} className="btn" style={{ padding: '0.4rem', border: '1px solid var(--border-dim)' }}><ChevronRight size={16} /></button>
         </div>
 
         {/* Days Horizontal List */}
@@ -91,7 +128,7 @@ const Agenda = () => {
           display: 'flex', width: '100%', overflowX: 'auto', gap: '0.5rem', 
           paddingBottom: '0.5rem', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' 
         }}>
-          {weekDaysMock.map((day) => {
+          {weekDays.map((day) => {
             const isActive = selectedDate === day.fullDate;
             const hasVisits = visitsMock[day.fullDate]?.length > 0;
             return (
