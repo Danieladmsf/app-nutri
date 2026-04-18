@@ -118,7 +118,7 @@ const ClientList = () => {
 
       {/* Data Grid Table */}
       <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8rem', minWidth: '800px', tableLayout: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8rem', minWidth: '100%', tableLayout: 'auto' }}>
           <thead>
             <tr style={{ background: 'var(--bg-deep)', borderBottom: '1px solid var(--border-dim)' }}>
               <th style={{ padding: '1rem 1.5rem', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>CLIENTE</th>
@@ -131,7 +131,7 @@ const ClientList = () => {
           <tbody>
             {clients.map((client) => (
               <tr key={client.id} style={{ borderBottom: '1px solid var(--border-dim)', transition: 'background 0.2s' }} className="table-row-hover">
-                <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                <td style={{ padding: '1rem 1.5rem' }}>
                    <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{client.name}</div>
                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{client.contactRole}</div>
                 </td>
