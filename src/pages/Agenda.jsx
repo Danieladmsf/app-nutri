@@ -351,10 +351,7 @@ const Agenda = () => {
         </div>
 
         {/* Days Horizontal List */}
-        <div className="days-horizontal-scroll" style={{ 
-          display: 'flex', width: '100%', overflowX: 'auto', gap: '0.5rem', 
-          paddingBottom: '0.5rem', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' 
-        }}>
+        <div className="days-horizontal-wrapper">
           {weekDays.map((day) => {
             const isActive = selectedDate === day.fullDate;
             const hasVisits = visitsData[day.fullDate]?.length > 0;
@@ -362,33 +359,28 @@ const Agenda = () => {
             return (
               <button 
                 key={day.id}
+                className="week-day-card"
                 onClick={() => { if (isWorkDay) { setSelectedDate(day.fullDate); setSelectedVisit(null); } }}
                 style={{ 
-                  flex: '0 0 auto',
-                  minWidth: '110px', 
-                  padding: '1.2rem 1rem', 
-                  borderRadius: 'var(--radius-md)',
                   background: !isWorkDay ? 'repeating-linear-gradient(135deg, var(--bg-deep), var(--bg-deep) 4px, transparent 4px, transparent 8px)' : isActive ? 'var(--bg-surface)' : 'var(--bg-deep)',
-                  border: '1px solid',
                   borderColor: isActive && isWorkDay ? 'var(--primary)' : 'var(--border-dim)',
-                  borderBottom: isActive && isWorkDay ? '3px solid var(--primary)' : '1px solid var(--border-dim)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  borderBottomColor: isActive && isWorkDay ? 'var(--primary)' : 'var(--border-dim)',
+                  borderBottomWidth: isActive && isWorkDay ? '3px' : '1px',
                   cursor: isWorkDay ? 'pointer' : 'default',
-                  transition: 'all 0.2s ease',
-                  position: 'relative',
                   opacity: isWorkDay ? 1 : 0.4
                 }}
               >
                 {hasVisits && !isActive && isWorkDay && (
-                  <div style={{ position: 'absolute', top: '8px', right: '8px', width: '6px', height: '6px', background: 'var(--primary)', borderRadius: '50%' }}></div>
+                  <div style={{ position: 'absolute', top: '6px', right: '6px', width: '6px', height: '6px', background: 'var(--primary)', borderRadius: '50%' }}></div>
                 )}
-                <span style={{ fontSize: '0.7rem', color: isActive && isWorkDay ? 'var(--primary)' : 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                  {day.dayStr}
+                <span className="week-day-name" style={{ color: isActive && isWorkDay ? 'var(--primary)' : 'var(--text-muted)' }}>
+                  <span className="desktop-only">{day.dayStr}</span>
+                  <span className="mobile-only">{day.dayStr.slice(0, 3)}</span>
                 </span>
-                <span style={{ fontSize: '1.8rem', fontWeight: 800, color: isWorkDay ? 'var(--text-main)' : 'var(--text-muted)', lineHeight: '1' }}>
+                <span className="week-day-number" style={{ color: isWorkDay ? 'var(--text-main)' : 'var(--text-muted)' }}>
                   {day.date}
                 </span>
-                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginTop: '0.2rem' }}>
+                <span className="week-day-sub">
                   {isWorkDay ? day.month : 'FOLGA'}
                 </span>
               </button>

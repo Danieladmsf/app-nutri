@@ -343,3 +343,66 @@ h1, h2, h3, h4, .serif {
   position: relative;
   scrollbar-width: thin;
 }
+
+/* Agenda Week Days Responsive */
+.days-horizontal-wrapper {
+  display: flex;
+  width: 100%;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.week-day-card {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 1.2rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.week-day-name {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.week-day-number {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.week-day-sub {
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
+@media (max-width: 600px) {
+  .days-horizontal-wrapper {
+    gap: 0.2rem;
+  }
+  .week-day-card {
+    padding: 0.8rem 0.2rem;
+    border-radius: var(--radius-minimal);
+  }
+  .week-day-name {
+    font-size: 0.55rem;
+    margin-bottom: 0.3rem;
+  }
+  .week-day-number {
+    font-size: 1.2rem;
+  }
+  .week-day-sub {
+    font-size: 0.5rem;
+    margin-top: 0.1rem;
+  }
+}
