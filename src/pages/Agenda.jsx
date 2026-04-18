@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Calendar, Clock, MapPin, X, FileText, FileCheck, ArrowRight, Building, Plus } from 'lucide-react';
+import { useAppContext } from '../contexts/AppContext';
+
+// Map JS getDay() index to workDays keys
+const DAY_KEY_MAP = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
 
 const generateWeekDays = (startDateStr) => {
   const parts = startDateStr.split('-');
@@ -21,6 +25,7 @@ const generateWeekDays = (startDateStr) => {
     days.push({
       id: `${yyyy}${mm}${dd}`,
       dayStr: dayNames[current.getDay()],
+      dayKey: DAY_KEY_MAP[current.getDay()],
       date: dd,
       month: monthNames[current.getMonth()],
       fullDate: `${yyyy}-${mm}-${dd}`
@@ -84,6 +89,7 @@ import { visitsMock as initialVisitsMock } from '../data/mockDatabase';
 
 const Agenda = () => {
   const navigate = useNavigate();
+  const { workDays } = useAppContext();
   const [viewMode, setViewMode] = useState('diaria'); // 'diaria' | 'mensal'
   const [weekStartObj, setWeekStartObj] = useState('2026-04-12'); // O domingo base
   const [selectedDate, setSelectedDate] = useState('2026-04-15');
@@ -369,36 +375,38 @@ const Agenda = () => {
           {weekDays.map((day) => {
             const isActive = selectedDate === day.fullDate;
             const hasVisits = visitsData[day.fullDate]?.length > 0;
+            const isWorkDay = workDays[day.dayKey] !== false;
             return (
               <button 
                 key={day.id}
-                onClick={() => { setSelectedDate(day.fullDate); setSelectedVisit(null); }}
+                onClick={() => { if (isWorkDay) { setSelectedDate(day.fullDate); setSelectedVisit(null); } }}
                 style={{ 
                   flex: '0 0 auto',
                   minWidth: '110px', 
                   padding: '1.2rem 1rem', 
                   borderRadius: 'var(--radius-md)',
-                  background: isActive ? 'var(--bg-surface)' : 'var(--bg-deep)',
+                  background: !isWorkDay ? 'repeating-linear-gradient(135deg, var(--bg-deep), var(--bg-deep) 4px, transparent 4px, transparent 8px)' : isActive ? 'var(--bg-surface)' : 'var(--bg-deep)',
                   border: '1px solid',
-                  borderColor: isActive ? 'var(--primary)' : 'var(--border-dim)',
-                  borderBottom: isActive ? '3px solid var(--primary)' : '1px solid var(--border-dim)',
+                  borderColor: isActive && isWorkDay ? 'var(--primary)' : 'var(--border-dim)',
+                  borderBottom: isActive && isWorkDay ? '3px solid var(--primary)' : '1px solid var(--border-dim)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  cursor: 'pointer',
+                  cursor: isWorkDay ? 'pointer' : 'default',
                   transition: 'all 0.2s ease',
-                  position: 'relative'
+                  position: 'relative',
+                  opacity: isWorkDay ? 1 : 0.4
                 }}
               >
-                {hasVisits && !isActive && (
+                {hasVisits && !isActive && isWorkDay && (
                   <div style={{ position: 'absolute', top: '8px', right: '8px', width: '6px', height: '6px', background: 'var(--primary)', borderRadius: '50%' }}></div>
                 )}
-                <span style={{ fontSize: '0.7rem', color: isActive ? 'var(--primary)' : 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.7rem', color: isActive && isWorkDay ? 'var(--primary)' : 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                   {day.dayStr}
                 </span>
-                <span style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: '1' }}>
+                <span style={{ fontSize: '1.8rem', fontWeight: 800, color: isWorkDay ? 'var(--text-main)' : 'var(--text-muted)', lineHeight: '1' }}>
                   {day.date}
                 </span>
                 <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginTop: '0.2rem' }}>
-                  {day.month}
+                  {isWorkDay ? day.month : 'FOLGA'}
                 </span>
               </button>
             )
