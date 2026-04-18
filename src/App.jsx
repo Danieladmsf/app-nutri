@@ -5,6 +5,8 @@ import Dashboard from './pages/Dashboard';
 import ReportGenerator from './pages/ReportGenerator';
 import ClientList from './pages/ClientList';
 
+import Agenda from './pages/Agenda';
+
 // Placeholder pages
 const Placeholder = ({ title }) => (
   <Layout>
@@ -21,7 +23,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout><Dashboard /></Layout>} />
         <Route path="/clientes" element={<Layout><ClientList /></Layout>} />
-        <Route path="/agenda" element={<Placeholder title="Agenda Completa" />} />
+        <Route path="/agenda" element={<Layout><Agenda /></Layout>} />
         <Route path="/laudos" element={<Layout><ReportGenerator /></Layout>} />
         <Route path="/config" element={<Placeholder title="Configurações" />} />
       </Routes>

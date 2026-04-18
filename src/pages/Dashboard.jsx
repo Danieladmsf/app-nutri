@@ -27,17 +27,17 @@ const Dashboard = () => {
       {/* Structured Management Grid */}
       <div className="grid-responsive-2col">
         
-        {/* Active Agenda Table */}
+        {/* Active Route Table */}
         <section className="card" style={{ padding: '0' }}>
           <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-             <h3 style={{ fontSize: '0.9rem', fontWeight: 700 }}>AGENDA DE ATIVIDADES</h3>
-             <button style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer' }}>VER CALENDÁRIO COMPLETO</button>
+             <h3 style={{ fontSize: '0.9rem', fontWeight: 700 }}>SUA ROTA DE HOJE (SEGUNDA-FEIRA)</h3>
+             <button style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer' }}>VER ROTA COMPLETA</button>
           </div>
           <div style={{ width: '100%' }}>
             {[
-              { time: '10:00', name: 'João Silva', type: 'Residencial', status: 'Confirmado', urgency: 'Média' },
-              { time: '14:30', name: 'Maria Oliveira', type: 'Acompanhamento', status: 'Aguardando', urgency: 'Alta' },
-              { time: '16:00', name: 'Carlos Lima', type: 'Primeira Consulta', status: 'Confirmado', urgency: 'Baixa' },
+              { time: '08:00', name: 'Cozinha Industrial Matriz', type: 'Auditoria Completa', status: 'Em Rota' },
+              { time: '10:30', name: 'Supermercado Nova Era', type: 'Checklist de Etiquetas', status: 'Pendente' },
+              { time: '14:00', name: 'Refeitório São João', type: 'Treinamento de EPIs', status: 'Pendente' },
             ].map((item, idx) => (
               <div key={idx} style={{ 
                 padding: '1.2rem 2rem', 
@@ -54,7 +54,8 @@ const Dashboard = () => {
                    <div className="desktop-only" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.type}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                   <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: item.status === 'Confirmado' ? 'var(--primary)' : 'var(--secondary)' }}></div>
+                   <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: item.status === 'Em Rota' ? 'var(--primary)' : 'var(--secondary)' }}></div>
+                   <span className="desktop-only" style={{ fontSize: '0.75rem' }}>{item.status}</span>
                 </div>
               </div>
             ))}
@@ -65,15 +66,15 @@ const Dashboard = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <section className="card">
             <h3 style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-               <FileText size={16} /> RECOMENDAÇÕES IA
+               <FileText size={16} /> RECOMENDAÇÕES DA ROTA
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                <div style={{ padding: '1rem', background: 'var(--bg-deep)', borderRadius: 'var(--radius-md)', borderLeft: '3px solid var(--primary)' }}>
                   <p style={{ fontSize: '0.75rem', lineHeight: '1.5' }}>
-                    <strong>Análise de Retenção:</strong> Maria Oliveira não agenda há 15 dias. Sugerimos enviar um lembrete automático.
+                    <strong>Alerta de Roteiro:</strong> Recomenda-se iniciar a auditoria na <em>Cozinha Matriz</em> focando nos EPIs devido ao histórico de não-conformidades.
                   </p>
                </div>
-               <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '0.8rem' }}>GERAR LAUDO IA</button>
+               <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '0.8rem' }}>INICIAR AUDITORIA IA</button>
             </div>
           </section>
 
