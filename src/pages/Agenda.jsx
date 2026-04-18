@@ -79,6 +79,7 @@ const visitsMock = {
 
 const Agenda = () => {
   const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState('diaria'); // 'diaria' | 'mensal'
   const [weekStartObj, setWeekStartObj] = useState('2026-04-12'); // O domingo base
   const [selectedDate, setSelectedDate] = useState('2026-04-15');
   const [selectedVisit, setSelectedVisit] = useState(null);
@@ -101,18 +102,35 @@ const Agenda = () => {
       <div className="flex-toolbar" style={{ gap: '1rem', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', gap: '1rem', flex: 1 }} className="full-width-mobile">
           <div className="card" style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-surface)', padding: '0.2rem', borderRadius: 'var(--radius-md)' }}>
-             <button className="btn" style={{ border: 'none', background: 'var(--bg-deep)', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+             <button 
+                onClick={() => setViewMode('diaria')}
+                className="btn" 
+                style={{ border: 'none', background: viewMode === 'diaria' ? 'var(--bg-deep)' : 'transparent', boxShadow: viewMode === 'diaria' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', color: viewMode === 'mensal' ? 'var(--text-muted)' : 'var(--text-main)', transition: 'all 0.2s' }}>
                Agenda Diária
              </button>
-             <button className="btn" style={{ border: 'none', background: 'transparent', color: 'var(--text-muted)' }}>
+             <button 
+                onClick={() => setViewMode('mensal')}
+                className="btn" 
+                style={{ border: 'none', background: viewMode === 'mensal' ? 'var(--bg-deep)' : 'transparent', boxShadow: viewMode === 'mensal' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', color: viewMode === 'diaria' ? 'var(--text-muted)' : 'var(--text-main)', transition: 'all 0.2s' }}>
                Visão Mensal (Rotas)
              </button>
           </div>
         </div>
       </div>
 
-      {/* Week Selector Bar */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
+      {viewMode === 'mensal' ? (
+        <div className="reveal-staggered" style={{ padding: '6rem 2rem', textAlign: 'center', background: 'var(--bg-surface)', border: '1px dashed var(--border-dim)', borderRadius: 'var(--radius-md)', flex: 1 }}>
+           <Calendar size={48} style={{ opacity: 0.2, margin: '0 auto 1.5rem', color: 'var(--text-main)' }} />
+           <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Módulo de Visão Mensal</h3>
+           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto' }}>
+              O calendário expandido de planejamento será liberado na próxima etapa do desenvolvimento. Por enquanto, utilize a <strong>Agenda Diária</strong> para as operações de campo.
+           </p>
+           <button onClick={() => setViewMode('diaria')} className="btn btn-primary" style={{ marginTop: '2rem' }}>Voltar para a Agenda Diária</button>
+        </div>
+      ) : (
+        <>
+          {/* Week Selector Bar */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
           <button onClick={handlePrevWeek} className="btn" style={{ padding: '0.4rem', border: '1px solid var(--border-dim)' }}><ChevronLeft size={16} /></button>
@@ -336,7 +354,7 @@ const Agenda = () => {
           </div>
         </div>
       )}
-      
+      )}
     </div>
   );
 };
