@@ -509,40 +509,48 @@ const Settings = () => {
         </div>
       </header>
 
-      {/* Body: Sidebar + Content */}
-      <div style={{ display: 'flex', gap: '2.5rem', flexWrap: 'wrap' }}>
+      {/* Horizontal Tabs + Content */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
 
-        {/* Tab Navigation */}
-        <aside style={{ width: '240px', display: 'flex', flexDirection: 'column', gap: '0.25rem', flexShrink: 0 }}>
+        {/* Tab Navigation — horizontal on top */}
+        <div style={{ display: 'flex', gap: '0', borderBottom: '1px solid var(--border-dim)' }}>
           {tabs.map(tab => (
-            <TabButton
+            <button
               key={tab.id}
-              active={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
-              icon={tab.icon}
-              label={tab.label}
-            />
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.8rem 1.5rem',
+                background: 'transparent',
+                border: 'none', borderBottom: '2px solid',
+                borderBottomColor: activeTab === tab.id ? 'var(--primary)' : 'transparent',
+                color: activeTab === tab.id ? 'var(--primary)' : 'var(--text-muted)',
+                fontWeight: activeTab === tab.id ? 700 : 500,
+                fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s'
+              }}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
           ))}
-        </aside>
+        </div>
 
         {/* Content Area */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="card" style={{ padding: '2rem' }}>
-            {activeTab === 'agenda' && (
-              <AgendaSettings
-                workDays={workDays} setWorkDays={setWorkDays}
-                workStart={workStart} setWorkStart={setWorkStart}
-                workEnd={workEnd} setWorkEnd={setWorkEnd}
-                slotDuration={slotDuration} setSlotDuration={setSlotDuration}
-              />
-            )}
-            {activeTab === 'perfil' && (
-              <UserProfile profile={profile} setProfile={setProfile} />
-            )}
-            {activeTab === 'laudo' && (
-              <LaudoIASettings categories={categories} setCategories={setCategories} />
-            )}
-          </div>
+        <div className="card" style={{ padding: '2rem', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+          {activeTab === 'agenda' && (
+            <AgendaSettings
+              workDays={workDays} setWorkDays={setWorkDays}
+              workStart={workStart} setWorkStart={setWorkStart}
+              workEnd={workEnd} setWorkEnd={setWorkEnd}
+              slotDuration={slotDuration} setSlotDuration={setSlotDuration}
+            />
+          )}
+          {activeTab === 'perfil' && (
+            <UserProfile profile={profile} setProfile={setProfile} />
+          )}
+          {activeTab === 'laudo' && (
+            <LaudoIASettings categories={categories} setCategories={setCategories} />
+          )}
         </div>
       </div>
     </div>
