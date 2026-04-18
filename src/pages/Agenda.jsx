@@ -390,9 +390,9 @@ const Agenda = () => {
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
           <button onClick={handlePrevWeek} className="btn" style={{ padding: '0.4rem', border: '1px solid var(--border-dim)' }}><ChevronLeft size={16} /></button>
-          <div className="card" style={{ padding: '0.5rem 2rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-surface)' }}>
-             <Calendar size={16} color="var(--primary)" />
-             Semana Atual <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.75rem', marginLeft: '0.5rem' }}>{weekDays[0].date}/{weekDays[0].month} - {weekDays[6].date}/{weekDays[6].month}</span>
+          <div className="card" style={{ padding: '0.5rem 1rem', fontWeight: 700, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-surface)', whiteSpace: 'nowrap' }}>
+             <Calendar size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
+             Semana <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.7rem' }}>{weekDays[0].date}/{weekDays[0].month} – {weekDays[6].date}/{weekDays[6].month}</span>
           </div>
           <button onClick={handleNextWeek} className="btn" style={{ padding: '0.4rem', border: '1px solid var(--border-dim)' }}><ChevronRight size={16} /></button>
         </div>
