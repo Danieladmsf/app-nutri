@@ -272,7 +272,7 @@ const Agenda = () => {
                   onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisits }))}
                   className="btn btn-primary reveal-staggered" 
                   style={{ width: '100%', padding: '1.2rem', justifyContent: 'center', boxShadow: '0 8px 24px rgba(27,61,47,0.2)' }}>
-                  Reagendar {selectedVisits.length} visita{selectedVisits.length > 1 ? 's' : ''} em lote
+                  Reagendar {selectedVisits.length} visita{selectedVisits.length > 1 ? 's' : ''}
                 </button>
               </div>
            )}
