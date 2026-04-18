@@ -119,9 +119,12 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
           <div style={{ borderTop: '1px solid var(--border-dim)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
             
             {mode === 'create' ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <input type="checkbox" id="recorrencia" checked={isRecurring} onChange={e => setIsRecurring(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--primary)' }} />
-                <label htmlFor="recorrencia" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Tornar esta visita FIXA na rotina desta semana?</label>
+              <div>
+                 <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Frequência da Visita</label>
+                 <select value={isRecurring ? 'fixa' : 'avulsa'} onChange={e => setIsRecurring(e.target.value === 'fixa')} style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem', color: 'var(--text-main)', outline: 'none' }}>
+                   <option value="avulsa">Visita Avulsa / Esporádica (Apenas nesta data)</option>
+                   <option value="fixa">Visita Permanente (Toda Semana)</option>
+                 </select>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
