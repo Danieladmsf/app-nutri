@@ -89,7 +89,7 @@ import { visitsMock as initialVisitsMock } from '../data/mockDatabase';
 
 const Agenda = () => {
   const navigate = useNavigate();
-  const { workDays } = useAppContext();
+  const { workDays, workStart, workEnd } = useAppContext();
   const [viewMode, setViewMode] = useState('diaria'); // 'diaria' | 'mensal'
   const [weekStartObj, setWeekStartObj] = useState('2026-04-12'); // O domingo base
   const [selectedDate, setSelectedDate] = useState('2026-04-15');
@@ -293,63 +293,77 @@ const Agenda = () => {
                 )}
              </div>
 
-             <div className="hourly-grid-container" style={{ flex: 1, minHeight: '600px', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)' }}>
-                <div style={{ position: 'relative', height: `1440px`, marginTop: '10px' }}>
-                   {Array.from({ length: 24 }).map((_, i) => (
-                      <div key={`hour-${i}`} style={{ 
-                         position: 'absolute', top: `${i * 60}px`, left: 0, right: 0, height: '60px', 
-                         borderBottom: '1px solid var(--border-dim)', display: 'flex', paddingLeft: '0.5rem'
-                      }}>
-                         <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, transform: 'translateY(-50%)', background: 'var(--bg-surface)', padding: '0 0.5rem', alignSelf: 'flex-start' }}>
-                           {String(i).padStart(2, '0')}:00
-                         </span>
-                      </div>
-                   ))}
-                   {(visitsData[selectedDate] || []).map(visit => {
-                      const topPx = parseTimeToMinutes(visit.time);
-                      const heightPx = parseDurationToMinutes(visit.duration);
-                      const isSelected = selectedVisit?.id === visit.id;
-                      const isChecked = selectedVisits.some(v => v.id === visit.id);
-                      return (
-                         <div 
-                           key={visit.id}
-                           onClick={() => {
-                             if (isSelectMode) toggleVisitSelection(visit);
-                             else setSelectedVisit(visit);
-                           }}
-                           style={{
-                              position: 'absolute', top: `${topPx}px`, height: `${heightPx}px`, left: '65px', right: '1rem',
-                              background: (isSelected || isChecked) ? 'rgba(27,61,47,0.15)' : (visit.isRecurring ? 'rgba(27,61,47,0.05)' : 'rgba(212,163,115,0.05)'),
-                              border: '1px solid', borderColor: (isSelected || isChecked) ? 'var(--primary)' : 'var(--border-dim)',
-                              borderLeft: (isSelected || isChecked) ? '4px solid var(--primary)' : `4px solid ${visit.isRecurring ? 'var(--primary)' : 'var(--secondary)'}`,
-                              borderRadius: '6px', padding: '0.4rem 0.8rem', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s ease',
-                              zIndex: (isSelected || isChecked) ? 10 : 5, boxShadow: (isSelected || isChecked) ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
-                              display: 'flex', flexDirection: 'column'
-                           }}
-                         >
-                            {isSelectMode && (
-                              <div style={{ position: 'absolute', top: '0.4rem', right: '0.4rem' }}>
-                                 <input type="checkbox" checked={isChecked} readOnly style={{ width: '16px', height: '16px', accentColor: 'var(--primary)', cursor: 'pointer' }} />
+             <div className="hourly-grid-container" style={{ flex: 1, minHeight: '600px', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', overflowY: 'auto', position: 'relative' }}>
+                {(() => {
+                   const gridStartHour = parseInt((workStart || '07:00').split(':')[0], 10);
+                   const gridEndHour = parseInt((workEnd || '18:00').split(':')[0], 10);
+                   const startOffsetPx = gridStartHour * 60;
+                   const gridHours = Array.from({ length: Math.max(1, gridEndHour - gridStartHour + 1) }, (_, i) => gridStartHour + i);
+                   
+                   return (
+                     <div style={{ position: 'relative', height: `${gridHours.length * 60}px`, marginTop: '10px' }}>
+                        {gridHours.map((h, i) => (
+                           <div key={`hour-${h}`} style={{ 
+                              position: 'absolute', top: `${i * 60}px`, left: 0, right: 0, height: '60px', 
+                              borderBottom: '1px solid var(--border-dim)', display: 'flex', paddingLeft: '0.5rem'
+                           }}>
+                              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, transform: 'translateY(-50%)', background: 'var(--bg-surface)', padding: '0 0.5rem', alignSelf: 'flex-start' }}>
+                                {String(h).padStart(2, '0')}:00
+                              </span>
+                           </div>
+                        ))}
+                        {(visitsData[selectedDate] || []).map(visit => {
+                           const absoluteTopPx = parseTimeToMinutes(visit.time);
+                           const relativeTopPx = absoluteTopPx - startOffsetPx;
+                           const heightPx = parseDurationToMinutes(visit.duration);
+                           const isSelected = selectedVisit?.id === visit.id;
+                           const isChecked = selectedVisits.some(v => v.id === visit.id);
+                           
+                           // Don't render if it's completely out of the grid bounds
+                           if (relativeTopPx + heightPx < 0 || relativeTopPx > gridHours.length * 60) return null;
+
+                           return (
+                              <div 
+                                key={visit.id}
+                                onClick={() => {
+                                  if (isSelectMode) toggleVisitSelection(visit);
+                                  else setSelectedVisit(visit);
+                                }}
+                                style={{
+                                   position: 'absolute', top: `${relativeTopPx}px`, height: `${heightPx}px`, left: '65px', right: '1rem',
+                                   background: (isSelected || isChecked) ? 'rgba(27,61,47,0.15)' : (visit.isRecurring ? 'rgba(27,61,47,0.05)' : 'rgba(212,163,115,0.05)'),
+                                   border: '1px solid', borderColor: (isSelected || isChecked) ? 'var(--primary)' : 'var(--border-dim)',
+                                   borderLeft: (isSelected || isChecked) ? '4px solid var(--primary)' : `4px solid ${visit.isRecurring ? 'var(--primary)' : 'var(--secondary)'}`,
+                                   borderRadius: '6px', padding: '0.4rem 0.8rem', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s ease',
+                                   zIndex: (isSelected || isChecked) ? 10 : 5, boxShadow: (isSelected || isChecked) ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                                   display: 'flex', flexDirection: 'column'
+                                }}
+                              >
+                                 {isSelectMode && (
+                                   <div style={{ position: 'absolute', top: '0.4rem', right: '0.4rem' }}>
+                                      <input type="checkbox" checked={isChecked} readOnly style={{ width: '16px', height: '16px', accentColor: 'var(--primary)', cursor: 'pointer' }} />
+                                   </div>
+                                 )}
+                                 <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {visit.time} - {visit.client}
+                                 </div>
+                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                      <MapPin size={10} style={{ display: 'inline', marginRight: '2px' }} /> {visit.address.split('-')[0]}
+                                   </div>
+                                   {visit.rescheduleType === 'provisional' && (
+                                     <span style={{ fontSize: '0.55rem', padding: '0.1rem 0.3rem', background: '#fff9ed', color: '#b27a00', borderRadius: '4px', border: '1px dashed currentColor' }}>EXCEPCIONAL</span>
+                                   )}
+                                 </div>
+                                 {heightPx > 60 && (
+                                    <div style={{ marginTop: 'auto', fontSize: '0.7rem', opacity: 0.6, fontWeight: 600 }}>Duração: {visit.duration}</div>
+                                 )}
                               </div>
-                            )}
-                            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                               {visit.time} - {visit.client}
-                            </div>
-                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                                 <MapPin size={10} style={{ display: 'inline', marginRight: '2px' }} /> {visit.address.split('-')[0]}
-                              </div>
-                              {visit.rescheduleType === 'provisional' && (
-                                <span style={{ fontSize: '0.55rem', padding: '0.1rem 0.3rem', background: '#fff9ed', color: '#b27a00', borderRadius: '4px', border: '1px dashed currentColor' }}>EXCEPCIONAL</span>
-                              )}
-                            </div>
-                            {heightPx > 60 && (
-                               <div style={{ marginTop: 'auto', fontSize: '0.7rem', opacity: 0.6, fontWeight: 600 }}>Duração: {visit.duration}</div>
-                            )}
-                         </div>
-                      )
-                   })}
-                </div>
+                           )
+                        })}
+                     </div>
+                   );
+                })()}
              </div>
            </div>
         </div>
