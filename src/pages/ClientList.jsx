@@ -12,6 +12,18 @@ const ClientList = () => {
   return (
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
+      {/* Header Toolbar */}
+      <header style={{ marginBottom: '0.5rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
+        <div className="flex-toolbar" style={{ gap: '1rem', alignItems: 'center' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
+             Lista de Clientes
+          </h1>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+             <button className="btn btn-primary full-width-mobile" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}><UserPlus size={16} /> NOVO CLIENTE</button>
+          </div>
+        </div>
+      </header>
+
       {/* SaaS Toolbar */}
       <div className="flex-toolbar">
         <div style={{ display: 'flex', gap: '1rem', flex: 1 }} className="full-width-mobile">
@@ -27,7 +39,6 @@ const ClientList = () => {
         </div>
         <div style={{ display: 'flex', gap: '1rem' }} className="full-width-mobile">
           <button className="btn full-width-mobile"><Download size={16} /> Exportar CSV</button>
-          <button className="btn btn-primary full-width-mobile"><UserPlus size={16} /> Novo Cliente</button>
         </div>
       </div>
 

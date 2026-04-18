@@ -41,6 +41,16 @@ const ReportGenerator = () => {
   return (
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
       
+      {/* Header Toolbar */}
+      <header style={{ marginBottom: '0.5rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
+        <div className="flex-toolbar" style={{ gap: '1rem', alignItems: 'center' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
+             Auditoria IA
+          </h1>
+          {/* Pode ser adicionado status globals do laudo aqui */}
+        </div>
+      </header>
+
       {/* SaaS Editor Toolbar */}
       <div className="flex-toolbar" style={{ marginBottom: '1.5rem', background: 'var(--bg-surface)', padding: '1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }} className="full-width-mobile">

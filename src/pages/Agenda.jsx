@@ -189,24 +189,47 @@ const Agenda = () => {
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column' }}>
       
       {/* Header Toolbar */}
-      <div className="flex-toolbar" style={{ gap: '1rem', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', flex: 1 }} className="full-width-mobile">
-          <div className="card" style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-surface)', padding: '0.2rem', borderRadius: 'var(--radius-md)' }}>
+      <header style={{ marginBottom: '2.5rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
+        <div className="flex-toolbar" style={{ gap: '1rem', alignItems: 'center' }}>
+          
+          {/* Title */}
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
+             Agenda & Rotinas
+          </h1>
+
+          {/* Action Row */}
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+             
+             {/* View Mode Toggles */}
+             <div className="card" style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-surface)', padding: '0.2rem', borderRadius: 'var(--radius-md)' }}>
+                <button 
+                   onClick={() => setViewMode('diaria')}
+                   className="btn" 
+                   style={{ border: 'none', background: viewMode === 'diaria' ? 'var(--bg-deep)' : 'transparent', boxShadow: viewMode === 'diaria' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', color: viewMode === 'mensal' ? 'var(--text-muted)' : 'var(--text-main)', transition: 'all 0.2s', padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>
+                  Agenda Diária
+                </button>
+                <button 
+                   onClick={() => setViewMode('mensal')}
+                   className="btn" 
+                   style={{ border: 'none', background: viewMode === 'mensal' ? 'var(--bg-deep)' : 'transparent', boxShadow: viewMode === 'mensal' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', color: viewMode === 'diaria' ? 'var(--text-muted)' : 'var(--text-main)', transition: 'all 0.2s', padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>
+                  Visão Calendário
+                </button>
+             </div>
+
+             <div className="desktop-only" style={{ width: '1px', height: '20px', background: 'var(--border-dim)', margin: '0 0.5rem' }}></div>
+
+             <button className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}>FILTRAR</button>
              <button 
-                onClick={() => setViewMode('diaria')}
-                className="btn" 
-                style={{ border: 'none', background: viewMode === 'diaria' ? 'var(--bg-deep)' : 'transparent', boxShadow: viewMode === 'diaria' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', color: viewMode === 'mensal' ? 'var(--text-muted)' : 'var(--text-main)', transition: 'all 0.2s' }}>
-               Agenda Diária
+               onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: null }))}
+               className="btn btn-primary" 
+               style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}
+             >
+               + NOVA VISITA
              </button>
-             <button 
-                onClick={() => setViewMode('mensal')}
-                className="btn" 
-                style={{ border: 'none', background: viewMode === 'mensal' ? 'var(--bg-deep)' : 'transparent', boxShadow: viewMode === 'mensal' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', color: viewMode === 'diaria' ? 'var(--text-muted)' : 'var(--text-main)', transition: 'all 0.2s' }}>
-               Visão Calendário
-             </button>
+
           </div>
         </div>
-      </div>
+      </header>
 
       {viewMode === 'mensal' ? (
         <div className="reveal-staggered agenda-hero-layout" style={{ flex: 1, alignItems: 'flex-start' }}>
