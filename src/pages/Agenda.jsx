@@ -391,6 +391,7 @@ const Agenda = () => {
           </div>
         </div>
       )}
+      </>
       )}
     </div>
   );
