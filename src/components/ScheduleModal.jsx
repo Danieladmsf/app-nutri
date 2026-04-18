@@ -167,7 +167,7 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
           <button className="btn" onClick={onClose}>Cancelar</button>
           <button className="btn btn-primary" onClick={() => {
               window.dispatchEvent(new CustomEvent('saveSchedule', { 
-                  detail: { newDate: date, visits: initialData } 
+                  detail: { newDate: date, visits: initialData, rescheduleType } 
               }));
               onClose();
           }}>

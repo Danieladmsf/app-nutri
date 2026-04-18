@@ -89,7 +89,7 @@ const Agenda = () => {
 
   useEffect(() => {
     const handleSaveSchedule = (e) => {
-       const { newDate, visits } = e.detail;
+       const { newDate, visits, rescheduleType } = e.detail;
        if (!newDate || !visits) return;
        
        setVisitsData(prev => {
@@ -104,7 +104,11 @@ const Agenda = () => {
          // Add to destination
          if (!newState[newDate]) newState[newDate] = [];
          visitsArray.forEach(v => {
-            newState[newDate].push({ ...v, time: '12:00' }); // Mocking same time, logic can expand later
+            newState[newDate].push({ 
+                ...v, 
+                time: '12:00', // Mocking same time, logic can expand later
+                rescheduleType 
+            }); 
          });
          return newState;
        });
@@ -278,10 +282,11 @@ const Agenda = () => {
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>{visit.duration}</div>
                  </div>
                  <div>
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                        {visit.client} 
-                       {visit.isRecurring === false && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(212,163,115,0.1)', color: 'var(--secondary)', borderRadius: '4px', border: '1px solid currentColor' }}>PONTUAL</span>}
-                       {visit.isRecurring === true && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(27,61,47,0.1)', color: 'var(--primary)', borderRadius: '4px', border: '1px solid currentColor' }}>ROTINA FIXA</span>}
+                       {visit.isRecurring === false && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(212,163,115,0.1)', color: 'var(--secondary)', borderRadius: '4px', border: '1px solid currentColor', whiteSpace: 'nowrap' }}>PONTUAL</span>}
+                       {visit.isRecurring === true && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(27,61,47,0.1)', color: 'var(--primary)', borderRadius: '4px', border: '1px solid currentColor', whiteSpace: 'nowrap' }}>ROTINA FIXA</span>}
+                       {visit.rescheduleType === 'provisional' && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: '#fff9ed', color: '#b27a00', borderRadius: '4px', border: '1px dashed currentColor', whiteSpace: 'nowrap' }}>&bull; EXCEPCIONAL</span>}
                     </h4>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
 
