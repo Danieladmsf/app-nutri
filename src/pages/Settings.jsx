@@ -129,26 +129,6 @@ const AgendaSettings = ({ workDays, setWorkDays, workStart, setWorkStart, workEn
           </div>
         </div>
       </section>
-
-      {/* Notifications */}
-      <section>
-        <h3 style={{ fontSize: '0.9rem', fontWeight: 800, marginBottom: '0.5rem' }}>Notificações de Rota</h3>
-        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-          Receba lembretes antes de cada visita agendada via notificação push ou WhatsApp.
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {[
-            { label: 'Lembrete 30min antes da visita', key: 'reminder30' },
-            { label: 'Resumo diário da rota às 07:00', key: 'dailySummary' },
-            { label: 'Alerta de reagendamento', key: 'rescheduleAlert' }
-          ].map(item => (
-            <label key={item.key} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-              <input type="checkbox" defaultChecked style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
-              <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{item.label}</span>
-            </label>
-          ))}
-        </div>
-      </section>
     </div>
   );
 };
