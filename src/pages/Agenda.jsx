@@ -60,6 +60,26 @@ const generateMonthCalendar = (year, month) => {
   return days;
 };
 
+const parseTimeToMinutes = (timeStr) => {
+  if (!timeStr) return 0;
+  const parts = timeStr.split(':');
+  return parseInt(parts[0]) * 60 + parseInt(parts[1] || 0);
+};
+
+const parseDurationToMinutes = (durationStr) => {
+  if (!durationStr) return 60; 
+  let mins = 0;
+  const text = durationStr.toLowerCase();
+  
+  const hoursMatch = text.match(/(\d+)\s*h/);
+  if (hoursMatch) mins += parseInt(hoursMatch[1]) * 60;
+  
+  const minsMatch = text.match(/(\d+)\s*m/);
+  if (minsMatch) mins += parseInt(minsMatch[1]);
+  
+  return mins;
+};
+
 const initialVisitsMock = {
   '2026-04-14': [],
   '2026-04-15': [
@@ -182,57 +202,166 @@ const Agenda = () => {
                 onClick={() => setViewMode('mensal')}
                 className="btn" 
                 style={{ border: 'none', background: viewMode === 'mensal' ? 'var(--bg-deep)' : 'transparent', boxShadow: viewMode === 'mensal' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', color: viewMode === 'diaria' ? 'var(--text-muted)' : 'var(--text-main)', transition: 'all 0.2s' }}>
-               Visão Mensal (Rotas)
+               Visão Calendário
              </button>
           </div>
         </div>
       </div>
 
       {viewMode === 'mensal' ? (
-        <div className="reveal-staggered" style={{ padding: '1rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', flex: 1 }}>
-           <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1.5rem', textAlign: 'center' }}>Abril de 2026</h3>
+        <div className="reveal-staggered agenda-hero-layout" style={{ flex: 1, alignItems: 'flex-start' }}>
            
-           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem', marginBottom: '0.5rem' }}>
-             {['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d => (
-                <div key={d} style={{ textAlign: 'center', fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)' }}>{d}</div>
-             ))}
-           </div>
-           
-           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem' }}>
-             {generateMonthCalendar(2026, 4).map((dayObj, i) => {
-                if (!dayObj) return <div key={`empty-${i}`} style={{ background: 'transparent' }} />;
-                
-                const dayVisits = visitsData[dayObj.fullDate] || [];
-                const fixed = dayVisits.filter(v => v.isRecurring).length;
-                const pontual = dayVisits.filter(v => !v.isRecurring && !v.rescheduleType).length;
-                const rescheduled = dayVisits.filter(v => v.rescheduleType).length;
-                const isSelected = selectedDate === dayObj.fullDate;
+           {/* Sidebar: Mini Calendar */}
+           <div className="agenda-sidebar">
+              <div>
+                 <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem' }}>Mês Base</h3>
+                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.2rem', marginBottom: '0.5rem' }}>
+                   {['D','S','T','Q','Q','S','S'].map((d, idx) => (
+                      <div key={idx} style={{ textAlign: 'center', fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)' }}>{d}</div>
+                   ))}
+                 </div>
+                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.2rem' }}>
+                   {generateMonthCalendar(2026, 4).map((dayObj, i) => {
+                      if (!dayObj) return <div key={`empty-${i}`} style={{ background: 'transparent' }} />;
+                      const isSelected = selectedDate === dayObj.fullDate;
+                      const dayVisits = visitsData[dayObj.fullDate] || [];
+                      const hasVisits = dayVisits.length > 0;
+                      return (
+                         <div 
+                           key={dayObj.fullDate} 
+                           onClick={() => {
+                              setSelectedDate(dayObj.fullDate);
+                              setWeekStartObj(dayObj.fullDate);
+                              setSelectedVisit(null);
+                           }}
+                           style={{ 
+                             aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                             background: isSelected ? 'var(--primary)' : 'transparent', 
+                             color: isSelected ? 'white' : 'var(--text-main)',
+                             borderRadius: '50%', fontSize: '0.75rem', fontWeight: isSelected ? 800 : 500,
+                             cursor: 'pointer', position: 'relative'
+                           }}>
+                            {dayObj.date}
+                            {hasVisits && !isSelected && <div style={{ position: 'absolute', bottom: '2px', width: '4px', height: '4px', borderRadius: '50%', background: 'var(--primary)' }}></div>}
+                         </div>
+                      )
+                   })}
+                 </div>
+              </div>
 
-                return (
-                   <div 
-                     key={dayObj.fullDate} 
+              {/* Seletor de Visitas Lote Sidebar */}
+              <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-dim)' }}>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Ações em Lote</h3>
+                <button 
+                  onClick={() => { setIsSelectMode(!isSelectMode); setSelectedVisits([]); }} 
+                  className="btn" 
+                  style={{ width: '100%', justifyContent: 'center', fontSize: '0.85rem', padding: '0.8rem', background: isSelectMode ? 'var(--primary)' : 'transparent', border: isSelectMode ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: isSelectMode ? 'white' : 'var(--text-main)' }}>
+                  {isSelectMode ? 'Cancelar Seleção' : 'Selecionar Múltiplas'}
+                </button>
+                {isSelectMode && (
+                   <button 
                      onClick={() => {
-                        setViewMode('diaria');
-                        setSelectedDate(dayObj.fullDate);
-                        setWeekStartObj(dayObj.fullDate);
+                        const acts = visitsData[selectedDate] || [];
+                        if (selectedVisits.length === acts.length) {
+                           setSelectedVisits([]);
+                        } else {
+                           setSelectedVisits([...acts]);
+                        }
                      }}
-                     style={{ 
-                       background: isSelected ? 'rgba(27,61,47,0.05)' : 'var(--bg-deep)', 
-                       border: '1px solid',
-                       borderColor: isSelected ? 'var(--primary)' : 'var(--border-dim)', 
-                       borderRadius: '8px', padding: '0.5rem', minHeight: '80px',
-                       cursor: 'pointer', display: 'flex', flexDirection: 'column',
-                       transition: 'all 0.2s ease'
-                     }}>
-                      <div style={{ fontWeight: 800, fontSize: '1rem', marginBottom: 'auto', color: isSelected ? 'var(--primary)' : 'var(--text-main)' }}>{dayObj.date}</div>
-                      <div style={{ display: 'flex', gap: '2px', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-                         {fixed > 0 && <span style={{ background: 'rgba(27,61,47,0.1)', color: 'var(--primary)', fontSize: '0.6rem', padding: '2px 4px', borderRadius: '4px', fontWeight: 700 }}>{fixed} Fx</span>}
-                         {pontual > 0 && <span style={{ background: 'rgba(212,163,115,0.1)', color: 'var(--secondary)', fontSize: '0.6rem', padding: '2px 4px', borderRadius: '4px', fontWeight: 700 }}>{pontual} Pt</span>}
-                         {rescheduled > 0 && <span style={{ background: '#fff9ed', color: '#b27a00', fontSize: '0.6rem', padding: '2px 4px', borderRadius: '4px', border: '1px dashed currentColor', fontWeight: 700 }}>{rescheduled} Ex</span>}
+                     className="btn"
+                     style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem', fontSize: '0.85rem', padding: '0.8rem', background: 'transparent', border: '1px solid var(--border-dim)', color: 'var(--text-main)' }}>
+                     {selectedVisits.length === (visitsData[selectedDate] || []).length && selectedVisits.length > 0 ? 'Desmarcar Todos' : 'Selecionar Todo o Dia'}
+                   </button>
+                )}
+                {isSelectMode && selectedVisits.length > 0 && (
+                   <button 
+                     onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisits }))}
+                     className="btn btn-primary reveal-staggered" 
+                     style={{ width: '100%', padding: '0.8rem', justifyContent: 'center', marginTop: '1rem', boxShadow: '0 8px 24px rgba(27,61,47,0.2)' }}>
+                     Reagendar {selectedVisits.length} visita{selectedVisits.length > 1 ? 's' : ''}
+                   </button>
+                )}
+              </div>
+           </div>
+
+           {/* Hourly Grid View */}
+           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+             {/* Header Day */}
+             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-dim)' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0, textTransform: 'capitalize' }}>{weekDays.find(d => d.fullDate === selectedDate)?.dayStr || 'Data'}</h2>
+                  <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{selectedDate.split('-').reverse().join('/')}</span>
+                </div>
+                {/* Context Action Menu for Selected Visit */}
+                {selectedVisit && (
+                  <div className="reveal-staggered" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', background: 'var(--bg-surface)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)' }}>
+                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>FOCO: <span style={{color: 'var(--primary)'}}>{selectedVisit.client}</span></span>
+                     <span style={{ width: '1px', height: '20px', background: 'var(--border-dim)', margin: '0 0.5rem' }}></span>
+                     <button onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Reagendar</button>
+                     <button onClick={() => navigate('/laudos')} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Avaliar</button>
+                     <button onClick={() => setSelectedVisit(null)} className="btn" style={{ padding: '0.4rem', border: 'none' }}><X size={16}/></button>
+                  </div>
+                )}
+             </div>
+
+             <div className="hourly-grid-container" style={{ flex: 1, minHeight: '600px', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)' }}>
+                <div style={{ position: 'relative', height: `1440px`, marginTop: '10px' }}>
+                   {Array.from({ length: 24 }).map((_, i) => (
+                      <div key={`hour-${i}`} style={{ 
+                         position: 'absolute', top: `${i * 60}px`, left: 0, right: 0, height: '60px', 
+                         borderBottom: '1px solid var(--border-dim)', display: 'flex', paddingLeft: '0.5rem'
+                      }}>
+                         <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, transform: 'translateY(-50%)', background: 'var(--bg-surface)', padding: '0 0.5rem', alignSelf: 'flex-start' }}>
+                           {String(i).padStart(2, '0')}:00
+                         </span>
                       </div>
-                   </div>
-                )
-             })}
+                   ))}
+                   {(visitsData[selectedDate] || []).map(visit => {
+                      const topPx = parseTimeToMinutes(visit.time);
+                      const heightPx = parseDurationToMinutes(visit.duration);
+                      const isSelected = selectedVisit?.id === visit.id;
+                      const isChecked = selectedVisits.some(v => v.id === visit.id);
+                      return (
+                         <div 
+                           key={visit.id}
+                           onClick={() => {
+                             if (isSelectMode) toggleVisitSelection(visit);
+                             else setSelectedVisit(visit);
+                           }}
+                           style={{
+                              position: 'absolute', top: `${topPx}px`, height: `${heightPx}px`, left: '65px', right: '1rem',
+                              background: (isSelected || isChecked) ? 'rgba(27,61,47,0.15)' : (visit.isRecurring ? 'rgba(27,61,47,0.05)' : 'rgba(212,163,115,0.05)'),
+                              border: '1px solid', borderColor: (isSelected || isChecked) ? 'var(--primary)' : 'var(--border-dim)',
+                              borderLeft: (isSelected || isChecked) ? '4px solid var(--primary)' : `4px solid ${visit.isRecurring ? 'var(--primary)' : 'var(--secondary)'}`,
+                              borderRadius: '6px', padding: '0.4rem 0.8rem', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s ease',
+                              zIndex: (isSelected || isChecked) ? 10 : 5, boxShadow: (isSelected || isChecked) ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                              display: 'flex', flexDirection: 'column'
+                           }}
+                         >
+                            {isSelectMode && (
+                              <div style={{ position: 'absolute', top: '0.4rem', right: '0.4rem' }}>
+                                 <input type="checkbox" checked={isChecked} readOnly style={{ width: '16px', height: '16px', accentColor: 'var(--primary)', cursor: 'pointer' }} />
+                              </div>
+                            )}
+                            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                               {visit.time} - {visit.client}
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                 <MapPin size={10} style={{ display: 'inline', marginRight: '2px' }} /> {visit.address.split('-')[0]}
+                              </div>
+                              {visit.rescheduleType === 'provisional' && (
+                                <span style={{ fontSize: '0.55rem', padding: '0.1rem 0.3rem', background: '#fff9ed', color: '#b27a00', borderRadius: '4px', border: '1px dashed currentColor' }}>EXCEPCIONAL</span>
+                              )}
+                            </div>
+                            {heightPx > 60 && (
+                               <div style={{ marginTop: 'auto', fontSize: '0.7rem', opacity: 0.6, fontWeight: 600 }}>Duração: {visit.duration}</div>
+                            )}
+                         </div>
+                      )
+                   })}
+                </div>
+             </div>
            </div>
         </div>
       ) : (
