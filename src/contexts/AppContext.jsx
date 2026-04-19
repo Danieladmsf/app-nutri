@@ -43,6 +43,14 @@ const DEFAULT_CATEGORIES = [
   }
 ];
 
+const DEFAULT_VISIT_TAGS = [
+  { id: 'rotina_fixa', label: 'ROTINA FIXA', description: 'Visita recorrente que se repete toda semana no mesmo dia e horário para o cliente.', isSystem: true, color: '#1B3D2F' },
+  { id: 'pontual', label: 'PONTUAL', description: 'Visita avulsa/esporádica agendada para uma data específica, sem repetição.', isSystem: true, color: '#D4A373' },
+  { id: 'treinamento', label: 'TREINAMENTO', description: 'Sessão de capacitação ou reciclagem para a equipe do cliente.', isSystem: false, color: '#5B8A72' },
+  { id: 'primeira_visita', label: 'PRIMEIRA VISITA', description: 'Primeira auditoria ou visita técnica a um novo estabelecimento.', isSystem: false, color: '#7B68EE' },
+  { id: 'reuniao', label: 'REUNIÃO', description: 'Reunião administrativa ou de alinhamento com o cliente.', isSystem: false, color: '#E07A5F' }
+];
+
 const DEFAULT_PROFILE = {
   name: '', email: '', whatsapp: '', crm: '', photo: '', bio: ''
 };
@@ -75,6 +83,9 @@ export const AppProvider = ({ children }) => {
   // Laudo IA Categories
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
 
+  // Visit Tags
+  const [visitTags, setVisitTags] = useState(DEFAULT_VISIT_TAGS);
+
   // ─── Load from Firestore on mount ───
   useEffect(() => {
     const loadSettings = async () => {
@@ -88,6 +99,7 @@ export const AppProvider = ({ children }) => {
           if (data.slotDuration) setSlotDuration(data.slotDuration);
           if (data.profile) setProfile(data.profile);
           if (data.categories) setCategories(data.categories);
+          if (data.visitTags) setVisitTags(data.visitTags);
           console.log('✅ Settings loaded from Firestore');
         } else {
           console.log('📦 No settings found — using defaults, will save on first change');
@@ -121,12 +133,12 @@ export const AppProvider = ({ children }) => {
     if (isLoading) return; // Don't save initial load
     
     const timeout = setTimeout(() => {
-      saveToFirestore({ workDays, workStart, workEnd, slotDuration, profile, categories });
+      saveToFirestore({ workDays, workStart, workEnd, slotDuration, profile, categories, visitTags });
     }, 1500); // 1.5s debounce
 
     setIsSynced(false);
     return () => clearTimeout(timeout);
-  }, [workDays, workStart, workEnd, slotDuration, profile, categories, isLoading, saveToFirestore]);
+  }, [workDays, workStart, workEnd, slotDuration, profile, categories, visitTags, isLoading, saveToFirestore]);
 
   const value = {
     isLoading,
@@ -143,6 +155,9 @@ export const AppProvider = ({ children }) => {
 
     // Laudo IA
     categories, setCategories,
+
+    // Visit Tags
+    visitTags, setVisitTags,
   };
 
   return (

@@ -69,7 +69,7 @@ const TabButton = ({ active, onClick, icon, label }) => (
 );
 
 // ─── Tab: Agenda & Rotina ───
-const AgendaSettings = ({ workDays, setWorkDays, workStart, setWorkStart, workEnd, setWorkEnd, slotDuration, setSlotDuration }) => {
+const AgendaSettings = ({ workDays, setWorkDays, workStart, setWorkStart, workEnd, setWorkEnd, slotDuration, setSlotDuration, visitTags, setVisitTags }) => {
   const dayLabels = {
     dom: 'Domingo', seg: 'Segunda', ter: 'Terça', qua: 'Quarta', qui: 'Quinta', sex: 'Sexta', sab: 'Sábado'
   };
@@ -129,6 +129,109 @@ const AgendaSettings = ({ workDays, setWorkDays, workStart, setWorkStart, workEn
             <input type="time" value={workEnd} onChange={e => setWorkEnd(e.target.value)}
               style={{ padding: '0.75rem 1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-minimal)', background: 'var(--bg-deep)', fontSize: '0.85rem', outline: 'none', color: 'var(--text-main)' }}
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Visit Tags */}
+      <section>
+        <h3 style={{ fontSize: '0.9rem', fontWeight: 800, marginBottom: '0.5rem' }}>Tags de Visita</h3>
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+          Tags são etiquetas que classificam o tipo de cada visita agendada. As tags de <strong>sistema</strong> (ROTINA FIXA e PONTUAL) são automáticas. Você pode criar tags personalizadas.
+        </p>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {visitTags.map((tag) => (
+            <div key={tag.id} style={{
+              padding: '1rem',
+              border: '1px solid var(--border-dim)',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--bg-deep)',
+              borderLeft: `4px solid ${tag.color}`
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '100px',
+                    fontSize: '0.6rem',
+                    fontWeight: 800,
+                    background: tag.color,
+                    color: '#fff',
+                    letterSpacing: '0.05em'
+                  }}>{tag.label}</span>
+                  {tag.isSystem && (
+                    <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Sistema</span>
+                  )}
+                </div>
+                {!tag.isSystem && (
+                  <button
+                    onClick={() => setVisitTags(prev => prev.filter(t => t.id !== tag.id))}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.2rem' }}
+                    title="Remover tag"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <input
+                type="text"
+                value={tag.description}
+                onChange={(e) => {
+                  setVisitTags(prev => prev.map(t =>
+                    t.id === tag.id ? { ...t, description: e.target.value } : t
+                  ));
+                }}
+                placeholder="Descreva para que serve esta tag..."
+                style={{
+                  width: '100%', padding: '0.6rem 0.8rem',
+                  border: '1px solid var(--border-dim)', borderRadius: '4px',
+                  background: 'var(--bg-surface)', fontSize: '0.75rem',
+                  color: 'var(--text-main)', outline: 'none', boxSizing: 'border-box'
+                }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Add New Tag */}
+        <div style={{ marginTop: '1rem', padding: '1rem', border: '2px dashed var(--border-dim)', borderRadius: 'var(--radius-md)', background: 'transparent' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-muted)' }}>+ Nova Tag Personalizada</div>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <input
+              type="text"
+              id="newTagName"
+              placeholder="Nome da tag (ex: Acompanhamento)"
+              style={{ flex: 1, minWidth: '150px', padding: '0.6rem 0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.75rem', color: 'var(--text-main)', outline: 'none' }}
+            />
+            <input
+              type="color"
+              id="newTagColor"
+              defaultValue="#5B8A72"
+              style={{ width: '40px', height: '36px', border: '1px solid var(--border-dim)', borderRadius: '4px', padding: '2px', cursor: 'pointer', background: 'var(--bg-deep)' }}
+            />
+            <button
+              className="btn btn-primary"
+              style={{ padding: '0.6rem 1rem', fontSize: '0.7rem' }}
+              onClick={() => {
+                const nameInput = document.getElementById('newTagName');
+                const colorInput = document.getElementById('newTagColor');
+                const name = nameInput.value.trim();
+                if (!name) return alert('Digite o nome da tag.');
+                const id = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+                if (visitTags.find(t => t.id === id)) return alert('Já existe uma tag com esse nome.');
+                setVisitTags(prev => [...prev, {
+                  id,
+                  label: name.toUpperCase(),
+                  description: '',
+                  isSystem: false,
+                  color: colorInput.value
+                }]);
+                nameInput.value = '';
+              }}
+            >
+              <Plus size={14} /> Adicionar
+            </button>
           </div>
         </div>
       </section>
@@ -432,6 +535,7 @@ const Settings = () => {
     slotDuration, setSlotDuration,
     profile, setProfile,
     categories, setCategories,
+    visitTags, setVisitTags,
   } = useAppContext();
 
   const tabs = [
@@ -500,6 +604,7 @@ const Settings = () => {
               workStart={workStart} setWorkStart={setWorkStart}
               workEnd={workEnd} setWorkEnd={setWorkEnd}
               slotDuration={slotDuration} setSlotDuration={setSlotDuration}
+              visitTags={visitTags} setVisitTags={setVisitTags}
             />
           )}
 

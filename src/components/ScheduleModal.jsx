@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Clock, AlertTriangle, RefreshCcw } from 'lucide-react';
+import { X, Calendar, Clock, AlertTriangle, RefreshCcw, Tag } from 'lucide-react';
 import { saveVisit, subscribeToClients } from '../services/firestore';
+import { useAppContext } from '../contexts/AppContext';
 
 const ScheduleModal = ({ isOpen, onClose, initialData }) => {
   // Modes: 'create', 'reschedule'
@@ -17,6 +18,10 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
   const [clients, setClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState('');
   const [saving, setSaving] = useState(false);
+  const [selectedTag, setSelectedTag] = useState('');
+  
+  // Get tags from context
+  const { visitTags } = useAppContext();
   
   // Reschedule state
   const [rescheduleType, setRescheduleType] = useState('provisional'); // provisional | permanent
@@ -72,6 +77,7 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
         status: 'Em aberto',
         isRecurring: isRecurring,
         visitType: visitType,
+        tag: selectedTag || (isRecurring ? 'rotina_fixa' : 'pontual'),
         clientData: {
           contact: selectedClient.contactRole || selectedClient.contact || 'Contato',
           lastVisitDate: selectedClient.lastVisitDate || '—',
@@ -213,6 +219,39 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
                   <option>Treinamento de Equipe</option>
                   <option>Checklist Operacional</option>
                 </select>
+              </div>
+            </div>
+          )}
+
+          {/* Tag Selector */}
+          {mode === 'create' && (
+            <div>
+              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Tag size={14} /> Tag da Visita
+              </label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {visitTags.map(tag => (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() => setSelectedTag(tag.id)}
+                    style={{
+                      padding: '0.4rem 0.8rem',
+                      borderRadius: '100px',
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      border: '2px solid',
+                      borderColor: selectedTag === tag.id ? tag.color : 'var(--border-dim)',
+                      background: selectedTag === tag.id ? tag.color : 'var(--bg-deep)',
+                      color: selectedTag === tag.id ? '#fff' : 'var(--text-muted)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      letterSpacing: '0.03em'
+                    }}
+                  >
+                    {tag.label}
+                  </button>
+                ))}
               </div>
             </div>
           )}
