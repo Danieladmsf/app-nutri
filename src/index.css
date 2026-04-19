@@ -375,6 +375,8 @@ h1, h2, h3, h4, .serif {
     padding-right: 1.5rem;
     overflow-y: auto;
     align-self: start;
+    position: sticky;
+    top: 2rem;
   }
   .agenda-sidebar .card {
     padding: 1rem !important;
@@ -402,10 +404,12 @@ h1, h2, h3, h4, .serif {
     padding-left: 1.5rem;
     min-height: 0;
     min-width: 0;
+    height: 100%;
   }
   .agenda-timeline-col .hourly-grid-container {
     overflow-y: auto;
     min-height: 0;
+    height: 100%;
   }
 }
 .hourly-grid-container {
