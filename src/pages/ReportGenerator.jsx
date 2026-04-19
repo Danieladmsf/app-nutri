@@ -559,49 +559,42 @@ const ReportGenerator = () => {
     return () => clearTimeout(timeout);
   }, [mode, isReady, client, occurrences, signature, closedAt, laudoId, visitId, startedAt, profile, aiSummary]);
 
-  // ─── Auto-gerar sumário IA quando ocorrências mudam ───
-  useEffect(() => {
-    if (mode !== 'editor' || !isReady || isHydratingRef.current) return;
-    // Só dispara se houver pelo menos 1 ocorrência com texto
+  // ─── Gerar sumário IA (chamado manualmente antes de gerar o PDF) ───
+  const generateAISummary = async () => {
     const textsWithContent = occurrences.filter(o => o.text && o.text.trim().length > 10);
-    if (textsWithContent.length === 0) { setAiSummary(''); return; }
+    if (textsWithContent.length === 0) return;
 
-    // Hash simples para evitar chamadas repetidas com as mesmas ocorrências
     const hash = textsWithContent.map(o => `${o.categoryId}|${o.itemId}|${o.text?.slice(0,50)}`).join(';;');
-    if (hash === lastSummaryHashRef.current) return;
+    if (hash === lastSummaryHashRef.current && aiSummary) return; // Já gerou para estas ocorrências
 
-    const timeout = setTimeout(async () => {
-      lastSummaryHashRef.current = hash;
-      setIsGeneratingSummary(true);
-      try {
-        const bulletPoints = textsWithContent.map((o, i) => {
-          const cat = INSPECTION_CATEGORIES.find(c => c.id === o.categoryId);
-          const item = cat?.items.find(it => it.id === o.itemId);
-          return `${i+1}. [${cat?.label || 'Geral'} > ${item?.label || 'Item'}] ${o.text}`;
-        }).join('\n');
+    lastSummaryHashRef.current = hash;
+    setIsGeneratingSummary(true);
+    try {
+      const bulletPoints = textsWithContent.map((o, i) => {
+        const cat = INSPECTION_CATEGORIES.find(c => c.id === o.categoryId);
+        const item = cat?.items.find(it => it.id === o.itemId);
+        return `${i+1}. [${cat?.label || 'Geral'} > ${item?.label || 'Item'}] ${o.text}`;
+      }).join('\n');
 
-        const res = await fetch('/api/generate-ai-note', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            categoryLabel: 'Sumário Executivo',
-            itemLabel: 'Resumo Geral da Auditoria',
-            itemText: `Você é um nutricionista auditor. Escreva um PARÁGRAFO ÚNICO de sumário executivo (4 a 6 linhas) para a capa de um laudo técnico de auditoria sanitária do estabelecimento "${client || 'não informado'}". O sumário deve consolidar as seguintes ${textsWithContent.length} ocorrências encontradas durante a inspeção:\n\n${bulletPoints}\n\nO texto deve ser impessoal, formal e técnico. NÃO use listas, bullets, numeração ou saudações. Apenas o parágrafo corrido. Comece direto pelo resumo.`,
-          }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.text) setAiSummary(data.text);
-        }
-      } catch (err) {
-        console.warn('Falha ao gerar sumário IA:', err.message);
-      } finally {
-        setIsGeneratingSummary(false);
+      const res = await fetch('/api/generate-ai-note', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          categoryLabel: 'Sumário Executivo',
+          itemLabel: 'Resumo Geral da Auditoria',
+          itemText: `Você é um nutricionista auditor. Escreva um PARÁGRAFO ÚNICO de sumário executivo (4 a 6 linhas) para a capa de um laudo técnico de auditoria sanitária do estabelecimento "${client || 'não informado'}". O sumário deve consolidar as seguintes ${textsWithContent.length} ocorrências encontradas durante a inspeção:\n\n${bulletPoints}\n\nO texto deve ser impessoal, formal e técnico. NÃO use listas, bullets, numeração ou saudações. Apenas o parágrafo corrido. Comece direto pelo resumo.`,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.text) setAiSummary(data.text);
       }
-    }, 3000); // 3s debounce para não disparar a cada keystroke
-
-    return () => clearTimeout(timeout);
-  }, [mode, isReady, occurrences, client, INSPECTION_CATEGORIES]);
+    } catch (err) {
+      console.warn('Falha ao gerar sumário IA:', err.message);
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
 
   const invalidateSignature = () => {
     if (signature || clientSignatureImage) {
@@ -654,6 +647,12 @@ const ReportGenerator = () => {
     
     setIsGenerating(true);
     try {
+      // Gera o sumário IA antes de renderizar o PDF (se ainda não existir)
+      await generateAISummary();
+
+      // Pequeno delay para o React renderizar o sumário no DOM oculto
+      await new Promise(r => setTimeout(r, 300));
+
       const element = document.getElementById('pdf-report-content');
       const opt = {
         margin:       [10, 10, 10, 10],
