@@ -303,7 +303,19 @@ const ReportGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved' | 'error'
+  const [nutritionSvg, setNutritionSvg] = useState('');
   const isHydratingRef = useRef(true);
+
+  // Carrega o símbolo da nutrição inline (necessário para o html2canvas renderizar no PDF)
+  useEffect(() => {
+    fetch('/nutrition-symbol.svg')
+      .then((r) => r.text())
+      .then((text) => {
+        const normalized = text.replace('<svg ', '<svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet" ');
+        setNutritionSvg(normalized);
+      })
+      .catch((e) => console.error('Falha ao carregar símbolo da nutrição:', e));
+  }, []);
 
   // Garante que o laudo tenha um ID no Firestore (necessário para uploads de fotos)
   const ensureLaudoId = async () => {
@@ -653,11 +665,10 @@ const ReportGenerator = () => {
                         Auditoria de Conformidade Sanitária
                      </div>
                   </div>
-                  <img
-                     src="/nutrition-symbol.svg"
-                     crossOrigin="anonymous"
-                     alt="Símbolo da Nutrição"
-                     style={{ width: '110px', height: '110px', objectFit: 'contain', flexShrink: 0 }}
+                  <div
+                     aria-label="Símbolo da Nutrição"
+                     style={{ width: '110px', height: '110px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                     dangerouslySetInnerHTML={{ __html: nutritionSvg }}
                   />
                </div>
 
