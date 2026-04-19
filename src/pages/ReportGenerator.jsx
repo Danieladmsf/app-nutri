@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, ChevronDown, Trash2, Plus, PenTool, Share2, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import html2pdf from 'html2pdf.js';
 import { useAppContext } from '../contexts/AppContext';
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -283,16 +284,28 @@ const ReportGenerator = () => {
     setOccurrences(newArr);
   };
 
-  const handleGeneratePDF = () => {
+  const handleGeneratePDF = async () => {
     if (!client) return alert("Selecione o Cliente / Estabelecimento primeiro.");
     if (occurrences.length === 0) return alert("Adicione pelo menos uma ocorrência ao Canvas antes de gerar o PDF.");
     
     setIsGenerating(true);
-    setTimeout(() => {
-      // Simulate PDF Generation logic
-      alert(`PDF Gerado com sucesso!\nCliente: ${client}\nOcorrências: ${occurrences.length}\n(Simulação do download)`);
+    try {
+      const element = document.getElementById('pdf-report-content');
+      const opt = {
+        margin:       15,
+        filename:     `Laudo_Auditoria_${client.replace(/\s+/g, '_')}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      
+      await html2pdf().set(opt).from(element).save();
+    } catch (e) {
+      console.error('Falha ao gerar o PDF', e);
+      alert('Houve uma falha ao renderizar o PDF. Tente novamente.');
+    } finally {
       setIsGenerating(false);
-    }, 1500);
+    }
   };
 
   const handleSign = () => {
@@ -389,6 +402,49 @@ const ReportGenerator = () => {
            </>
          )}
 
+      </div>
+
+      {/* HIDDEN PDF TEMPLATE */}
+      <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', pointerEvents: 'none' }}>
+         <div id="pdf-report-content" style={{ width: '800px', backgroundColor: '#fff', padding: '40px', color: '#000', fontFamily: 'Arial, sans-serif' }}>
+            <div style={{ textAlign: 'center', borderBottom: '2px solid #ccc', paddingBottom: '20px', marginBottom: '30px' }}>
+               <h1 style={{ fontSize: '26px', margin: 0, color: '#1B3D2F', fontWeight: 'bold' }}>LAUDO TÉCNICO DE AUDITORIA</h1>
+               <p style={{ fontSize: '18px', color: '#333', marginTop: '15px' }}>Cliente Auditado: <strong>{client}</strong></p>
+               <p style={{ fontSize: '16px', color: '#666', marginTop: '5px' }}>Data da Emissão: {new Date().toLocaleDateString('pt-BR')}</p>
+            </div>
+
+            {occurrences.map((occ, i) => {
+               const cat = INSPECTION_CATEGORIES.find(c => c.id === occ.categoryId);
+               const item = cat?.items.find(it => it.id === occ.itemId);
+               return (
+                 <div key={occ.id} style={{ marginBottom: '40px', borderBottom: '1px solid #eee', paddingBottom: '25px', pageBreakInside: 'avoid' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
+                      <div style={{ width: '30px', height: '30px', borderRadius: '15px', background: '#1B3D2F', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>{i + 1}</div>
+                      <h3 style={{ fontSize: '20px', color: '#1B3D2F', margin: 0 }}>{cat ? cat.label : 'Não classificado'} - {item ? item.label : 'Não especificado'}</h3>
+                    </div>
+                    
+                    {occ.photoUrl && (
+                      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+                        <img src={occ.photoUrl} alt="Evidência Fotográfica" style={{ maxWidth: '400px', maxHeight: '300px', borderRadius: '8px', border: '1px solid #ccc' }} />
+                      </div>
+                    )}
+
+                    <div style={{ background: '#f9f9f9', padding: '20px', borderRadius: '8px', borderLeft: '4px solid #D4A373' }}>
+                      <h4 style={{ fontSize: '16px', color: '#333', marginBottom: '10px', marginTop: 0 }}>Orientação Técnica e Procedimentos:</h4>
+                      <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#444', margin: 0, whiteSpace: 'pre-wrap' }}>{occ.text || 'Nenhuma orientação descrita para esta ocorrência.'}</p>
+                    </div>
+                 </div>
+               )
+            })}
+
+            {signature && (
+               <div style={{ marginTop: '50px', paddingTop: '30px', borderTop: '2px dashed #ccc', textAlign: 'center', pageBreakInside: 'avoid' }}>
+                   <p style={{ fontSize: '18px', color: '#1B3D2F', fontWeight: 'bold', margin: '0 0 15px 0' }}>✓ Selo de Validação Eletrônica</p>
+                   <p style={{ fontSize: '16px', color: '#333', margin: 0 }}>Este laudo técnico foi atestado e assinado pelo representante da unidade:</p>
+                   <p style={{ fontSize: '20px', color: '#000', margin: '15px 0 0 0', fontWeight: 'bold' }}>{signature}</p>
+               </div>
+            )}
+         </div>
       </div>
 
     </div>
