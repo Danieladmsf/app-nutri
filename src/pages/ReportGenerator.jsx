@@ -52,6 +52,127 @@ const getBase64FromBlobUrl = async (blobUrl) => {
   });
 };
 
+const SignaturePadModal = ({ isOpen, onClose, onSave }) => {
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [name, setName] = useState('');
+
+  useEffect(() => {
+    if (isOpen && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "#1B3D2F";
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      
+      const preventScroll = (e) => e.preventDefault();
+      canvas.addEventListener('touchstart', preventScroll, { passive: false });
+      canvas.addEventListener('touchmove', preventScroll, { passive: false });
+      return () => {
+        canvas.removeEventListener('touchstart', preventScroll);
+        canvas.removeEventListener('touchmove', preventScroll);
+      };
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const startDrawing = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext('2d');
+    
+    // Suporte a scaling CSS vs. resolução real do Canvas
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    
+    ctx.beginPath();
+    ctx.moveTo(x * scaleX, y * scaleY);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext('2d');
+    
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    
+    ctx.lineTo(x * scaleX, y * scaleY);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    if (!isDrawing || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.closePath();
+    setIsDrawing(false);
+  };
+
+  const clearPad = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  };
+
+  const handleSave = () => {
+    if (!name.trim()) return alert("Digite o nome ou cargo de quem está assinando.");
+    const base64 = canvasRef.current.toDataURL("image/jpeg", 0.8);
+    onSave({ name: name.trim(), imageObj: base64 });
+  };
+
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', flexDirection: 'column', padding: '20px', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ background: 'var(--bg-deep)', padding: '20px', borderRadius: '12px', width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>Coleta de Assinatura</h3>
+        <input 
+          type="text" 
+          placeholder="Nome de quem está assinando..." 
+          value={name} 
+          onChange={(e) => setName(e.target.value)}
+          style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid var(--border-dim)', background: 'var(--bg-surface)', outline: 'none', color: 'var(--text-main)', boxSizing: 'border-box' }}
+        />
+        <div style={{ background: '#fff', borderRadius: '6px', border: '2px solid var(--border-dim)', overflow: 'hidden' }}>
+          <canvas 
+            ref={canvasRef}
+            width={600} 
+            height={300} 
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseOut={stopDrawing}
+            onTouchStart={startDrawing}
+            onTouchMove={draw}
+            onTouchEnd={stopDrawing}
+            style={{ display: 'block', width: '100%', touchAction: 'none' }}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between', marginTop: '10px' }}>
+          <button onClick={clearPad} style={{ padding: '10px', flex: 1, background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: '6px', cursor: 'pointer', fontWeight: 700, color: 'var(--text-main)' }}>Limpar</button>
+          <div style={{ display: 'flex', gap: '10px', flex: 2 }}>
+            <button onClick={onClose} style={{ padding: '10px', flex: 1, background: 'transparent', border: '1px solid var(--text-muted)', color: 'var(--text-muted)', borderRadius: '6px', cursor: 'pointer', fontWeight: 700 }}>Cancelar</button>
+            <button onClick={handleSave} className="btn btn-primary" style={{ padding: '10px', flex: 1, border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 700, background: 'var(--primary)', color: '#fff' }}>Pronto</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrence, removeOccurrence, moveUp, moveDown, laudoId, ensureLaudoId }) => {
   const fileInputRef = useRef(null);
   const [isGeneratingIA, setIsGeneratingIA] = useState(false);
@@ -314,6 +435,8 @@ const ReportGenerator = () => {
   const [client, setClient] = useState(stateClient);
   const [occurrences, setOccurrences] = useState([]);
   const [signature, setSignature] = useState(null);
+  const [clientSignatureImage, setClientSignatureImage] = useState(null);
+  const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   const [startedAt, setStartedAt] = useState(null);
   const [closedAt, setClosedAt] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -355,6 +478,7 @@ const ReportGenerator = () => {
       setClient(laudo.client || stateClient || '');
       setOccurrences(laudo.occurrences || []);
       setSignature(laudo.signature || null);
+      setClientSignatureImage(laudo.clientSignatureImage || null);
       setStartedAt(laudo.startedAt || new Date().toISOString());
       setClosedAt(laudo.closedAt || null);
       setIsReady(true);
@@ -398,6 +522,7 @@ const ReportGenerator = () => {
           client,
           occurrences: sanitizeOccurrences(occurrences),
           signature,
+          clientSignatureImage,
           startedAt,
           closedAt,
           status: signature ? 'signed' : 'draft',
@@ -417,8 +542,9 @@ const ReportGenerator = () => {
   }, [mode, isReady, client, occurrences, signature, closedAt, laudoId, visitId, startedAt, profile]);
 
   const invalidateSignature = () => {
-    if (signature) {
+    if (signature || clientSignatureImage) {
       setSignature(null);
+      setClientSignatureImage(null);
       setClosedAt(null);
       alert('Atenção: Como você fez uma edição no laudo, a assinatura anterior do cliente foi removida. Será necessária uma nova assinatura.');
     }
@@ -487,11 +613,14 @@ const ReportGenerator = () => {
 
   const handleSign = () => {
     if (!client || occurrences.length === 0) return alert("O laudo precisa ser preenchido antes de ser assinado.");
-    const signName = prompt("Assinatura do Cliente (Digite o nome para simular assintura digital):");
-    if (signName) {
-      setSignature(signName);
-      setClosedAt(new Date());
-    }
+    setIsSignatureModalOpen(true);
+  };
+
+  const handleSignatureSave = ({ name, imageObj }) => {
+    setSignature(name);
+    setClientSignatureImage(imageObj);
+    setClosedAt(new Date());
+    setIsSignatureModalOpen(false);
   };
 
   const InfoField = ({ label, value, highlight }) => (
@@ -856,10 +985,15 @@ const ReportGenerator = () => {
                         {/* Assinatura do Cliente */}
                         <div style={{ flex: 1, borderTop: '2px solid #1B3D2F', paddingTop: '10px' }}>
                            <div style={{ minHeight: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                             <span style={{ fontSize: '18px', color: '#222', fontWeight: 'bold', wordBreak: 'break-word' }}>{signature}</span>
+                             {clientSignatureImage ? (
+                               <img src={clientSignatureImage} alt="Assinatura Cliente" style={{ height: '50px', maxWidth: '100%', objectFit: 'contain' }} />
+                             ) : (
+                               <span style={{ fontSize: '18px', color: '#222', fontWeight: 'bold', wordBreak: 'break-word', fontFamily: 'serif', fontStyle: 'italic' }}>{signature}</span>
+                             )}
                            </div>
                            <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '4px', fontWeight: 'bold' }}>
                               Representante do Estabelecimento
+                              {(signature && clientSignatureImage) && <div style={{ fontSize: '8px', color: '#999', marginTop: '2px', textTransform: 'none', letterSpacing: 'normal', fontStyle: 'italic' }}>{signature}</div>}
                            </div>
                         </div>
 
@@ -893,6 +1027,11 @@ const ReportGenerator = () => {
          </div>
       </div>
 
+      <SignaturePadModal 
+        isOpen={isSignatureModalOpen} 
+        onClose={() => setIsSignatureModalOpen(false)} 
+        onSave={handleSignatureSave} 
+      />
     </div>
   );
 };
