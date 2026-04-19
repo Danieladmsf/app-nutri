@@ -171,14 +171,14 @@ const Agenda = () => {
         <div className="reveal-staggered agenda-hero-layout" style={{ flex: 1, width: '100%' }}>
            
               <div className="agenda-sidebar">
-              <div>
-                 <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem' }}>Mês Base</h3>
-                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.2rem', marginBottom: '0.5rem' }}>
+              <div className="card" style={{ padding: '1.5rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
+                 <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1.2rem' }}>Mês Base</h3>
+                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem', marginBottom: '0.8rem' }}>
                    {['D','S','T','Q','Q','S','S'].map((d, idx) => (
-                      <div key={idx} style={{ textAlign: 'center', fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)' }}>{d}</div>
+                      <div key={idx} style={{ textAlign: 'center', fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', padding: '0.3rem 0' }}>{d}</div>
                    ))}
                  </div>
-                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.2rem' }}>
+                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.3rem' }}>
                    {generateMonthCalendar(2026, 4).map((dayObj, i) => {
                       if (!dayObj) return <div key={`empty-${i}`} style={{ background: 'transparent' }} />;
                       const isSelected = selectedDate === dayObj.fullDate;
@@ -193,14 +193,14 @@ const Agenda = () => {
                               setSelectedVisit(null);
                            }}
                            style={{ 
-                             height: '35px', width: '35px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                             height: '40px', width: '40px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center',
                              background: isSelected ? 'var(--primary)' : 'transparent', 
                              color: isSelected ? 'white' : 'var(--text-main)',
-                             borderRadius: '50%', fontSize: '0.75rem', fontWeight: isSelected ? 800 : 500,
-                             cursor: 'pointer', position: 'relative'
+                             borderRadius: '50%', fontSize: '0.8rem', fontWeight: isSelected ? 800 : 500,
+                             cursor: 'pointer', position: 'relative', transition: 'all 0.15s ease'
                            }}>
                             {dayObj.date}
-                            {hasVisits && !isSelected && <div style={{ position: 'absolute', bottom: '2px', width: '4px', height: '4px', borderRadius: '50%', background: 'var(--primary)' }}></div>}
+                            {hasVisits && !isSelected && <div style={{ position: 'absolute', bottom: '3px', width: '4px', height: '4px', borderRadius: '50%', background: 'var(--primary)' }}></div>}
                          </div>
                       )
                    })}
