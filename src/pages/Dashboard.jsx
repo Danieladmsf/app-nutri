@@ -97,35 +97,43 @@ const Dashboard = () => {
         {/* Active Route Table */}
         <section className="card" style={{ padding: '0' }}>
           <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-             <h3 style={{ fontSize: '0.9rem', fontWeight: 700 }}>SUA ROTA DE HOJE (SEGUNDA-FEIRA)</h3>
+             <h3 style={{ fontSize: '0.9rem', fontWeight: 700 }}>SUA ROTA DE HOJE ({today.toLocaleDateString('pt-BR', { weekday: 'long' }).toUpperCase()})</h3>
              <Link to="/" style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'none' }}>VER ROTA COMPLETA</Link>
           </div>
           <div style={{ width: '100%' }}>
-            {[
-              { time: '08:00', name: 'Cozinha Industrial Matriz', type: 'Auditoria Completa', status: 'Em Rota' },
-              { time: '10:30', name: 'Supermercado Nova Era', type: 'Checklist de Etiquetas', status: 'Pendente' },
-              { time: '14:00', name: 'Refeitório São João', type: 'Treinamento de EPIs', status: 'Pendente' },
-            ].map((item, idx) => (
-              <div key={idx} style={{ 
-                padding: '1.2rem 2rem', 
-                borderBottom: idx === 2 ? 'none' : '1px solid var(--border-dim)',
-                display: 'grid',
-                gridTemplateColumns: '60px 1fr auto',
-                gap: '1rem',
-                alignItems: 'center',
-                fontSize: '0.85rem'
-              }}>
-                <div style={{ fontWeight: 600, color: 'var(--primary)' }}>{item.time}</div>
-                <div>
-                   <div style={{ fontWeight: 600 }}>{item.name}</div>
-                   <div className="desktop-only" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.type}</div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                   <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: item.status === 'Em Rota' ? 'var(--primary)' : 'var(--secondary)' }}></div>
-                   <span className="desktop-only" style={{ fontSize: '0.75rem' }}>{item.status}</span>
-                </div>
+            {todayVisits.length === 0 ? (
+              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                Nenhuma visita agendada para hoje.
               </div>
-            ))}
+            ) : (
+              todayVisits.sort((a, b) => a.time.localeCompare(b.time)).map((item, idx) => {
+                const isPast = new Date(`${todayKey}T${item.time}`) < new Date();
+                const status = item.status === 'Concluído' ? 'Concluído' : (isPast ? 'Pendente' : 'Em Rota');
+                const tagColor = visitTags?.find(t => t.id === item.tag)?.color || 'var(--primary)';
+
+                return (
+                  <div key={item.id || idx} style={{ 
+                    padding: '1.2rem 2rem', 
+                    borderBottom: idx === todayVisits.length - 1 ? 'none' : '1px solid var(--border-dim)',
+                    display: 'grid',
+                    gridTemplateColumns: '60px 1fr auto',
+                    gap: '1rem',
+                    alignItems: 'center',
+                    fontSize: '0.85rem'
+                  }}>
+                    <div style={{ fontWeight: 600, color: 'var(--primary)' }}>{item.time}</div>
+                    <div>
+                       <div style={{ fontWeight: 600 }}>{item.client}</div>
+                       <div className="desktop-only" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.visitType || 'Auditoria'}</div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                       <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: status === 'Concluído' ? tagColor : (status === 'Pendente' ? 'var(--secondary)' : 'var(--primary)') }}></div>
+                       <span className="desktop-only" style={{ fontSize: '0.75rem', color: status === 'Concluído' ? tagColor : 'inherit' }}>{status}</span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </section>
 
