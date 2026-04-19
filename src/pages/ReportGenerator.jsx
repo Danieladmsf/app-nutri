@@ -325,8 +325,8 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Evidência (Opcional)</label>
              {occurrence.photoUrl && !isUploading ? (
                /* Já tem foto - mostra preview com opções para trocar */
-               <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-dim)' }}>
-                 <img src={occurrence.photoUrl} alt="Evidência" style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }} />
+               <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-dim)', background: '#1a1a1a' }}>
+                 <img src={occurrence.photoUrl} alt="Evidência" style={{ width: '100%', height: '180px', objectFit: 'contain', display: 'block' }} />
                  <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', background: 'rgba(0,0,0,0.65)', padding: '0.5rem', display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
                    <button onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }} style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', padding: '0.35rem 0.7rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', touchAction: 'manipulation' }}>
                      <Camera size={12} /> Trocar via Câmera
@@ -1011,13 +1011,15 @@ const ReportGenerator = () => {
 
                      {/* Foto */}
                      {occ.photoUrl && (
-                        <div style={{ background: '#f8f8f8', border: '1px solid #e2e2de', borderRadius: '8px', padding: '10px', marginBottom: '16px', textAlign: 'center' }}>
-                           <img
-                              src={occ.photoUrl}
-                              crossOrigin="anonymous"
-                              alt="Evidência"
-                              style={{ maxWidth: '100%', width: '100%', height: 'auto', maxHeight: '460px', objectFit: 'contain', borderRadius: '4px', display: 'block', margin: '0 auto' }}
-                           />
+                        <div style={{ background: '#f0f0ee', border: '1px solid #e2e2de', borderRadius: '8px', padding: '10px', marginBottom: '16px', textAlign: 'center' }}>
+                           <div style={{ width: '100%', height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8f8', borderRadius: '4px', overflow: 'hidden' }}>
+                              <img
+                                 src={occ.photoUrl}
+                                 crossOrigin="anonymous"
+                                 alt="Evidência"
+                                 style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain', display: 'block' }}
+                              />
+                           </div>
                            <div style={{ fontSize: '9px', color: '#999', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 'bold', marginTop: '8px' }}>
                               Evidência Fotográfica
                            </div>
