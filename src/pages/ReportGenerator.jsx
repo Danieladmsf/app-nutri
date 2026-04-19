@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, ChevronDown, Trash2, Plus, PenTool, Share2, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { useAppContext } from '../contexts/AppContext';
@@ -236,7 +237,9 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
 
 const ReportGenerator = () => {
   const { categories: INSPECTION_CATEGORIES } = useAppContext();
-  const [client, setClient] = useState('');
+  const location = useLocation();
+  const lockedClient = location.state?.client || '';
+  const [client, setClient] = useState(lockedClient);
   const [occurrences, setOccurrences] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [signature, setSignature] = useState(null);
@@ -331,16 +334,23 @@ const ReportGenerator = () => {
       {/* Editor Main Top-Bar */}
       <div className="flex-toolbar" style={{ marginBottom: '1.5rem', background: 'var(--bg-surface)', padding: '1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }} className="full-width-mobile">
-           <select 
-             value={client} 
-             onChange={(e) => setClient(e.target.value)}
-             style={{ width: '100%', maxWidth: '300px', padding: '0.6rem 1rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', outline: 'none', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}
-           >
-             <option value="">Selecione o Cliente Auditado...</option>
-             <option value="Cozinha Industrial Matriz">Cozinha Industrial Matriz</option>
-             <option value="Supermercado Nova Era">Supermercado Nova Era</option>
-             <option value="Refeitório São João">Refeitório São João</option>
-           </select>
+           {lockedClient ? (
+             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 1rem', background: 'var(--bg-deep)', border: '1px solid var(--border-dim)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>
+               <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Cliente</span>
+               <span>{lockedClient}</span>
+             </div>
+           ) : (
+             <select
+               value={client}
+               onChange={(e) => setClient(e.target.value)}
+               style={{ width: '100%', maxWidth: '300px', padding: '0.6rem 1rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', outline: 'none', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}
+             >
+               <option value="">Selecione o Cliente Auditado...</option>
+               <option value="Cozinha Industrial Matriz">Cozinha Industrial Matriz</option>
+               <option value="Supermercado Nova Era">Supermercado Nova Era</option>
+               <option value="Refeitório São João">Refeitório São João</option>
+             </select>
+           )}
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }} className="full-width-mobile">
            <button onClick={handleSign} className="btn" style={{ flex: 1, justifyContent: 'center', border: signature ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: signature ? 'var(--primary)' : 'var(--text-main)' }}>

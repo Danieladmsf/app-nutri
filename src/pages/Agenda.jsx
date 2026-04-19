@@ -232,7 +232,7 @@ const Agenda = () => {
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>FOCO: <span style={{color: 'var(--primary)'}}>{selectedVisit.client}</span></span>
                   <span style={{ width: '1px', height: '20px', background: 'var(--border-dim)', margin: '0 0.5rem' }}></span>
                   <button onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Reagendar</button>
-                  <button onClick={() => navigate('/laudos')} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Avaliar</button>
+                  <button onClick={() => navigate('/laudos', { state: { client: selectedVisit.client } })} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Avaliar</button>
                   <button onClick={() => setSelectedVisit(null)} className="btn" style={{ padding: '0.4rem', border: 'none', marginLeft: 'auto' }}><X size={16}/></button>
                </div>
              )}
@@ -512,12 +512,12 @@ const Agenda = () => {
                  >
                     Reagendar
                  </button>
-                 <button 
-                   onClick={() => navigate('/laudos')} 
-                   className="btn btn-primary" 
+                 <button
+                   onClick={() => navigate('/laudos', { state: { client: selectedVisit.client } })}
+                   className="btn btn-primary"
                    style={{ flex: 2, justifyContent: 'center', padding: '1rem' }}
                  >
-                    <FileText size={16} /> AUDITORIA IA
+                    <FileText size={16} /> Auditar
                  </button>
              </div>
           </div>
@@ -581,12 +581,12 @@ const Agenda = () => {
                  >
                     Reagendar
                  </button>
-                 <button 
-                   onClick={() => navigate('/laudos')} 
-                   className="btn btn-primary" 
+                 <button
+                   onClick={() => navigate('/laudos', { state: { client: selectedVisit.client } })}
+                   className="btn btn-primary"
                    style={{ flex: 2, justifyContent: 'center', padding: '1rem' }}
                  >
-                    <FileText size={16} /> AUDITORIA IA
+                    <FileText size={16} /> Auditar
                  </button>
              </div>
           </div>
