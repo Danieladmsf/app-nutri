@@ -641,16 +641,24 @@ const ReportGenerator = () => {
             <div style={{ width: '720px', minHeight: '1020px', padding: '36px 32px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
 
                {/* Banner superior */}
-               <div style={{ background: '#1B3D2F', color: '#fff', padding: '28px 28px', borderRadius: '10px', marginBottom: '26px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                  <div style={{ fontSize: '10px', color: '#D4A373', fontWeight: 'bold', letterSpacing: '3px', marginBottom: '8px' }}>
-                     NUTRIAPP · GESTÃO DE CONFORMIDADE ALIMENTAR
+               <div style={{ background: '#1B3D2F', color: '#fff', padding: '28px 28px', borderRadius: '10px', marginBottom: '26px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                     <div style={{ fontSize: '10px', color: '#D4A373', fontWeight: 'bold', letterSpacing: '3px', marginBottom: '8px' }}>
+                        NUTRIAPP · GESTÃO DE CONFORMIDADE ALIMENTAR
+                     </div>
+                     <div style={{ fontSize: '34px', fontWeight: 900, letterSpacing: '-0.5px', lineHeight: 1.1, margin: '0 0 6px 0' }}>
+                        LAUDO TÉCNICO
+                     </div>
+                     <div style={{ fontSize: '13px', color: '#D4A373', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                        Auditoria de Conformidade Sanitária
+                     </div>
                   </div>
-                  <div style={{ fontSize: '34px', fontWeight: 900, letterSpacing: '-0.5px', lineHeight: 1.1, margin: '0 0 6px 0' }}>
-                     LAUDO TÉCNICO
-                  </div>
-                  <div style={{ fontSize: '13px', color: '#D4A373', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>
-                     Auditoria de Conformidade Sanitária
-                  </div>
+                  <img
+                     src="/nutrition-symbol.png"
+                     crossOrigin="anonymous"
+                     alt="Símbolo da Nutrição"
+                     style={{ width: '96px', height: '96px', objectFit: 'contain', flexShrink: 0, filter: 'brightness(0) invert(1)' }}
+                  />
                </div>
 
                {/* Estabelecimento (linha de destaque) */}
