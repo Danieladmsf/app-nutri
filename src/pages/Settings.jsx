@@ -268,6 +268,7 @@ const FIELD_FORMATTERS = {
 // ─── Tab: Perfil do Usuário ───
 const UserProfile = ({ profile, setProfile }) => {
   const fileInputRef = useRef(null);
+  const signatureInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
 
   const handleAvatarUpload = async (e) => {
@@ -286,21 +287,40 @@ const UserProfile = ({ profile, setProfile }) => {
     }
   };
 
+  const handleSignatureUpload = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setIsUploading(true);
+      try {
+        const url = await uploadProfilePhoto(file); // reaproveita uploadProfilePhoto
+        setProfile(prev => ({ ...prev, signatureImage: url }));
+      } catch (err) {
+        console.error("Signature upload failed:", err);
+        alert("Erro ao enviar assinatura. Verifique o tamanho (máx 5MB) e sua conexão.");
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
 
-      {/* Avatar */}
-      <section style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div 
-          onClick={() => !isUploading && fileInputRef.current?.click()}
-          style={{
-            width: '80px', height: '80px', borderRadius: '50%',
-            background: 'var(--bg-deep)', border: '2px dashed var(--border-dim)',
-            display: 'grid', placeItems: 'center', position: 'relative', cursor: isUploading ? 'not-allowed' : 'pointer', flexShrink: 0,
-            backgroundImage: (profile.photo && !isUploading) ? `url(${profile.photo})` : 'none',
-            backgroundSize: 'cover', backgroundPosition: 'center',
-            opacity: isUploading ? 0.7 : 1
-          }}
+      {/* Uploaders (Avatar e Assinatura) */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2.5rem' }}>
+        
+        {/* Avatar */}
+        <section style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div 
+            onClick={() => !isUploading && fileInputRef.current?.click()}
+            style={{
+              width: '80px', height: '80px', borderRadius: '50%',
+              background: 'var(--bg-deep)', border: '2px dashed var(--border-dim)',
+              display: 'grid', placeItems: 'center', position: 'relative', cursor: isUploading ? 'not-allowed' : 'pointer', flexShrink: 0,
+              backgroundImage: (profile.photo && !isUploading) ? `url(${profile.photo})` : 'none',
+              backgroundSize: 'cover', backgroundPosition: 'center',
+              opacity: isUploading ? 0.7 : 1
+            }}
         >
           {(!profile.photo && !isUploading) && <Camera size={24} color="var(--text-muted)" />}
           {isUploading && <RefreshCcw size={20} className="spin" color="var(--primary)" />}
@@ -328,7 +348,51 @@ const UserProfile = ({ profile, setProfile }) => {
             style={{ display: 'none' }} 
           />
         </div>
-      </section>
+          </div>
+        </section>
+
+        {/* Assinatura */}
+        <section style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div 
+            onClick={() => !isUploading && signatureInputRef.current?.click()}
+            style={{
+              width: '160px', height: '80px', borderRadius: '8px',
+              background: 'var(--bg-deep)', border: '2px dashed var(--border-dim)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', cursor: isUploading ? 'not-allowed' : 'pointer', flexShrink: 0,
+              backgroundImage: (profile.signatureImage && !isUploading) ? `url(${profile.signatureImage})` : 'none',
+              backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center',
+              opacity: isUploading ? 0.7 : 1
+            }}
+          >
+            {(!profile.signatureImage && !isUploading) && <PenTool size={24} color="var(--text-muted)" />}
+            {isUploading && <RefreshCcw size={20} className="spin" color="var(--primary)" />}
+            
+            <div style={{
+              position: 'absolute', bottom: '-4px', right: '-4px',
+              width: '28px', height: '28px', borderRadius: '50%',
+              background: 'var(--primary)', color: 'white',
+              display: 'grid', placeItems: 'center', border: '2px solid var(--bg-surface)',
+              opacity: isUploading ? 0.5 : 1
+            }}>
+              <Camera size={12} />
+            </div>
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Assinatura Digital</div>
+            <div style={{ fontSize: '0.7rem', color: isUploading ? 'var(--primary)' : 'var(--text-muted)', marginTop: '0.25rem', maxWidth: '200px' }}>
+              {isUploading ? 'ENVIANDO ASSINATURA...' : 'Envie uma foto da sua rubrica ou assinatura PNG transparente.'}
+            </div>
+            <input 
+              type="file" 
+              ref={signatureInputRef} 
+              onChange={handleSignatureUpload} 
+              accept="image/*" 
+              style={{ display: 'none' }} 
+            />
+          </div>
+        </section>
+
+      </div>
 
       {/* Form Fields */}
       <section>

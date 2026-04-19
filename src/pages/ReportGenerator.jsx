@@ -850,11 +850,31 @@ const ReportGenerator = () => {
                         Este laudo técnico foi atestado e assinado pelo representante legal do estabelecimento auditado, conferindo validade ao conteúdo aqui registrado em conformidade com as normas sanitárias vigentes.
                      </div>
 
-                     {/* Linha de assinatura */}
-                     <div style={{ borderTop: '2px solid #1B3D2F', paddingTop: '10px', minWidth: '360px', maxWidth: '520px', width: '80%' }}>
-                        <div style={{ fontSize: '20px', color: '#000', fontWeight: 'bold', wordBreak: 'break-word' }}>{signature}</div>
-                        <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '4px', fontWeight: 'bold' }}>
-                           Representante do Estabelecimento
+                     {/* Linhas de assinatura */}
+                     <div style={{ display: 'flex', gap: '40px', justifyContent: 'center', minWidth: '360px', maxWidth: '640px', width: '100%', marginTop: '30px' }}>
+                        
+                        {/* Assinatura do Cliente */}
+                        <div style={{ flex: 1, borderTop: '2px solid #1B3D2F', paddingTop: '10px' }}>
+                           <div style={{ minHeight: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                             <span style={{ fontSize: '18px', color: '#222', fontWeight: 'bold', wordBreak: 'break-word' }}>{signature}</span>
+                           </div>
+                           <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '4px', fontWeight: 'bold' }}>
+                              Representante do Estabelecimento
+                           </div>
+                        </div>
+
+                        {/* Assinatura do Profissional */}
+                        <div style={{ flex: 1, borderTop: '2px solid #1B3D2F', paddingTop: '10px' }}>
+                           <div style={{ minHeight: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                             {profile?.signatureImage ? (
+                               <img src={profile.signatureImage} crossOrigin="anonymous" alt="Assinatura Nutricionista" style={{ height: '50px', maxWidth: '100%', objectFit: 'contain' }} />
+                             ) : (
+                               <span style={{ fontSize: '16px', color: '#222', fontWeight: 800, wordBreak: 'break-word' }}>{profile?.name || 'Nutricionista'}</span>
+                             )}
+                           </div>
+                           <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '4px', fontWeight: 'bold' }}>
+                              Nutricionista Responsável {profile?.crm ? ` · ${profile.crm}` : ''}
+                           </div>
                         </div>
                      </div>
 
