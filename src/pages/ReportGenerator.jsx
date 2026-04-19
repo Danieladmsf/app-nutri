@@ -456,7 +456,10 @@ const ReportGenerator = () => {
   const [isReady, setIsReady] = useState(false);
   const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved' | 'error'
   const [nutritionSvg, setNutritionSvg] = useState('');
+  const [aiSummary, setAiSummary] = useState('');
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const isHydratingRef = useRef(true);
+  const lastSummaryHashRef = useRef('');
 
   // Carrega o símbolo da nutrição inline (necessário para o html2canvas renderizar no PDF)
   useEffect(() => {
@@ -492,6 +495,7 @@ const ReportGenerator = () => {
       setOccurrences(laudo.occurrences || []);
       setSignature(laudo.signature || null);
       setClientSignatureImage(laudo.clientSignatureImage || null);
+      setAiSummary(laudo.aiSummary || '');
       setStartedAt(laudo.startedAt || new Date().toISOString());
       setClosedAt(laudo.closedAt || null);
       setIsReady(true);
@@ -536,6 +540,7 @@ const ReportGenerator = () => {
           occurrences: sanitizeOccurrences(occurrences),
           signature,
           clientSignatureImage,
+          aiSummary,
           startedAt,
           closedAt,
           status: signature ? 'signed' : 'draft',
@@ -552,7 +557,51 @@ const ReportGenerator = () => {
     }, 1200);
 
     return () => clearTimeout(timeout);
-  }, [mode, isReady, client, occurrences, signature, closedAt, laudoId, visitId, startedAt, profile]);
+  }, [mode, isReady, client, occurrences, signature, closedAt, laudoId, visitId, startedAt, profile, aiSummary]);
+
+  // ─── Auto-gerar sumário IA quando ocorrências mudam ───
+  useEffect(() => {
+    if (mode !== 'editor' || !isReady || isHydratingRef.current) return;
+    // Só dispara se houver pelo menos 1 ocorrência com texto
+    const textsWithContent = occurrences.filter(o => o.text && o.text.trim().length > 10);
+    if (textsWithContent.length === 0) { setAiSummary(''); return; }
+
+    // Hash simples para evitar chamadas repetidas com as mesmas ocorrências
+    const hash = textsWithContent.map(o => `${o.categoryId}|${o.itemId}|${o.text?.slice(0,50)}`).join(';;');
+    if (hash === lastSummaryHashRef.current) return;
+
+    const timeout = setTimeout(async () => {
+      lastSummaryHashRef.current = hash;
+      setIsGeneratingSummary(true);
+      try {
+        const bulletPoints = textsWithContent.map((o, i) => {
+          const cat = INSPECTION_CATEGORIES.find(c => c.id === o.categoryId);
+          const item = cat?.items.find(it => it.id === o.itemId);
+          return `${i+1}. [${cat?.label || 'Geral'} > ${item?.label || 'Item'}] ${o.text}`;
+        }).join('\n');
+
+        const res = await fetch('/api/generate-ai-note', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            categoryLabel: 'Sumário Executivo',
+            itemLabel: 'Resumo Geral da Auditoria',
+            itemText: `Você é um nutricionista auditor. Escreva um PARÁGRAFO ÚNICO de sumário executivo (4 a 6 linhas) para a capa de um laudo técnico de auditoria sanitária do estabelecimento "${client || 'não informado'}". O sumário deve consolidar as seguintes ${textsWithContent.length} ocorrências encontradas durante a inspeção:\n\n${bulletPoints}\n\nO texto deve ser impessoal, formal e técnico. NÃO use listas, bullets, numeração ou saudações. Apenas o parágrafo corrido. Comece direto pelo resumo.`,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.text) setAiSummary(data.text);
+        }
+      } catch (err) {
+        console.warn('Falha ao gerar sumário IA:', err.message);
+      } finally {
+        setIsGeneratingSummary(false);
+      }
+    }, 3000); // 3s debounce para não disparar a cada keystroke
+
+    return () => clearTimeout(timeout);
+  }, [mode, isReady, occurrences, client, INSPECTION_CATEGORIES]);
 
   const invalidateSignature = () => {
     if (signature || clientSignatureImage) {
@@ -791,6 +840,13 @@ const ReportGenerator = () => {
         </div>
       </div>
 
+      {/* Indicador de Sumário IA */}
+      {isGeneratingSummary && (
+        <div style={{ padding: '0.6rem 1rem', background: 'rgba(212,163,115,0.08)', border: '1px solid rgba(212,163,115,0.25)', borderRadius: 'var(--radius-md)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', color: '#D4A373', flexShrink: 0 }}>
+          <RefreshCcw size={14} className="spin" /> Gerando sumário executivo com IA...
+        </div>
+      )}
+
       {/* FOOTER ACTIONS (sticky at bottom) */}
       <div className="laudo-footer-actions" style={{ flexShrink: 0, marginTop: '1rem', padding: '1rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
          <button onClick={handleSign} className="btn" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem', border: signature ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: signature ? 'var(--primary)' : 'var(--text-main)' }}>
@@ -890,8 +946,8 @@ const ReportGenerator = () => {
                   <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 'bold', marginBottom: '8px' }}>
                      Sumário da Auditoria
                   </div>
-                  <div style={{ fontSize: '13px', color: '#222', lineHeight: 1.6, wordBreak: 'break-word' }}>
-                     Este documento consolida <strong>{occurrences.length} ocorrência{occurrences.length !== 1 ? 's' : ''} técnica{occurrences.length !== 1 ? 's' : ''}</strong> identificada{occurrences.length !== 1 ? 's' : ''} durante a inspeção sanitária realizada em <strong>{client || 'estabelecimento'}</strong>. Cada item é acompanhado de evidência fotográfica (quando aplicável) e da respectiva orientação corretiva para regularização.
+                  <div style={{ fontSize: '13px', color: '#222', lineHeight: 1.7, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                     {aiSummary || `Este documento consolida ${occurrences.length} ocorrência${occurrences.length !== 1 ? 's' : ''} técnica${occurrences.length !== 1 ? 's' : ''} identificada${occurrences.length !== 1 ? 's' : ''} durante a inspeção sanitária realizada em ${client || 'estabelecimento'}. Cada item é acompanhado de evidência fotográfica (quando aplicável) e da respectiva orientação corretiva para regularização.`}
                   </div>
                </div>
 
