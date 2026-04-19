@@ -560,10 +560,10 @@ const Agenda = () => {
       {/* Mobile Context Modal/Drawer */}
       {selectedVisit && (
         <div className="mobile-only" style={{
-          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: 'calc(75px + env(safe-area-inset-bottom))'
         }}>
-          <div style={{ background: 'var(--bg-surface)', width: '100%', maxHeight: '90vh', borderTopLeftRadius: '20px', borderTopRightRadius: '20px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-             <div style={{ padding: '1rem', textAlign: 'center', borderBottom: '1px solid var(--border-dim)', position: 'relative' }}>
+          <div style={{ background: 'var(--bg-surface)', width: '100%', maxHeight: '80vh', borderTopLeftRadius: '20px', borderTopRightRadius: '20px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+             <div style={{ padding: '1rem', textAlign: 'center', borderBottom: '1px solid var(--border-dim)', position: 'relative', flexShrink: 0 }}>
                 <div style={{ width: '40px', height: '4px', background: 'var(--border-dim)', borderRadius: '2px', margin: '0 auto 1rem' }}></div>
                 <h4 style={{ fontSize: '1rem', fontWeight: 800 }}>{selectedVisit.client}</h4>
                 <button onClick={() => setSelectedVisit(null)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'var(--text-muted)' }}><X size={20}/></button>
@@ -582,7 +582,7 @@ const Agenda = () => {
                 </div>
              </div>
 
-             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-surface)', paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))', display: 'flex', gap: '1rem' }}>
+             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-surface)', display: 'flex', gap: '1rem', flexShrink: 0 }}>
                  <button 
                    onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))} 
                    className="btn" 
