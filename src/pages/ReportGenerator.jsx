@@ -847,12 +847,12 @@ const ReportGenerator = () => {
       )}
 
       {/* FOOTER ACTIONS (sticky at bottom) */}
-      <div className="laudo-footer-actions" style={{ flexShrink: 0, marginTop: '1rem', padding: '1rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-         <button onClick={handleSign} className="btn" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem', border: signature ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: signature ? 'var(--primary)' : 'var(--text-main)' }}>
+      <div className="laudo-footer-actions" style={{ flexShrink: 0, marginTop: '1rem', padding: '1rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', display: 'flex', gap: '0.75rem', flexWrap: 'wrap', touchAction: 'manipulation' }}>
+         <button onClick={handleSign} className="btn" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem', border: signature ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: signature ? 'var(--primary)' : 'var(--text-main)', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
            {signature ? <CheckCircle2 size={16} /> : <PenTool size={16} />}
            {signature ? 'ASSINADO' : 'ASSINAR'}
          </button>
-         <button onClick={handleGeneratePDF} className="btn btn-primary" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem' }} disabled={isGenerating}>
+         <button onClick={handleGeneratePDF} className="btn btn-primary" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }} disabled={isGenerating}>
            {isGenerating ? <RefreshCcw size={14} className="spin" /> : <Download size={14} />}
            GERAR PDF
          </button>
