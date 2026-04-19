@@ -1,48 +1,224 @@
-import React, { useState } from 'react';
-import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, Layout, Share2, Tag, Trash2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, ChevronDown, Trash2, Plus, PenTool, Share2, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 
-const ReportGenerator = () => {
-  const { categories: INSPECTION_CATEGORIES, profile } = useAppContext();
-  const [client, setClient] = useState('');
-  const [notes, setNotes] = useState('');
-  const [selectedShortcuts, setSelectedShortcuts] = useState([]);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [report, setReport] = useState(null);
+const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrence, removeOccurrence, moveUp, moveDown }) => {
+  const fileInputRef = useRef(null);
 
-  const toggleShortcut = (item) => {
-    if (selectedShortcuts.find(s => s.id === item.id)) {
-      setSelectedShortcuts(selectedShortcuts.filter(s => s.id !== item.id));
-    } else {
-      setSelectedShortcuts([...selectedShortcuts, item]);
+  const handleCategoryChange = (e) => {
+    const catId = e.target.value;
+    updateOccurrence(occurrence.id, { categoryId: catId, itemId: '', text: '' });
+  };
+
+  const handleItemChange = (e) => {
+    const itemId = e.target.value;
+    const cat = categories.find(c => c.id === occurrence.categoryId);
+    const item = cat?.items.find(i => i.id === itemId);
+    
+    // Simulate AI Text generation based on pre-written knowledge
+    const aiText = item ? `Identificada não conformidade: ${item.text} Recomenda-se a adequação imediata para evitar contaminações cruzadas e garantir a segurança alimentar conforme RDC 216.` : '';
+    
+    updateOccurrence(occurrence.id, { itemId, text: aiText });
+  };
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      updateOccurrence(occurrence.id, { photoUrl: url });
     }
   };
 
-  const handleGenerate = () => {
-    if (!notes && selectedShortcuts.length === 0) return;
-    setIsGenerating(true);
+  const selectedCategory = categories.find(c => c.id === occurrence.categoryId);
+
+  return (
+    <div className="card reveal-staggered" style={{ padding: 0, marginBottom: '1.5rem', border: '1px solid var(--border-dim)', overflow: 'hidden' }}>
+      
+      {/* Header Actions */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-deep)', padding: '0.8rem 1rem', borderBottom: '1px solid var(--border-dim)' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <div style={{ width: '24px', height: '24px', borderRadius: '12px', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>
+            {index + 1}
+          </div>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ocorrência</span>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button onClick={moveUp} disabled={index === 0} style={{ background: 'none', border: '1px solid var(--border-dim)', borderRadius: '4px', padding: '0.3rem', cursor: index === 0 ? 'not-allowed' : 'pointer', opacity: index === 0 ? 0.3 : 1 }}>
+            <ChevronUp size={16} color="var(--text-main)" />
+          </button>
+          <button onClick={moveDown} disabled={index === total - 1} style={{ background: 'none', border: '1px solid var(--border-dim)', borderRadius: '4px', padding: '0.3rem', cursor: index === total - 1 ? 'not-allowed' : 'pointer', opacity: index === total - 1 ? 0.3 : 1 }}>
+            <ChevronDown size={16} color="var(--text-main)" />
+          </button>
+          <button onClick={removeOccurrence} style={{ background: 'none', border: '1px solid rgba(212, 163, 115, 0.3)', borderRadius: '4px', padding: '0.3rem', cursor: 'pointer', color: 'var(--secondary)', marginLeft: '0.5rem' }}>
+            <Trash2 size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+        
+        {/* Context Selectors */}
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 200px' }}>
+            <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Categoria / Setor</label>
+            <select value={occurrence.categoryId || ''} onChange={handleCategoryChange} style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', outline: 'none', fontSize: '0.8rem', color: 'var(--text-main)' }}>
+              <option value="">Selecione...</option>
+              {categories.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+            </select>
+          </div>
+          <div style={{ flex: '1 1 200px' }}>
+            <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Assunto Específico</label>
+            <select value={occurrence.itemId || ''} onChange={handleItemChange} disabled={!occurrence.categoryId} style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', outline: 'none', fontSize: '0.8rem', color: 'var(--text-main)', opacity: !occurrence.categoryId ? 0.5 : 1 }}>
+              <option value="">Selecione o detalhe...</option>
+              {selectedCategory?.items.map(i => <option key={i.id} value={i.id}>{i.label}</option>)}
+            </select>
+          </div>
+        </div>
+
+        {/* Media & Text Row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }} className="agenda-hero-layout">
+           
+           {/* Photo Area */}
+           <div style={{ flexShrink: 0, width: '100%' }}>
+             <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Evidência (Opcional)</label>
+             <div 
+               onClick={() => fileInputRef.current?.click()}
+               style={{ 
+                 height: '180px', 
+                 border: '2px dashed var(--border-dim)', 
+                 borderRadius: 'var(--radius-md)', 
+                 background: occurrence.photoUrl ? `url(${occurrence.photoUrl}) center/cover` : 'var(--bg-deep)',
+                 display: 'flex', 
+                 flexDirection: 'column',
+                 alignItems: 'center', 
+                 justifyContent: 'center',
+                 cursor: 'pointer',
+                 color: 'var(--text-muted)',
+                 position: 'relative',
+                 overflow: 'hidden'
+               }}
+             >
+               {!occurrence.photoUrl && (
+                 <>
+                   <Camera size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
+                   <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Câmera / Galeria</span>
+                 </>
+               )}
+               {occurrence.photoUrl && (
+                 <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', background: 'rgba(0,0,0,0.6)', padding: '0.5rem', textAlign: 'center', color: '#fff', fontSize: '0.7rem' }}>
+                   Trocar Imagem
+                 </div>
+               )}
+               <input type="file" accept="image/*" capture="environment" ref={fileInputRef} onChange={handlePhotoUpload} style={{ display: 'none' }} />
+             </div>
+           </div>
+
+           {/* AI Text Area */}
+           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+             <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+               <Sparkles size={14} color="var(--primary)" /> ORIENTAÇÃO TÉCNICA (EDITÁVEL)
+             </label>
+             <textarea 
+               value={occurrence.text || ''}
+               onChange={(e) => updateOccurrence(occurrence.id, { text: e.target.value })}
+               placeholder="Selecione um assunto para a IA gerar o texto ou digite aqui as orientações..."
+               style={{ 
+                 width: '100%', 
+                 flex: 1,
+                 minHeight: '150px',
+                 padding: '1rem', 
+                 border: '1px solid var(--border-dim)', 
+                 borderRadius: '4px', 
+                 background: 'var(--bg-surface)', 
+                 outline: 'none', 
+                 fontSize: '0.85rem', 
+                 lineHeight: '1.6',
+                 color: 'var(--text-main)',
+                 resize: 'vertical',
+                 fontFamily: 'inherit'
+               }}
+             />
+           </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+const ReportGenerator = () => {
+  const { categories: INSPECTION_CATEGORIES } = useAppContext();
+  const [client, setClient] = useState('');
+  const [occurrences, setOccurrences] = useState([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [signature, setSignature] = useState(null);
+
+  const invalidateSignature = () => {
+    if (signature) {
+      setSignature(null);
+      alert('Atenção: Como você fez uma edição no laudo, a assinatura anterior do cliente foi removida. Será necessária uma nova assinatura.');
+    }
+  };
+
+  const addOccurrence = () => {
+    invalidateSignature();
+    const newBlock = { id: Date.now().toString(), categoryId: '', itemId: '', text: '', photoUrl: null };
+    setOccurrences([...occurrences, newBlock]);
+  };
+
+  const updateOccurrence = (id, data) => {
+    invalidateSignature();
+    setOccurrences(occurrences.map(o => o.id === id ? { ...o, ...data } : o));
+  };
+
+  const removeOccurrence = (id) => {
+    invalidateSignature();
+    setOccurrences(occurrences.filter(o => o.id !== id));
+  };
+
+  const moveUp = (index) => {
+    if (index === 0) return;
+    invalidateSignature();
+    const newArr = [...occurrences];
+    const temp = newArr[index - 1];
+    newArr[index - 1] = newArr[index];
+    newArr[index] = temp;
+    setOccurrences(newArr);
+  };
+
+  const moveDown = (index) => {
+    if (index === occurrences.length - 1) return;
+    invalidateSignature();
+    const newArr = [...occurrences];
+    const temp = newArr[index + 1];
+    newArr[index + 1] = newArr[index];
+    newArr[index] = temp;
+    setOccurrences(newArr);
+  };
+
+  const handleGeneratePDF = () => {
+    if (!client) return alert("Selecione o Cliente / Estabelecimento primeiro.");
+    if (occurrences.length === 0) return alert("Adicione pelo menos uma ocorrência ao Canvas antes de gerar o PDF.");
     
-    // Simulate IA processing based on shortcuts and notes
+    setIsGenerating(true);
     setTimeout(() => {
-      setReport({
-        title: "RELATÓRIO DE CONFORMIDADE #042",
-        date: "18 ABRIL 2026",
-        auditor: profile.name || 'Auditor não identificado',
-        crm: profile.crm || '—',
-        diagnosis: `Identificadas ${selectedShortcuts.length} não conformidades críticas durante a auditoria operacional.`,
-        recommendations: [
-          ...selectedShortcuts.map(s => s.text),
-          "Realizar treinamento de reciclagem com a equipe operante.",
-          "Agendar re-inspeção em 7 dias."
-        ],
-        tips: notes || "A manutenção dos padrões higiênico-sanitários é vital para a segurança alimentar."
-      });
+      // Simulate PDF Generation logic
+      alert(`PDF Gerado com sucesso!\nCliente: ${client}\nOcorrências: ${occurrences.length}\n(Simulação do download)`);
       setIsGenerating(false);
     }, 1500);
   };
 
+  const handleSign = () => {
+    if (!client || occurrences.length === 0) return alert("O laudo precisa ser preenchido antes de ser assinado.");
+    const signName = prompt("Assinatura do Cliente (Digite o nome para simular assintura digital):");
+    if (signName) {
+      setSignature(signName);
+    }
+  };
+
   return (
-    <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+    <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', paddingBottom: '3rem' }}>
       
       {/* Header Toolbar */}
       <header style={{ marginBottom: '0.5rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
@@ -50,156 +226,85 @@ const ReportGenerator = () => {
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
              Laudos
           </h1>
-          {/* Pode ser adicionado status globals do laudo aqui */}
         </div>
       </header>
 
-      {/* SaaS Editor Toolbar */}
+      {/* Editor Main Top-Bar */}
       <div className="flex-toolbar" style={{ marginBottom: '1.5rem', background: 'var(--bg-surface)', padding: '1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }} className="full-width-mobile">
-           <button className="btn desktop-only" style={{ padding: '0.4rem' }}><ChevronLeft size={16}/></button>
-           <h2 style={{ fontSize: '0.9rem', fontWeight: 700 }}>AUDITORIA INDUSTRIAL</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }} className="full-width-mobile">
+           <select 
+             value={client} 
+             onChange={(e) => setClient(e.target.value)}
+             style={{ width: '100%', maxWidth: '300px', padding: '0.6rem 1rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', outline: 'none', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}
+           >
+             <option value="">Selecione o Cliente Auditado...</option>
+             <option value="Cozinha Industrial Matriz">Cozinha Industrial Matriz</option>
+             <option value="Supermercado Nova Era">Supermercado Nova Era</option>
+             <option value="Refeitório São João">Refeitório São João</option>
+           </select>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }} className="full-width-mobile">
-           <button className="btn desktop-only"><Share2 size={16} /> Compartilhar</button>
-           <button className="btn btn-primary full-width-mobile" onClick={handleGenerate} disabled={isGenerating}>
-             {isGenerating ? <RefreshCcw size={14} className="spin" /> : <Sparkles size={14} />}
-             GERAR LAUDO
+           <button onClick={handleSign} className="btn" style={{ flex: 1, justifyContent: 'center', border: signature ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: signature ? 'var(--primary)' : 'var(--text-main)' }}>
+             {signature ? <CheckCircle2 size={16} /> : <PenTool size={16} />}
+             {signature ? 'ASSINADO' : 'ASSINAR'}
+           </button>
+           <button onClick={handleGeneratePDF} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} disabled={isGenerating}>
+             {isGenerating ? <RefreshCcw size={14} className="spin" /> : <Download size={14} />}
+             GERAR PDF
            </button>
         </div>
       </div>
 
-      <div className="grid-editorial" style={{ flex: 1 }}>
-        
-        {/* Editor Side */}
-        <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-           <div>
-              <label className="stat-label" style={{ marginBottom: '0.75rem', display: 'block' }}>ESTABELECIMENTO / CLIENTE</label>
-              <select 
-                value={client} 
-                onChange={(e) => setClient(e.target.value)}
-                style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-minimal)', background: 'var(--bg-deep)', outline: 'none', fontSize: '0.8rem' }}
-              >
-                <option value="">Selecione a unidade...</option>
-                <option value="1">Cozinha Industrial Sul</option>
-                <option value="2">Supermercado Matriz</option>
-              </select>
-           </div>
+      {signature && (
+        <div style={{ padding: '0.8rem 1rem', background: 'rgba(0, 255, 136, 0.05)', border: '1px solid rgba(0, 255, 136, 0.2)', color: 'var(--primary)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+          <CheckCircle2 size={16} /> Documento validado e assinado eletronicamente por <strong>{signature}</strong>.
+        </div>
+      )}
 
-           {/* Inspection Shortcuts */}
-           <div>
-              <label className="stat-label" style={{ marginBottom: '1rem', display: 'block' }}>ATALHOS DE INSPEÇÃO (O QUE FOI ENCONTRADO?)</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                {INSPECTION_CATEGORIES.map(cat => (
-                  <div key={cat.id}>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>{cat.label}</div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                      {cat.items.map(item => {
-                        const isSelected = selectedShortcuts.find(s => s.id === item.id);
-                        return (
-                          <button 
-                            key={item.id}
-                            onClick={() => toggleShortcut(item)}
-                            style={{ 
-                              padding: '0.5rem 0.8rem', 
-                              fontSize: '0.75rem', 
-                              borderRadius: '4px',
-                              border: '1px solid',
-                              borderColor: isSelected ? 'var(--primary)' : 'var(--border-dim)',
-                              background: isSelected ? 'rgba(27, 61, 47, 0.1)' : 'var(--bg-deep)',
-                              color: isSelected ? 'var(--primary)' : 'var(--text-main)',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s'
-                            }}
-                          >
-                            {item.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+      {/* CANVAS AREA */}
+      <div style={{ flex: 1, maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+         
+         {occurrences.length === 0 ? (
+           <div style={{ padding: '4rem 2rem', textAlign: 'center', background: 'var(--bg-surface)', border: '1px dashed var(--border-dim)', borderRadius: 'var(--radius-md)', marginTop: '2rem' }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '32px', background: 'rgba(27,61,47,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                 <Sparkles size={28} color="var(--primary)" />
               </div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Canvas em Branco</h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.5', maxWidth: '400px', margin: '0 auto 2rem' }}>
+                Comece a construir seu laudo técnico. Adicione a primeira ocorrência, a IA cuidará dos textos normativos.
+              </p>
+              <button onClick={addOccurrence} className="btn btn-primary" style={{ padding: '0.8rem 2rem', margin: '0 auto' }}>
+                <Plus size={18} /> INICIAR AUDITORIA
+              </button>
            </div>
+         ) : (
+           <>
+             {/* List of Occurrence Blocks */}
+             {occurrences.map((occ, index) => (
+               <OccurrenceBlock 
+                 key={occ.id} 
+                 occurrence={occ} 
+                 index={index}
+                 total={occurrences.length}
+                 categories={INSPECTION_CATEGORIES}
+                 updateOccurrence={updateOccurrence}
+                 removeOccurrence={() => removeOccurrence(occ.id)}
+                 moveUp={() => moveUp(index)}
+                 moveDown={() => moveDown(index)}
+               />
+             ))}
 
-           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', marginTop: '1rem' }}>
-              <label className="stat-label" style={{ marginBottom: '0.75rem', display: 'block' }}>OBSERVAÇÕES ADICIONAIS (I.A. EXPANDIRÁ)</label>
-              <textarea 
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Ex: Problema específico no compressor da câmara 2..."
-                style={{ 
-                  flex: 1, minHeight: '150px', width: '100%', padding: '1.2rem', 
-                  border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-minimal)', 
-                  background: 'var(--bg-deep)', outline: 'none', fontSize: '0.85rem',
-                  resize: 'none', lineHeight: '1.6'
-                }}
-              />
-           </div>
+             {/* Add Button at the bottom */}
+             <div style={{ padding: '1rem 0', display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+               <button onClick={addOccurrence} className="btn" style={{ padding: '0.8rem 2rem', background: 'var(--bg-deep)', border: '1px dashed var(--border-dim)', width: '100%', maxWidth: '300px', justifyContent: 'center' }}>
+                 <Plus size={16} /> Adicionar Nova Ocorrência
+               </button>
+             </div>
+           </>
+         )}
 
-           <div style={{ display: 'flex', gap: '1rem' }}>
-              <button className="btn" style={{ flex: 1 }}><Camera size={16}/> Tirar Foto</button>
-              {selectedShortcuts.length > 0 && (
-                <button className="btn" onClick={() => setSelectedShortcuts([])}><Trash2 size={16} /> Limpar</button>
-              )}
-           </div>
-        </section>
-
-        {/* Preview Side */}
-        <section className="card" style={{ background: report ? 'var(--bg-surface)' : 'var(--bg-deep)', position: 'relative', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-          {report ? (
-            <div className="reveal-staggered">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
-                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <div style={{ width: '40px', height: '40px', background: 'var(--primary)', color: 'white', display: 'grid', placeItems: 'center', fontWeight: 'bold' }}>AUD</div>
-                    <div>
-                       <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>{report.title}</h3>
-                       <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>GERADO EM {report.date}</div>
-                       <div style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: 700, marginTop: '0.2rem' }}>
-                         {report.auditor} • {report.crm}
-                       </div>
-                    </div>
-                 </div>
-                 <button className="btn" style={{ padding: '0.4rem' }}><Download size={16}/></button>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                <div>
-                   <h4 style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>SUMÁRIO DA INSPEÇÃO</h4>
-                   <p style={{ fontSize: '0.9rem', lineHeight: '1.6', color: 'var(--text-main)', borderLeft: '3px solid var(--primary)', paddingLeft: '1.2rem' }}>{report.diagnosis}</p>
-                </div>
-
-                <div>
-                   <h4 style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: '1rem' }}>ITENS DE AUDITORIA IDENTIFICADOS</h4>
-                   <div style={{ display: 'grid', gap: '0.75rem' }}>
-                      {report.recommendations.map((rec, i) => (
-                        <div key={i} style={{ padding: '0.75rem', background: 'var(--bg-deep)', border: '1px solid var(--border-dim)', fontSize: '0.8rem', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)', flexShrink: 0 }}></div>
-                           <span style={{ lineHeight: '1.4' }}>{rec}</span>
-                        </div>
-                      ))}
-                   </div>
-                </div>
-
-                <div className="card" style={{ background: 'rgba(181, 141, 103, 0.05)', border: '1px dashed var(--secondary)', padding: '1rem' }}>
-                   <h4 style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--secondary)', marginBottom: '0.5rem' }}>NOTAS DO CONSULTOR</h4>
-                   <p style={{ fontSize: '0.8rem', fontStyle: 'italic', color: 'var(--secondary)', lineHeight: '1.5' }}>{report.tips}</p>
-                </div>
-              </div>
-
-              <div style={{ marginTop: '3rem', padding: '1rem 0', borderTop: '1px solid var(--border-dim)' }}>
-                 <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>ENVIAR LAUDO</button>
-              </div>
-            </div>
-          ) : (
-            <div style={{ margin: 'auto', textAlign: 'center', opacity: 0.3, padding: '3rem' }}>
-               <Layout size={48} style={{ marginBottom: '1.5rem', display: 'inline-block' }} />
-               <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>PREVISUALIZAÇÃO DO LAUDO</div>
-               <div style={{ fontSize: '0.7rem' }}>Use os atalhos ou notas para gerar</div>
-            </div>
-          )}
-        </section>
       </div>
+
     </div>
   );
 };
