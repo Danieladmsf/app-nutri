@@ -80,7 +80,7 @@ const Dashboard = () => {
       {/* Dynamic Tag-Based Stat Grid */}
       <div className="grid-stats">
         {dynamicCards.map((stat, idx) => (
-          <div key={idx} className="card" style={{ padding: '1.5rem', border: '1px solid var(--border-dim)', borderLeft: `4px solid ${stat.color}` }}>
+          <div key={idx} className="card" style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', minWidth: 0, border: '1px solid var(--border-dim)', borderLeft: `4px solid ${stat.color}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: '1rem' }}>
                <span style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em' }}>{stat.label}</span>
                <div style={{ color: stat.color }}>{stat.icon}</div>
@@ -95,8 +95,8 @@ const Dashboard = () => {
       <div className="grid-responsive-2col">
         
         {/* Active Route Table */}
-        <section className="card" style={{ padding: '0' }}>
-          <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <section className="card" style={{ padding: '0', minWidth: 0 }}>
+          <div style={{ padding: 'clamp(1rem, 3vw, 1.5rem) clamp(1rem, 4vw, 2rem)', borderBottom: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
              <h3 style={{ fontSize: '0.9rem', fontWeight: 700 }}>SUA ROTA DE HOJE ({today.toLocaleDateString('pt-BR', { weekday: 'long' }).toUpperCase()})</h3>
              <Link to="/" style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'none' }}>VER ROTA COMPLETA</Link>
           </div>
