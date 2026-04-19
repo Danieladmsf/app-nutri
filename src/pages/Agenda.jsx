@@ -125,16 +125,29 @@ const Agenda = () => {
   }
 
   return (
-    <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column' }}>
-      
+    <div className={`reveal-staggered ${viewMode === 'mensal' ? 'agenda-mensal-page' : ''}`} style={{ display: 'flex', flexDirection: 'column' }}>
+
       {/* Header Toolbar */}
-      <header style={{ marginBottom: '2.5rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
+      <header className="agenda-page-header" style={{ marginBottom: '2.5rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
         <div className="flex-toolbar" style={{ gap: '1rem', alignItems: 'center' }}>
-          
-          {/* Title */}
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
-             Rotinas
-          </h1>
+
+          {/* Title + Selected Date */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
+               Rotinas
+            </h1>
+            {viewMode === 'mensal' && (
+              <>
+                <span style={{ color: 'var(--border-dim)', fontWeight: 300 }}>|</span>
+                <span style={{ fontSize: '1rem', fontWeight: 700, textTransform: 'capitalize' }}>
+                  {weekDays.find(d => d.fullDate === selectedDate)?.dayStr || 'Data'},
+                </span>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                  {selectedDate.split('-').reverse().join('/')}
+                </span>
+              </>
+            )}
+          </div>
 
           {/* Action Row */}
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -168,7 +181,7 @@ const Agenda = () => {
       </header>
 
       {viewMode === 'mensal' ? (
-        <div className="reveal-staggered agenda-hero-layout" style={{ flex: 1, width: '100%' }}>
+        <div className="reveal-staggered agenda-hero-layout" style={{ width: '100%' }}>
            
               <div className="agenda-sidebar">
               <div className="card" style={{ padding: '1.5rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
@@ -185,14 +198,14 @@ const Agenda = () => {
                       const dayVisits = visitsData[dayObj.fullDate] || [];
                       const hasVisits = dayVisits.length > 0;
                       return (
-                         <div 
-                           key={dayObj.fullDate} 
+                         <div
+                           key={dayObj.fullDate}
                            onClick={() => {
                               setSelectedDate(dayObj.fullDate);
                               setWeekStartObj(dayObj.fullDate);
                               setSelectedVisit(null);
                            }}
-                           className="cal-day-cell"
+                           className={`cal-day-cell ${isSelected ? 'cal-day-cell--selected' : ''}`}
                            style={{ 
                              margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center',
                              background: isSelected ? 'var(--primary)' : 'var(--bg-surface)', 
@@ -245,23 +258,16 @@ const Agenda = () => {
 
            {/* Hourly Grid View */}
            <div className="agenda-timeline-col">
-             {/* Header Day */}
-             <div className="agenda-timeline-header" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-dim)' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, textTransform: 'capitalize' }}>{weekDays.find(d => d.fullDate === selectedDate)?.dayStr || 'Data'},</h2>
-                  <span style={{ fontSize: '1.1rem', color: 'var(--text-muted)', fontWeight: 600 }}>{selectedDate.split('-').reverse().join('/')}</span>
-                </div>
-                {/* Context Action Menu for Selected Visit */}
-                {selectedVisit && (
-                  <div className="reveal-staggered" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', background: 'var(--bg-surface)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)' }}>
-                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>FOCO: <span style={{color: 'var(--primary)'}}>{selectedVisit.client}</span></span>
-                     <span style={{ width: '1px', height: '20px', background: 'var(--border-dim)', margin: '0 0.5rem' }}></span>
-                     <button onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Reagendar</button>
-                     <button onClick={() => navigate('/laudos')} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Avaliar</button>
-                     <button onClick={() => setSelectedVisit(null)} className="btn" style={{ padding: '0.4rem', border: 'none' }}><X size={16}/></button>
-                  </div>
-                )}
-             </div>
+             {/* Context Action Menu for Selected Visit (only renders when a visit is selected) */}
+             {selectedVisit && (
+               <div className="agenda-timeline-header reveal-staggered" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginBottom: '1rem', padding: '0.5rem 1rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>FOCO: <span style={{color: 'var(--primary)'}}>{selectedVisit.client}</span></span>
+                  <span style={{ width: '1px', height: '20px', background: 'var(--border-dim)', margin: '0 0.5rem' }}></span>
+                  <button onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Reagendar</button>
+                  <button onClick={() => navigate('/laudos')} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Avaliar</button>
+                  <button onClick={() => setSelectedVisit(null)} className="btn" style={{ padding: '0.4rem', border: 'none', marginLeft: 'auto' }}><X size={16}/></button>
+               </div>
+             )}
 
              <div className="hourly-grid-container" style={{ border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', position: 'relative' }}>
                 {(() => {

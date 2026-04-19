@@ -359,6 +359,14 @@ h1, h2, h3, h4, .serif {
 
 /* Desktop only: CSS Grid — each block in its own area */
 @media (min-width: 1025px) {
+  .agenda-mensal-page {
+    height: calc(100vh - 4rem);
+    max-height: calc(100vh - 4rem);
+    overflow: hidden;
+  }
+  .agenda-mensal-page > .agenda-page-header {
+    flex-shrink: 0;
+  }
   .agenda-hero-layout {
     display: grid !important;
     grid-template-columns: 260px 1fr;
@@ -368,15 +376,19 @@ h1, h2, h3, h4, .serif {
     flex-direction: unset !important;
     overflow: hidden;
   }
+  .agenda-mensal-page .agenda-hero-layout {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+  }
   .agenda-sidebar {
     grid-column: 1;
     grid-row: 1;
     border-right: 1px solid var(--border-dim);
     padding-right: 1.5rem;
-    overflow-y: auto;
-    align-self: start;
-    position: sticky;
-    top: 2rem;
+    overflow: hidden;
+    align-self: stretch;
+    min-height: 0;
   }
   .agenda-sidebar .card {
     padding: 1rem !important;
@@ -395,6 +407,13 @@ h1, h2, h3, h4, .serif {
   .cal-day-cell:hover {
     background: var(--bg-deep) !important;
   }
+  .cal-day-cell--selected {
+    background: var(--primary) !important;
+    color: #fff !important;
+  }
+  .cal-day-cell--selected:hover {
+    background: var(--primary) !important;
+  }
   .agenda-timeline-col {
     grid-column: 2;
     grid-row: 1;
@@ -404,12 +423,10 @@ h1, h2, h3, h4, .serif {
     padding-left: 1.5rem;
     min-height: 0;
     min-width: 0;
-    height: 100%;
   }
   .agenda-timeline-col .hourly-grid-container {
     overflow-y: auto;
     min-height: 0;
-    height: 100%;
   }
 }
 .hourly-grid-container {
