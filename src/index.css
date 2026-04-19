@@ -363,7 +363,9 @@ h1, h2, h3, h4, .serif {
     flex-shrink: 0;
     border-right: 1px solid var(--border-dim);
     padding-right: 1.5rem;
-    overflow-y: auto;
+    align-self: flex-start;
+    position: sticky;
+    top: 0;
   }
   .agenda-sidebar .card {
     padding: 1rem !important;
