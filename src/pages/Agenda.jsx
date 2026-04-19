@@ -222,38 +222,6 @@ const Agenda = () => {
                  </div>
               </div>
 
-              {/* Seletor de Visitas Lote Sidebar */}
-              <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-dim)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                  <h3 style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', margin: 0 }}>Ações em Lote</h3>
-                  <button 
-                    onClick={() => { setIsSelectMode(!isSelectMode); setSelectedVisits([]); }} 
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, color: isSelectMode ? '#c0392b' : 'var(--primary)', padding: 0 }}>
-                    {isSelectMode ? '✕ Cancelar' : 'Ativar'}
-                  </button>
-                </div>
-                {isSelectMode && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <button 
-                      onClick={() => {
-                         const acts = visitsData[selectedDate] || [];
-                         if (selectedVisits.length === acts.length) setSelectedVisits([]);
-                         else setSelectedVisits([...acts]);
-                      }}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', padding: 0, textAlign: 'left' }}>
-                      {selectedVisits.length === (visitsData[selectedDate] || []).length && selectedVisits.length > 0 ? '☑ Desmarcar todos' : '☐ Selecionar todo o dia'}
-                    </button>
-                    {selectedVisits.length > 0 && (
-                       <button 
-                         onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisits }))}
-                         className="btn btn-primary reveal-staggered" 
-                         style={{ width: '100%', padding: '0.7rem', justifyContent: 'center', fontSize: '0.8rem' }}>
-                         Reagendar {selectedVisits.length} visita{selectedVisits.length > 1 ? 's' : ''}
-                       </button>
-                    )}
-                  </div>
-                )}
-              </div>
            </div>
 
            {/* Hourly Grid View */}
@@ -293,33 +261,24 @@ const Agenda = () => {
                            const relativeTopPx = absoluteTopPx - startOffsetPx;
                            const heightPx = parseDurationToMinutes(visit.duration);
                            const isSelected = selectedVisit?.id === visit.id;
-                           const isChecked = selectedVisits.some(v => v.id === visit.id);
-                           
+
                            // Don't render if it's completely out of the grid bounds
                            if (relativeTopPx + heightPx < 0 || relativeTopPx > gridHours.length * 60) return null;
 
                            return (
-                              <div 
+                              <div
                                 key={visit.id}
-                                onClick={() => {
-                                  if (isSelectMode) toggleVisitSelection(visit);
-                                  else setSelectedVisit(visit);
-                                }}
+                                onClick={() => setSelectedVisit(visit)}
                                 style={{
                                    position: 'absolute', top: `${relativeTopPx}px`, height: `${heightPx}px`, left: '65px', right: '1rem',
-                                   background: (isSelected || isChecked) ? 'rgba(27,61,47,0.15)' : (visit.isRecurring ? 'rgba(27,61,47,0.05)' : 'rgba(212,163,115,0.05)'),
-                                   border: '1px solid', borderColor: (isSelected || isChecked) ? 'var(--primary)' : 'var(--border-dim)',
-                                   borderLeft: (isSelected || isChecked) ? '4px solid var(--primary)' : `4px solid ${visit.isRecurring ? 'var(--primary)' : 'var(--secondary)'}`,
+                                   background: isSelected ? 'rgba(27,61,47,0.15)' : (visit.isRecurring ? 'rgba(27,61,47,0.05)' : 'rgba(212,163,115,0.05)'),
+                                   border: '1px solid', borderColor: isSelected ? 'var(--primary)' : 'var(--border-dim)',
+                                   borderLeft: isSelected ? '4px solid var(--primary)' : `4px solid ${visit.isRecurring ? 'var(--primary)' : 'var(--secondary)'}`,
                                    borderRadius: '6px', padding: '0.4rem 0.8rem', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s ease',
-                                   zIndex: (isSelected || isChecked) ? 10 : 5, boxShadow: (isSelected || isChecked) ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                                   zIndex: isSelected ? 10 : 5, boxShadow: isSelected ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
                                    display: 'flex', flexDirection: 'column'
                                 }}
                               >
-                                 {isSelectMode && (
-                                   <div style={{ position: 'absolute', top: '0.4rem', right: '0.4rem' }}>
-                                      <input type="checkbox" checked={isChecked} readOnly style={{ width: '16px', height: '16px', accentColor: 'var(--primary)', cursor: 'pointer' }} />
-                                   </div>
-                                 )}
                                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {visit.time} - {visit.client}
                                  </div>
