@@ -436,6 +436,30 @@ h1, h2, h3, h4, .serif {
   -ms-overflow-style: none; /* IE and Edge */
 }
 
+/* Laudo editor: fixed header/footer, only canvas scrolls */
+@media (min-width: 1025px) {
+  .laudo-editor-page {
+    height: calc(100vh - 4rem);
+    max-height: calc(100vh - 4rem);
+    overflow: hidden;
+  }
+  .laudo-editor-page > .laudo-editor-head,
+  .laudo-editor-page > .laudo-info-bar,
+  .laudo-editor-page > .laudo-footer-actions {
+    flex-shrink: 0;
+  }
+}
+.laudo-canvas-scroll {
+  scrollbar-width: thin;
+}
+.laudo-canvas-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.laudo-canvas-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-dim);
+  border-radius: 3px;
+}
+
 .hourly-grid-container::-webkit-scrollbar, .no-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Edge */
 }

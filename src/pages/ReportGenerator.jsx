@@ -235,14 +235,27 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
   );
 };
 
+const formatDateTime = (d) => {
+  if (!d) return null;
+  const date = d instanceof Date ? d : new Date(d);
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  const hh = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `${dd}/${mm}/${yyyy} · ${hh}:${min}`;
+};
+
 const ReportGenerator = () => {
-  const { categories: INSPECTION_CATEGORIES } = useAppContext();
+  const { categories: INSPECTION_CATEGORIES, profile } = useAppContext();
   const location = useLocation();
   const lockedClient = location.state?.client || '';
   const [client, setClient] = useState(lockedClient);
   const [occurrences, setOccurrences] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [signature, setSignature] = useState(null);
+  const [startedAt] = useState(() => new Date());
+  const [closedAt, setClosedAt] = useState(null);
 
   const invalidateSignature = () => {
     if (signature) {
@@ -316,102 +329,114 @@ const ReportGenerator = () => {
     const signName = prompt("Assinatura do Cliente (Digite o nome para simular assintura digital):");
     if (signName) {
       setSignature(signName);
+      setClosedAt(new Date());
     }
   };
 
+  const InfoField = ({ label, value, highlight }) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', minWidth: 0 }}>
+      <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{label}</span>
+      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: highlight || 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value || '—'}</span>
+    </div>
+  );
+
   return (
-    <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', paddingBottom: '3rem' }}>
-      
+    <div className="laudo-editor-page reveal-staggered" style={{ display: 'flex', flexDirection: 'column' }}>
+
       {/* Header Toolbar */}
-      <header style={{ marginBottom: '0.5rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
+      <header className="laudo-editor-head" style={{ marginBottom: '1rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
         <div className="flex-toolbar" style={{ gap: '1rem', alignItems: 'center' }}>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
-             Laudos
+             Laudo em Edição
           </h1>
         </div>
       </header>
 
-      {/* Editor Main Top-Bar */}
-      <div className="flex-toolbar" style={{ marginBottom: '1.5rem', background: 'var(--bg-surface)', padding: '1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }} className="full-width-mobile">
-           {lockedClient ? (
-             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 1rem', background: 'var(--bg-deep)', border: '1px solid var(--border-dim)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>
-               <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Cliente</span>
-               <span>{lockedClient}</span>
-             </div>
-           ) : (
-             <select
-               value={client}
-               onChange={(e) => setClient(e.target.value)}
-               style={{ width: '100%', maxWidth: '300px', padding: '0.6rem 1rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', outline: 'none', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}
-             >
-               <option value="">Selecione o Cliente Auditado...</option>
-               <option value="Cozinha Industrial Matriz">Cozinha Industrial Matriz</option>
-               <option value="Supermercado Nova Era">Supermercado Nova Era</option>
-               <option value="Refeitório São João">Refeitório São João</option>
-             </select>
-           )}
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }} className="full-width-mobile">
-           <button onClick={handleSign} className="btn" style={{ flex: 1, justifyContent: 'center', border: signature ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: signature ? 'var(--primary)' : 'var(--text-main)' }}>
-             {signature ? <CheckCircle2 size={16} /> : <PenTool size={16} />}
-             {signature ? 'ASSINADO' : 'ASSINAR'}
-           </button>
-           <button onClick={handleGeneratePDF} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} disabled={isGenerating}>
-             {isGenerating ? <RefreshCcw size={14} className="spin" /> : <Download size={14} />}
-             GERAR PDF
-           </button>
-        </div>
+      {/* Info Bar: Client + Professional + Timestamps */}
+      <div className="laudo-info-bar" style={{ flexShrink: 0, background: 'var(--bg-surface)', padding: '1rem 1.25rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', marginBottom: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem' }}>
+         <InfoField label="Estabelecimento" value={client} />
+         <InfoField label="Profissional" value={profile?.name ? `${profile.name}${profile.crm ? ` · CRN ${profile.crm}` : ''}` : 'Sem perfil cadastrado'} />
+         <InfoField label="Início" value={formatDateTime(startedAt)} />
+         <InfoField
+           label="Encerramento"
+           value={closedAt ? formatDateTime(closedAt) : 'Em aberto'}
+           highlight={closedAt ? 'var(--primary)' : 'var(--secondary)'}
+         />
       </div>
 
+      {!lockedClient && (
+        <div style={{ marginBottom: '1rem', background: 'var(--bg-surface)', padding: '0.75rem 1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Selecione o cliente:</span>
+          <select
+            value={client}
+            onChange={(e) => setClient(e.target.value)}
+            style={{ flex: 1, minWidth: '200px', padding: '0.5rem 0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', outline: 'none', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}
+          >
+            <option value="">Selecione o Cliente Auditado...</option>
+            <option value="Cozinha Industrial Matriz">Cozinha Industrial Matriz</option>
+            <option value="Supermercado Nova Era">Supermercado Nova Era</option>
+            <option value="Refeitório São João">Refeitório São João</option>
+          </select>
+        </div>
+      )}
+
       {signature && (
-        <div style={{ padding: '0.8rem 1rem', background: 'rgba(0, 255, 136, 0.05)', border: '1px solid rgba(0, 255, 136, 0.2)', color: 'var(--primary)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+        <div style={{ padding: '0.8rem 1rem', background: 'rgba(0, 255, 136, 0.05)', border: '1px solid rgba(0, 255, 136, 0.2)', color: 'var(--primary)', borderRadius: 'var(--radius-md)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', flexShrink: 0 }}>
           <CheckCircle2 size={16} /> Documento validado e assinado eletronicamente por <strong>{signature}</strong>.
         </div>
       )}
 
-      {/* CANVAS AREA */}
-      <div style={{ flex: 1, maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-         
-         {occurrences.length === 0 ? (
-           <div style={{ padding: '4rem 2rem', textAlign: 'center', background: 'var(--bg-surface)', border: '1px dashed var(--border-dim)', borderRadius: 'var(--radius-md)', marginTop: '2rem' }}>
-              <div style={{ width: '64px', height: '64px', borderRadius: '32px', background: 'rgba(27,61,47,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                 <Sparkles size={28} color="var(--primary)" />
-              </div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Canvas em Branco</h3>
-              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.5', maxWidth: '400px', margin: '0 auto 2rem' }}>
-                Comece a construir seu laudo técnico. Adicione a primeira ocorrência, a IA cuidará dos textos normativos.
-              </p>
-              <button onClick={addOccurrence} className="btn btn-primary" style={{ padding: '0.8rem 2rem', margin: '0 auto' }}>
-                <Plus size={18} /> INICIAR AUDITORIA
-              </button>
-           </div>
-         ) : (
-           <>
-             {/* List of Occurrence Blocks */}
-             {occurrences.map((occ, index) => (
-               <OccurrenceBlock 
-                 key={occ.id} 
-                 occurrence={occ} 
-                 index={index}
-                 total={occurrences.length}
-                 categories={INSPECTION_CATEGORIES}
-                 updateOccurrence={updateOccurrence}
-                 removeOccurrence={() => removeOccurrence(occ.id)}
-                 moveUp={() => moveUp(index)}
-                 moveDown={() => moveDown(index)}
-               />
-             ))}
-
-             {/* Add Button at the bottom */}
-             <div style={{ padding: '1rem 0', display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
-               <button onClick={addOccurrence} className="btn" style={{ padding: '0.8rem 2rem', background: 'var(--bg-deep)', border: '1px dashed var(--border-dim)', width: '100%', maxWidth: '300px', justifyContent: 'center' }}>
-                 <Plus size={16} /> Adicionar Nova Ocorrência
+      {/* CANVAS AREA (scrollable) */}
+      <div className="laudo-canvas-scroll" style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '0.25rem' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%', paddingBottom: '1rem' }}>
+          {occurrences.length === 0 ? (
+            <div style={{ padding: '4rem 2rem', textAlign: 'center', background: 'var(--bg-surface)', border: '1px dashed var(--border-dim)', borderRadius: 'var(--radius-md)', marginTop: '1rem' }}>
+               <div style={{ width: '64px', height: '64px', borderRadius: '32px', background: 'rgba(27,61,47,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                  <Sparkles size={28} color="var(--primary)" />
+               </div>
+               <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Canvas em Branco</h3>
+               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.5', maxWidth: '400px', margin: '0 auto 2rem' }}>
+                 Comece a construir seu laudo técnico. Adicione a primeira ocorrência, a IA cuidará dos textos normativos.
+               </p>
+               <button onClick={addOccurrence} className="btn btn-primary" style={{ padding: '0.8rem 2rem', margin: '0 auto' }}>
+                 <Plus size={18} /> INICIAR AUDITORIA
                </button>
-             </div>
-           </>
-         )}
+            </div>
+          ) : (
+            <>
+              {occurrences.map((occ, index) => (
+                <OccurrenceBlock
+                  key={occ.id}
+                  occurrence={occ}
+                  index={index}
+                  total={occurrences.length}
+                  categories={INSPECTION_CATEGORIES}
+                  updateOccurrence={updateOccurrence}
+                  removeOccurrence={() => removeOccurrence(occ.id)}
+                  moveUp={() => moveUp(index)}
+                  moveDown={() => moveDown(index)}
+                />
+              ))}
+              <div style={{ padding: '1rem 0', display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+                <button onClick={addOccurrence} className="btn" style={{ padding: '0.8rem 2rem', background: 'var(--bg-deep)', border: '1px dashed var(--border-dim)', width: '100%', maxWidth: '300px', justifyContent: 'center' }}>
+                  <Plus size={16} /> Adicionar Nova Ocorrência
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
+      {/* FOOTER ACTIONS (sticky at bottom) */}
+      <div className="laudo-footer-actions" style={{ flexShrink: 0, marginTop: '1rem', padding: '1rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+         <button onClick={handleSign} className="btn" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem', border: signature ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: signature ? 'var(--primary)' : 'var(--text-main)' }}>
+           {signature ? <CheckCircle2 size={16} /> : <PenTool size={16} />}
+           {signature ? 'ASSINADO' : 'ASSINAR'}
+         </button>
+         <button onClick={handleGeneratePDF} className="btn btn-primary" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem' }} disabled={isGenerating}>
+           {isGenerating ? <RefreshCcw size={14} className="spin" /> : <Download size={14} />}
+           GERAR PDF
+         </button>
       </div>
 
       {/* HIDDEN PDF TEMPLATE */}
@@ -420,7 +445,14 @@ const ReportGenerator = () => {
             <div style={{ textAlign: 'center', borderBottom: '2px solid #ccc', paddingBottom: '20px', marginBottom: '30px' }}>
                <h1 style={{ fontSize: '26px', margin: 0, color: '#1B3D2F', fontWeight: 'bold' }}>LAUDO TÉCNICO DE AUDITORIA</h1>
                <p style={{ fontSize: '18px', color: '#333', marginTop: '15px' }}>Cliente Auditado: <strong>{client}</strong></p>
-               <p style={{ fontSize: '16px', color: '#666', marginTop: '5px' }}>Data da Emissão: {new Date().toLocaleDateString('pt-BR')}</p>
+               {profile?.name && (
+                 <p style={{ fontSize: '15px', color: '#333', marginTop: '5px' }}>
+                   Profissional Responsável: <strong>{profile.name}</strong>{profile.crm ? ` — CRN ${profile.crm}` : ''}
+                 </p>
+               )}
+               <p style={{ fontSize: '14px', color: '#666', marginTop: '10px' }}>
+                 Início: {formatDateTime(startedAt)}{'   '}·{'   '}Encerramento: {closedAt ? formatDateTime(closedAt) : 'Em aberto'}
+               </p>
             </div>
 
             {occurrences.map((occ, i) => {
