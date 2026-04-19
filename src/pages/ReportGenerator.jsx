@@ -206,26 +206,76 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
   };
 
   const handlePhotoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
+    const rawFile = e.target.files[0];
+    if (rawFile) {
+      if (e.target) e.target.value = ''; // Reseta o input para permitir selecionar a mesma foto novamente
+      
       setIsUploading(true);
       try {
+        // --- Algoritmo de Compressão e Conversão para JPEG ---
+        const file = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(rawFile);
+          reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
+              const MAX_SIZE = 1200; // Resolução segura e nítida
+              
+              if (width > height) {
+                if (width > MAX_SIZE) {
+                  height *= MAX_SIZE / width;
+                  width = MAX_SIZE;
+                }
+              } else {
+                if (height > MAX_SIZE) {
+                  width *= MAX_SIZE / height;
+                  height = MAX_SIZE;
+                }
+              }
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              
+              canvas.toBlob((blob) => {
+                if (blob) {
+                  resolve(new File([blob], rawFile.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: "image/jpeg" }));
+                } else {
+                  resolve(rawFile); // Fallback se falhar
+                }
+              }, 'image/jpeg', 0.85); // Qualidade 85% otimizada
+            };
+            img.onerror = () => resolve(rawFile);
+          };
+          reader.onerror = () => resolve(rawFile);
+        });
+        // --- Fim da Compressão ---
+
         // Garantir que temos um ID de laudo antes do upload para organizar a pasta
         const currentLaudoId = await ensureLaudoId();
         
         // Upload para o Firebase Storage
         const downloadURL = await uploadAuditPhoto(file, currentLaudoId, occurrence.id);
         
-        // Atualiza a ocorrência com a URL pública do Firebase (via silent para não perder estado de outras)
-        updateOccurrenceSilent(occurrence.id, { photoUrl: downloadURL });
+        if (downloadURL) {
+          // Atualiza a ocorrência com a URL pública do Firebase (via silent para não perder estado de outras)
+          updateOccurrenceSilent(occurrence.id, { photoUrl: downloadURL });
+        } else {
+          throw new Error("Download URL inválida");
+        }
       } catch (err) {
         console.error("Erro no upload:", err);
-        alert("Falha ao salvar imagem no servidor. Verifique sua conexão.");
+        alert("Falha ao salvar imagem. Verifique a conexão ou tente outra foto.");
       } finally {
         setIsUploading(false);
       }
     }
   };
+
 
   const callAnthropicAI = async () => {
     if (!selectedCategory || !selectedItem) {
