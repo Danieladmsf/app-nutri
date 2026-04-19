@@ -10,13 +10,14 @@ import { doc, collection } from 'firebase/firestore';
 // A chave da API Anthropic agora fica segura no servidor (api/generate-ai-note.js).
 // O front-end apenas chama a rota /api/generate-ai-note via fetch.
 
-const getBase64FromBlobUrl = async (blobUrl) => {
-  const response = await fetch(blobUrl);
+const getBase64FromBlobUrl = async (url) => {
+  const response = await fetch(url, { mode: 'cors' });
   const blob = await response.blob();
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       const img = new Image();
+      img.crossOrigin = 'anonymous';
       img.onload = () => {
         const canvas = document.createElement('canvas');
         let width = img.width;
@@ -186,7 +187,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave }) => {
   );
 };
 
-const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrence, removeOccurrence, moveUp, moveDown, laudoId, ensureLaudoId }) => {
+const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrence, updateOccurrenceSilent, removeOccurrence, moveUp, moveDown, laudoId, ensureLaudoId }) => {
   const fileInputRef = useRef(null);
   const [isGeneratingIA, setIsGeneratingIA] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -214,8 +215,8 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
         // Upload para o Firebase Storage
         const downloadURL = await uploadAuditPhoto(file, currentLaudoId, occurrence.id);
         
-        // Atualiza a ocorrência com a URL pública do Firebase
-        updateOccurrence(occurrence.id, { photoUrl: downloadURL });
+        // Atualiza a ocorrência com a URL pública do Firebase (via silent para não perder estado de outras)
+        updateOccurrenceSilent(occurrence.id, { photoUrl: downloadURL });
       } catch (err) {
         console.error("Erro no upload:", err);
         alert("Falha ao salvar imagem no servidor. Verifique sua conexão.");
@@ -261,7 +262,7 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
       }
 
       const data = await res.json();
-      updateOccurrence(occurrence.id, { text: data.text });
+      updateOccurrenceSilent(occurrence.id, { text: data.text });
     } catch (err) {
       console.error("Erro na API da IA:", err);
       alert("Houve um erro ao se comunicar com a IA. Verifique sua conexão.");
@@ -613,7 +614,12 @@ const ReportGenerator = () => {
 
   const updateOccurrence = (id, data) => {
     invalidateSignature();
-    setOccurrences(occurrences.map(o => o.id === id ? { ...o, ...data } : o));
+    setOccurrences(prev => prev.map(o => o.id === id ? { ...o, ...data } : o));
+  };
+
+  // Versão silenciosa (sem invalidar assinatura) para uploads async que não devem apagar assinatura
+  const updateOccurrenceSilent = (id, data) => {
+    setOccurrences(prev => prev.map(o => o.id === id ? { ...o, ...data } : o));
   };
 
   const removeOccurrence = (id) => {
@@ -822,6 +828,7 @@ const ReportGenerator = () => {
                   total={occurrences.length}
                   categories={INSPECTION_CATEGORIES}
                   updateOccurrence={updateOccurrence}
+                  updateOccurrenceSilent={updateOccurrenceSilent}
                   removeOccurrence={() => removeOccurrence(occ.id)}
                   moveUp={() => moveUp(index)}
                   moveDown={() => moveDown(index)}
