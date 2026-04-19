@@ -660,13 +660,6 @@ const ReportGenerator = () => {
                {/* Cartão de visita do profissional */}
                <div style={{ background: '#1B3D2F', color: '#fff', padding: '24px 26px', borderRadius: '10px', marginBottom: '24px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact', display: 'flex', alignItems: 'center', gap: '24px' }}>
 
-                  {/* Símbolo da nutrição (lado esquerdo, destaque) */}
-                  <div
-                     aria-label="Símbolo da Nutrição"
-                     style={{ width: '260px', height: '260px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                     dangerouslySetInnerHTML={{ __html: nutritionSvg }}
-                  />
-
                   {/* Dados profissionais */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                      <div style={{ fontSize: '22px', fontWeight: 900, letterSpacing: '-0.3px', lineHeight: 1.15, marginBottom: '2px', wordBreak: 'break-word' }}>
@@ -701,6 +694,13 @@ const ReportGenerator = () => {
                         </div>
                      )}
                   </div>
+
+                  {/* Símbolo da nutrição (lado direito, destaque) */}
+                  <div
+                     aria-label="Símbolo da Nutrição"
+                     style={{ width: '260px', height: '260px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                     dangerouslySetInnerHTML={{ __html: nutritionSvg }}
+                  />
                </div>
 
                {/* Estabelecimento (linha de destaque) */}
