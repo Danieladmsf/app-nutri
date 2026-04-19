@@ -153,13 +153,6 @@ const Dashboard = () => {
             </div>
           </section>
 
-          <section className="card" style={{ background: 'var(--primary)', color: 'white', border: 'none' }}>
-            <h3 style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '1rem' }}>SISTEMA OPERACIONAL</h3>
-            <div style={{ fontSize: '0.7rem', opacity: 0.9, lineHeight: '1.6' }}>
-              Base de dados sincronizada via Cloud Sync. <br/>
-              Status: <strong>OPERACIONAL</strong>
-            </div>
-          </section>
         </div>
 
       </div>
