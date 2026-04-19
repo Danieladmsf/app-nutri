@@ -200,6 +200,13 @@ h1, h2, h3, h4, .serif {
   align-items: center;
 }
 
+.agenda-hero-layout {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
 .full-width-mobile {
   width: auto;
 }
@@ -213,7 +220,7 @@ h1, h2, h3, h4, .serif {
     padding-bottom: 90px !important; /* Spacing for bottom nav */
   }
 
-  .grid-editorial, .grid-responsive-2col {
+  .grid-editorial, .grid-responsive-2col, .agenda-hero-layout {
     grid-template-columns: 1fr !important;
     gap: 1.5rem !important;
   }

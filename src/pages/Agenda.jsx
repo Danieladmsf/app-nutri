@@ -245,9 +245,9 @@ const Agenda = () => {
            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
              {/* Header Day */}
              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-dim)' }}>
-                <div>
-                  <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0, textTransform: 'capitalize' }}>{weekDays.find(d => d.fullDate === selectedDate)?.dayStr || 'Data'}</h2>
-                  <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{selectedDate.split('-').reverse().join('/')}</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, textTransform: 'capitalize' }}>{weekDays.find(d => d.fullDate === selectedDate)?.dayStr || 'Data'},</h2>
+                  <span style={{ fontSize: '1.1rem', color: 'var(--text-muted)', fontWeight: 600 }}>{selectedDate.split('-').reverse().join('/')}</span>
                 </div>
                 {/* Context Action Menu for Selected Visit */}
                 {selectedVisit && (
