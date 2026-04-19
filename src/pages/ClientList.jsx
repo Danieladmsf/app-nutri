@@ -115,27 +115,24 @@ const ClientList = () => {
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
              Lista de Clientes
           </h1>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-             <button onClick={() => openEditModal()} className="btn btn-primary full-width-mobile" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}><UserPlus size={16} /> NOVO CLIENTE</button>
+          <div style={{ display: 'flex', gap: '0.5rem', width: '100%', flex: 1, justifyContent: 'flex-end' }}>
+             <button onClick={() => openEditModal()} className="btn btn-primary" style={{ flex: 1, maxWidth: '200px', padding: '0.5rem', fontSize: '0.75rem', justifyContent: 'center' }}><UserPlus size={16} /> + CLIENTE</button>
+             <button onClick={handleExportCSV} className="btn" style={{ flex: 1, maxWidth: '200px', padding: '0.5rem', fontSize: '0.75rem', justifyContent: 'center' }}><Download size={16} /> EXPORTAR CSV</button>
           </div>
         </div>
       </header>
 
       {/* SaaS Toolbar */}
       <div className="flex-toolbar">
-        <div style={{ display: 'flex', gap: '1rem', flex: 1 }} className="full-width-mobile">
-          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.6rem 1.2rem', background: 'var(--bg-surface)', flex: 1, maxWidth: '400px' }}>
+        <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.6rem 1.2rem', background: 'var(--bg-surface)', flex: 1 }}>
             <Search size={16} color="var(--text-muted)" />
             <input 
               type="text" 
               placeholder="Buscar por nome ou cidade..." 
-              style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: '0.8rem', color: 'var(--text-main)' }}
+              style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: '0.8rem', color: 'var(--text-main)', minWidth: 0 }}
             />
           </div>
-          <button className="btn"><Filter size={16} /> Filtros</button>
-        </div>
-        <div style={{ display: 'flex', gap: '1rem' }} className="full-width-mobile">
-          <button onClick={handleExportCSV} className="btn full-width-mobile"><Download size={16} /> Exportar CSV</button>
         </div>
       </div>
 
