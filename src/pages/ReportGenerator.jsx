@@ -174,6 +174,7 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
                  <>
                    <Camera size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Câmera / Galeria</span>
+                   <span style={{ fontSize: '0.6rem', color: 'var(--primary)', marginTop: '0.4rem', fontWeight: 700, padding: '0.2rem 0.5rem', border: '1px dashed var(--primary)', borderRadius: '4px' }}>Tire fotos na HORIZONTAL</span>
                  </>
                )}
                {occurrence.photoUrl && (
@@ -600,42 +601,57 @@ const ReportGenerator = () => {
       {/* HIDDEN PDF TEMPLATE */}
       <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', pointerEvents: 'none' }}>
          <div id="pdf-report-content" style={{ width: '800px', backgroundColor: '#fff', padding: '40px', color: '#000', fontFamily: 'Arial, sans-serif' }}>
-            <div style={{ textAlign: 'center', borderBottom: '2px solid #ccc', paddingBottom: '20px', marginBottom: '30px' }}>
-               <h1 style={{ fontSize: '26px', margin: 0, color: '#1B3D2F', fontWeight: 'bold' }}>LAUDO TÉCNICO DE AUDITORIA</h1>
-               <p style={{ fontSize: '18px', color: '#333', marginTop: '15px' }}>Cliente Auditado: <strong>{client}</strong></p>
-               {profile?.name && (
-                 <p style={{ fontSize: '15px', color: '#333', marginTop: '5px' }}>
-                   Profissional Responsável: <strong>{profile.name}</strong>{profile.crm ? ` — CRN ${profile.crm}` : ''}
-                 </p>
-               )}
-               <p style={{ fontSize: '14px', color: '#666', marginTop: '10px' }}>
-                 Início: {formatDateTime(startedAt)}{'   '}·{'   '}Encerramento: {closedAt ? formatDateTime(closedAt) : 'Em aberto'}
-               </p>
-            </div>
+             {/* HEADER DO PDF */}
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '3px solid #1B3D2F', paddingBottom: '20px', marginBottom: '30px' }}>
+                <div style={{ flex: 1 }}>
+                   <h1 style={{ fontSize: '28px', margin: 0, color: '#1B3D2F', fontWeight: '900', letterSpacing: '-0.5px' }}>LAUDO TÉCNICO</h1>
+                   <h2 style={{ fontSize: '16px', margin: '4px 0 15px 0', color: '#D4A373', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Auditoria de Conformidade</h2>
+                   <p style={{ fontSize: '14px', color: '#555', margin: '0 0 5px 0' }}><strong>Início:</strong> {formatDateTime(startedAt)}</p>
+                   <p style={{ fontSize: '14px', color: '#555', margin: 0 }}><strong>Encerramento:</strong> {closedAt ? formatDateTime(closedAt) : 'Em aberto'}</p>
+                </div>
+                <div style={{ flex: 1, textAlign: 'right' }}>
+                   <p style={{ fontSize: '18px', color: '#1B3D2F', margin: '0 0 10px 0', fontWeight: 'bold', textTransform: 'uppercase' }}>{client}</p>
+                   {profile?.name && (
+                     <div style={{ display: 'inline-block', background: '#f5f5f5', padding: '10px 15px', borderRadius: '8px', border: '1px solid #ddd', textAlign: 'left' }}>
+                       <p style={{ fontSize: '12px', color: '#777', margin: '0 0 2px 0', textTransform: 'uppercase', fontWeight: 'bold' }}>Resp. Técnico</p>
+                       <p style={{ fontSize: '15px', color: '#333', margin: 0 }}><strong>{profile.name}</strong></p>
+                       {profile.crm && <p style={{ fontSize: '13px', color: '#555', margin: '2px 0 0 0' }}>CRN {profile.crm}</p>}
+                     </div>
+                   )}
+                </div>
+             </div>
 
-            {occurrences.map((occ, i) => {
-               const cat = INSPECTION_CATEGORIES.find(c => c.id === occ.categoryId);
-               const item = cat?.items.find(it => it.id === occ.itemId);
-               return (
-                 <div key={occ.id} style={{ marginBottom: '40px', borderBottom: '1px solid #eee', paddingBottom: '25px', pageBreakInside: 'avoid' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
-                      <div style={{ width: '30px', height: '30px', borderRadius: '15px', background: '#1B3D2F', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>{i + 1}</div>
-                      <h3 style={{ fontSize: '20px', color: '#1B3D2F', margin: 0 }}>{cat ? cat.label : 'Não classificado'} - {item ? item.label : 'Não especificado'}</h3>
-                    </div>
-                    
-                    {occ.photoUrl && (
-                      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-                        <img src={occ.photoUrl} alt="Evidência Fotográfica" style={{ maxWidth: '400px', maxHeight: '300px', borderRadius: '8px', border: '1px solid #ccc' }} />
-                      </div>
-                    )}
+             {/* CORPO DO PDF */}
+             {occurrences.map((occ, i) => {
+                const cat = INSPECTION_CATEGORIES.find(c => c.id === occ.categoryId);
+                const item = cat?.items.find(it => it.id === occ.itemId);
+                return (
+                  <div key={occ.id} style={{ marginBottom: '50px', pageBreakInside: 'avoid' }}>
+                     
+                     {/* Title Strip */}
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#1B3D2F', color: 'white', padding: '12px 15px', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}>
+                       <div style={{ width: '28px', height: '28px', borderRadius: '14px', background: '#D4A373', color: '#1B3D2F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '14px' }}>{i + 1}</div>
+                       <h3 style={{ fontSize: '16px', margin: 0, fontWeight: 'bold' }}>{cat ? cat.label : 'Não classificado'} — {item ? item.label : 'Não especificado'}</h3>
+                     </div>
+                     
+                     <div style={{ border: '2px solid #1B3D2F', borderTop: 'none', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px', overflow: 'hidden' }}>
+                       {/* Photo Area (Full Width Horizontal) */}
+                       {occ.photoUrl && (
+                         <div style={{ width: '100%', background: '#e0e0e0', borderBottom: '2px solid #1B3D2F' }}>
+                           <img src={occ.photoUrl} alt="Evidência Fotográfica" style={{ width: '100%', height: 'auto', maxHeight: '460px', objectFit: 'cover', display: 'block' }} />
+                         </div>
+                       )}
 
-                    <div style={{ background: '#f9f9f9', padding: '20px', borderRadius: '8px', borderLeft: '4px solid #D4A373' }}>
-                      <h4 style={{ fontSize: '16px', color: '#333', marginBottom: '10px', marginTop: 0 }}>Orientação Técnica e Procedimentos:</h4>
-                      <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#444', margin: 0, whiteSpace: 'pre-wrap' }}>{occ.text || 'Nenhuma orientação descrita para esta ocorrência.'}</p>
-                    </div>
-                 </div>
-               )
-            })}
+                       {/* Text Area Just Below */}
+                       <div style={{ background: '#fbfbfb', padding: '25px', position: 'relative' }}>
+                         <div style={{ position: 'absolute', top: 0, left: 0, width: '6px', height: '100%', background: '#D4A373' }}></div>
+                         <h4 style={{ fontSize: '14px', color: '#1B3D2F', margin: '0 0 10px 0', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800' }}>Constatação e Orientação Técnica</h4>
+                         <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#222', margin: 0, whiteSpace: 'pre-wrap' }}>{occ.text || 'Nenhuma orientação descrita.'}</p>
+                       </div>
+                     </div>
+                  </div>
+                )
+             })}
 
             {signature && (
                <div style={{ marginTop: '50px', paddingTop: '30px', borderTop: '2px dashed #ccc', textAlign: 'center', pageBreakInside: 'avoid' }}>
