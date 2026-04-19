@@ -351,21 +351,23 @@ h1, h2, h3, h4, .serif {
   gap: 1.5rem;
 }
 
-/* Desktop only: side-by-side calendar + timeline */
+/* Desktop only: CSS Grid — each block in its own area */
 @media (min-width: 1025px) {
   .agenda-hero-layout {
-    flex-direction: row !important;
+    display: grid !important;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: 1fr;
     height: calc(100vh - 12rem);
-    overflow: hidden;
+    gap: 0;
+    flex-direction: unset !important;
   }
   .agenda-sidebar {
-    width: 260px;
-    flex-shrink: 0;
+    grid-column: 1;
+    grid-row: 1;
     border-right: 1px solid var(--border-dim);
     padding-right: 1.5rem;
-    align-self: flex-start;
-    position: sticky;
-    top: 0;
+    overflow-y: auto;
+    align-self: start;
   }
   .agenda-sidebar .card {
     padding: 1rem !important;
@@ -385,14 +387,14 @@ h1, h2, h3, h4, .serif {
     background: var(--bg-deep) !important;
   }
   .agenda-timeline-col {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
+    grid-column: 2;
+    grid-row: 1;
+    display: grid;
+    grid-template-rows: auto 1fr;
     overflow: hidden;
+    padding-left: 1.5rem;
   }
   .agenda-timeline-col .hourly-grid-container {
-    flex: 1;
     overflow-y: auto;
   }
 }
