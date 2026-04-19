@@ -75,9 +75,6 @@ const Dashboard = () => {
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
              Dashboard <span className="serif" style={{ fontStyle: 'italic', fontWeight: 400 }}>Executivo</span>
           </h1>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-             <button className="btn" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}>FILTRAR PERÍODO</button>
-          </div>
         </div>
       </header>
 
