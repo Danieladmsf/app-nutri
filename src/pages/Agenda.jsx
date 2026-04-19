@@ -560,7 +560,7 @@ const Agenda = () => {
       {/* Mobile Context Modal/Drawer */}
       {selectedVisit && (
         <div className="mobile-only" style={{
-          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: 'calc(71px + env(safe-area-inset-bottom))'
         }}>
           <div style={{ background: 'var(--bg-surface)', width: '100%', maxHeight: '85vh', borderTopLeftRadius: '20px', borderTopRightRadius: '20px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
              <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-dim)', background: 'rgba(27, 61, 47, 0.05)', position: 'relative', flexShrink: 0 }}>
@@ -606,7 +606,7 @@ const Agenda = () => {
                </div>
              </div>
 
-             <div style={{ padding: '1rem 1.5rem', paddingBottom: 'calc(1rem + 75px + env(safe-area-inset-bottom))', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-surface)', display: 'flex', gap: '1rem', flexShrink: 0 }}>
+             <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-surface)', display: 'flex', gap: '1rem', flexShrink: 0 }}>
                  <button 
                    onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))} 
                    className="btn" 
