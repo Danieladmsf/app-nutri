@@ -240,6 +240,31 @@ const AgendaSettings = ({ workDays, setWorkDays, workStart, setWorkStart, workEn
   );
 };
 
+// ─── Formatadores de campo ───
+const formatWhatsapp = (v) => {
+  const digits = (v || '').replace(/\D/g, '').slice(0, 11);
+  if (!digits) return '';
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+};
+
+const formatCrn = (v) => {
+  const digits = (v || '').replace(/\D/g, '').slice(0, 8);
+  if (!digits) return '';
+  const firstTwo = digits.slice(0, 2);
+  const regionLen = (firstTwo === '10' || firstTwo === '11') ? 2 : 1;
+  const region = digits.slice(0, regionLen);
+  const number = digits.slice(regionLen);
+  return number ? `CRN-${region} ${number}` : `CRN-${region}`;
+};
+
+const FIELD_FORMATTERS = {
+  whatsapp: formatWhatsapp,
+  crm: formatCrn,
+};
+
 // ─── Tab: Perfil do Usuário ───
 const UserProfile = ({ profile, setProfile }) => {
   const fileInputRef = useRef(null);
@@ -321,9 +346,15 @@ const UserProfile = ({ profile, setProfile }) => {
               </label>
               <input
                 type={field.type}
-                value={profile[field.key]}
-                onChange={e => setProfile(prev => ({ ...prev, [field.key]: e.target.value }))}
+                value={profile[field.key] || ''}
+                onChange={e => {
+                  const fmt = FIELD_FORMATTERS[field.key];
+                  const value = fmt ? fmt(e.target.value) : e.target.value;
+                  setProfile(prev => ({ ...prev, [field.key]: value }));
+                }}
                 placeholder={field.placeholder}
+                inputMode={field.key === 'whatsapp' ? 'tel' : undefined}
+                maxLength={field.key === 'whatsapp' ? 15 : (field.key === 'crm' ? 13 : undefined)}
                 style={{
                   width: '100%', padding: '0.8rem 1rem',
                   border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-minimal)',
