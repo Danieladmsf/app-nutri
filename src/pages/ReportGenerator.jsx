@@ -16,10 +16,36 @@ const getBase64FromBlobUrl = async (blobUrl) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64data = reader.result;
-      const b64 = base64data.split(',')[1];
-      const mime = base64data.substring(base64data.indexOf(':') + 1, base64data.indexOf(';'));
-      resolve({ b64, mime });
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const MAX_SIZE = 800;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const base64data = canvas.toDataURL('image/jpeg', 0.7);
+        const b64 = base64data.split(',')[1];
+        resolve({ b64, mime: 'image/jpeg' });
+      };
+      img.onerror = reject;
+      img.src = reader.result;
     };
     reader.onerror = reject;
     reader.readAsDataURL(blob);
