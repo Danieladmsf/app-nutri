@@ -83,6 +83,30 @@ const ClientList = () => {
     }
   };
 
+  const handleExportCSV = () => {
+    if (!clients.length) return alert('Nenhum cliente para exportar.');
+    const headers = ['Nome', 'Contato', 'Cargo', 'Endereço', 'Status', 'Última Visita'];
+    const rows = clients.map(c => [
+      c.name || '',
+      c.phone || c.whatsapp || '',
+      c.contactRole || '',
+      c.address || '',
+      c.status || '',
+      c.lastVisitDate || '—'
+    ]);
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `clientes_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
@@ -112,7 +136,7 @@ const ClientList = () => {
           <button className="btn"><Filter size={16} /> Filtros</button>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }} className="full-width-mobile">
-          <button className="btn full-width-mobile"><Download size={16} /> Exportar CSV</button>
+          <button onClick={handleExportCSV} className="btn full-width-mobile"><Download size={16} /> Exportar CSV</button>
         </div>
       </div>
 
