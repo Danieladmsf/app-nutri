@@ -20,19 +20,21 @@ const Sidebar = () => {
       }}>
         {/* Workspace Selector */}
         <div style={{ padding: '0 1.5rem', marginBottom: '3rem' }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '1rem', 
-            padding: '0.75rem', 
-            background: 'var(--bg-deep)', 
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            padding: '0.75rem',
+            background: 'var(--bg-deep)',
             border: '1px solid var(--border-dim)',
             borderRadius: 'var(--radius-md)',
             cursor: 'pointer'
           }}>
-            <div style={{ width: '24px', height: '24px', background: 'var(--primary)', color: 'white', display: 'grid', placeItems: 'center', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>A</div>
+            <div style={{ width: '32px', height: '32px', background: 'var(--primary)', borderRadius: '4px', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+              <img src="/nutrition-symbol.svg" alt="NutriApp" style={{ width: '26px', height: '26px' }} />
+            </div>
             <div style={{ flex: 1 }}>
-               <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>Ana Nutri</div>
+               <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>NutriApp</div>
                <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>Workspace Profissional</div>
             </div>
           </div>
