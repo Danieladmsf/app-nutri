@@ -48,7 +48,7 @@ const ReportGenerator = () => {
       <header style={{ marginBottom: '0.5rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
         <div className="flex-toolbar" style={{ gap: '1rem', alignItems: 'center' }}>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
-             Auditoria IA
+             Laudos
           </h1>
           {/* Pode ser adicionado status globals do laudo aqui */}
         </div>

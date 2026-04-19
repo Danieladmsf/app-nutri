@@ -113,7 +113,7 @@ const ClientList = () => {
       <header style={{ marginBottom: '0.5rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
         <div className="flex-toolbar" style={{ gap: '1rem', alignItems: 'center' }}>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
-             Lista de Clientes
+             Clientes
           </h1>
           <div style={{ display: 'flex', gap: '0.5rem', width: '100%', flex: 1, justifyContent: 'flex-end' }}>
              <button onClick={() => openEditModal()} className="btn btn-primary" style={{ flex: 1, maxWidth: '200px', padding: '0.5rem', fontSize: '0.75rem', justifyContent: 'center' }}><UserPlus size={16} /> + CLIENTE</button>

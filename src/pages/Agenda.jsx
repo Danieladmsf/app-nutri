@@ -133,7 +133,7 @@ const Agenda = () => {
           
           {/* Title */}
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
-             Agenda & Rotinas
+             Rotinas
           </h1>
 
           {/* Action Row */}
