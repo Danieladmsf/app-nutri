@@ -440,13 +440,14 @@ const ReportGenerator = () => {
     try {
       const element = document.getElementById('pdf-report-content');
       const opt = {
-        margin:       15,
+        margin:       [10, 10, 10, 10],
         filename:     `Laudo_Auditoria_${client.replace(/\s+/g, '_')}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        html2canvas:  { scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff', windowWidth: 720 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+        pagebreak:    { mode: ['css', 'legacy'], before: '.pdf-page-break' }
       };
-      
+
       await html2pdf().set(opt).from(element).save();
     } catch (e) {
       console.error('Falha ao gerar o PDF', e);
@@ -634,96 +635,196 @@ const ReportGenerator = () => {
 
       {/* HIDDEN PDF TEMPLATE */}
       <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', pointerEvents: 'none' }}>
-         <div id="pdf-report-content" style={{ width: '800px', backgroundColor: '#fff', padding: '40px', color: '#000', fontFamily: 'Arial, sans-serif' }}>
-             {/* HEADER DO PDF */}
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '3px solid #1B3D2F', paddingBottom: '20px', marginBottom: '30px' }}>
-                <div style={{ flex: 1 }}>
-                   <h1 style={{ fontSize: '28px', margin: 0, color: '#1B3D2F', fontWeight: '900', letterSpacing: '-0.5px' }}>LAUDO TÉCNICO</h1>
-                   <h2 style={{ fontSize: '16px', margin: '4px 0 15px 0', color: '#D4A373', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Auditoria de Conformidade</h2>
-                   <div style={{ display: 'inline-block', background: '#f8f8f8', padding: '10px 15px', borderRadius: '6px', borderLeft: '4px solid #1B3D2F' }}>
-                       <p style={{ fontSize: '14px', color: '#333', margin: '0 0 5px 0' }}><strong>Início:</strong> {formatDateTime(startedAt) || 'Data não registrada'}</p>
-                       <p style={{ fontSize: '14px', color: '#333', margin: 0 }}><strong>Encerramento:</strong> {closedAt ? (formatDateTime(closedAt) || 'Data não registrada') : 'Em aberto'}</p>
-                   </div>
-                </div>
-                <div style={{ flex: 1, textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '15px' }}>
-                   <div style={{ background: '#1B3D2F', color: 'white', padding: '10px 20px', borderRadius: '4px', display: 'inline-block' }}>
-                     <p style={{ fontSize: '18px', margin: 0, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{client}</p>
-                   </div>
-                   {profile?.name && (
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'right' }}>
-                         <div>
-                           <p style={{ fontSize: '11px', color: '#777', margin: '0 0 2px 0', textTransform: 'uppercase', fontWeight: 'bold' }}>Resp. Técnico</p>
-                           <p style={{ fontSize: '15px', color: '#1B3D2F', margin: 0 }}><strong>{profile.name}</strong></p>
-                           {profile.crm && <p style={{ fontSize: '13px', color: '#555', margin: '2px 0 0 0' }}>CRN {profile.crm}</p>}
-                         </div>
-                         {profile.photo && (
-                           <img 
-                             src={profile.photo} 
-                             crossOrigin="anonymous"
-                             alt="Avatar" 
-                             style={{ width: '48px', height: '48px', borderRadius: '24px', objectFit: 'cover', border: '2px solid #D4A373' }} 
+         <div id="pdf-report-content" style={{ width: '720px', backgroundColor: '#fff', color: '#000', fontFamily: 'Arial, Helvetica, sans-serif', boxSizing: 'border-box' }}>
+
+            {/* ========== PÁGINA 1 — CAPA / IDENTIFICAÇÃO ========== */}
+            <div style={{ width: '720px', minHeight: '1020px', padding: '36px 32px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
+
+               {/* Banner superior */}
+               <div style={{ background: '#1B3D2F', color: '#fff', padding: '28px 28px', borderRadius: '10px', marginBottom: '26px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                  <div style={{ fontSize: '10px', color: '#D4A373', fontWeight: 'bold', letterSpacing: '3px', marginBottom: '8px' }}>
+                     NUTRIAPP · GESTÃO DE CONFORMIDADE ALIMENTAR
+                  </div>
+                  <div style={{ fontSize: '34px', fontWeight: 900, letterSpacing: '-0.5px', lineHeight: 1.1, margin: '0 0 6px 0' }}>
+                     LAUDO TÉCNICO
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#D4A373', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                     Auditoria de Conformidade Sanitária
+                  </div>
+               </div>
+
+               {/* Estabelecimento (linha de destaque) */}
+               <div style={{ background: '#f4f4f2', border: '1px solid #e2e2de', borderLeft: '5px solid #1B3D2F', borderRadius: '6px', padding: '16px 20px', marginBottom: '16px', WebkitPrintColorAdjust: 'exact' }}>
+                  <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 'bold', marginBottom: '4px' }}>
+                     Estabelecimento Auditado
+                  </div>
+                  <div style={{ fontSize: '20px', color: '#1B3D2F', fontWeight: 900, wordBreak: 'break-word' }}>
+                     {client || '—'}
+                  </div>
+               </div>
+
+               {/* Grid de datas */}
+               <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ flex: 1, background: '#f8f8f8', border: '1px solid #e2e2de', borderRadius: '6px', padding: '14px 16px', boxSizing: 'border-box' }}>
+                     <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 'bold', marginBottom: '4px' }}>Início da Inspeção</div>
+                     <div style={{ fontSize: '14px', color: '#222', fontWeight: 'bold', wordBreak: 'break-word' }}>{formatDateTime(startedAt) || '—'}</div>
+                  </div>
+                  <div style={{ flex: 1, background: '#f8f8f8', border: '1px solid #e2e2de', borderRadius: '6px', padding: '14px 16px', boxSizing: 'border-box' }}>
+                     <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 'bold', marginBottom: '4px' }}>Encerramento</div>
+                     <div style={{ fontSize: '14px', color: closedAt ? '#1B3D2F' : '#D4A373', fontWeight: 'bold', wordBreak: 'break-word' }}>{closedAt ? formatDateTime(closedAt) : 'Em aberto'}</div>
+                  </div>
+               </div>
+
+               {/* Responsável técnico */}
+               <div style={{ background: '#fff', border: '1px solid #e2e2de', borderRadius: '6px', padding: '18px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {profile?.photo && (
+                     <img
+                        src={profile.photo}
+                        crossOrigin="anonymous"
+                        alt="Responsável"
+                        style={{ width: '64px', height: '64px', borderRadius: '32px', objectFit: 'cover', border: '3px solid #D4A373', flexShrink: 0 }}
+                     />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                     <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 'bold', marginBottom: '4px' }}>
+                        Nutricionista Responsável Técnico
+                     </div>
+                     <div style={{ fontSize: '17px', color: '#1B3D2F', fontWeight: 'bold', wordBreak: 'break-word' }}>
+                        {profile?.name || 'Não informado'}
+                     </div>
+                     {profile?.crm && (
+                        <div style={{ fontSize: '12px', color: '#555', marginTop: '2px' }}>
+                           CRN <strong>{profile.crm}</strong>
+                        </div>
+                     )}
+                  </div>
+               </div>
+
+               {/* Sumário */}
+               <div style={{ background: '#f8f8f8', borderLeft: '4px solid #D4A373', padding: '18px 20px', borderRadius: '4px', WebkitPrintColorAdjust: 'exact' }}>
+                  <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 'bold', marginBottom: '8px' }}>
+                     Sumário da Auditoria
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#222', lineHeight: 1.6, wordBreak: 'break-word' }}>
+                     Este documento consolida <strong>{occurrences.length} ocorrência{occurrences.length !== 1 ? 's' : ''} técnica{occurrences.length !== 1 ? 's' : ''}</strong> identificada{occurrences.length !== 1 ? 's' : ''} durante a inspeção sanitária realizada em <strong>{client || 'estabelecimento'}</strong>. Cada item é acompanhado de evidência fotográfica (quando aplicável) e da respectiva orientação corretiva para regularização.
+                  </div>
+               </div>
+
+               {/* Rodapé capa */}
+               <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid #e2e2de', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: '#999' }}>
+                  <span>NutriApp · Documento gerado eletronicamente</span>
+                  <span>Capa</span>
+               </div>
+            </div>
+
+            {/* ========== PÁGINAS DE OCORRÊNCIA ========== */}
+            {occurrences.map((occ, i) => {
+               const cat = INSPECTION_CATEGORIES.find(c => c.id === occ.categoryId);
+               const item = cat?.items.find(it => it.id === occ.itemId);
+               return (
+                  <div key={occ.id} className="pdf-page-break" style={{ width: '720px', minHeight: '1020px', padding: '36px 32px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', pageBreakBefore: 'always' }}>
+
+                     {/* Cabeçalho compacto da ocorrência */}
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: '#1B3D2F', color: '#fff', padding: '16px 20px', borderRadius: '8px', marginBottom: '18px', WebkitPrintColorAdjust: 'exact' }}>
+                        <div style={{ width: '38px', height: '38px', borderRadius: '19px', background: '#D4A373', color: '#1B3D2F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '16px', flexShrink: 0 }}>
+                           {i + 1}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                           <div style={{ fontSize: '10px', color: '#D4A373', fontWeight: 'bold', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '2px' }}>
+                              Ocorrência {i + 1} de {occurrences.length}
+                           </div>
+                           <div style={{ fontSize: '15px', fontWeight: 'bold', wordBreak: 'break-word', lineHeight: 1.3 }}>
+                              {cat ? cat.label : 'Não classificado'} — {item ? item.label : 'Não especificado'}
+                           </div>
+                        </div>
+                     </div>
+
+                     {/* Barra de identificação do laudo (contexto em cada página) */}
+                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold', padding: '0 4px', marginBottom: '14px' }}>
+                        <span style={{ wordBreak: 'break-word', maxWidth: '60%' }}>{client}</span>
+                        <span>{formatDateTime(startedAt)?.split(' · ')[0] || ''}</span>
+                     </div>
+
+                     {/* Foto */}
+                     {occ.photoUrl && (
+                        <div style={{ background: '#f8f8f8', border: '1px solid #e2e2de', borderRadius: '8px', padding: '10px', marginBottom: '16px', textAlign: 'center' }}>
+                           <img
+                              src={occ.photoUrl}
+                              crossOrigin="anonymous"
+                              alt="Evidência"
+                              style={{ maxWidth: '100%', width: '100%', height: 'auto', maxHeight: '460px', objectFit: 'contain', borderRadius: '4px', display: 'block', margin: '0 auto' }}
                            />
-                         )}
-                     </div>
-                   )}
-                </div>
-             </div>
+                           <div style={{ fontSize: '9px', color: '#999', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 'bold', marginTop: '8px' }}>
+                              Evidência Fotográfica
+                           </div>
+                        </div>
+                     )}
 
-             {/* CORPO DO PDF */}
-             {occurrences.map((occ, i) => {
-                const cat = INSPECTION_CATEGORIES.find(c => c.id === occ.categoryId);
-                const item = cat?.items.find(it => it.id === occ.itemId);
-                return (
-                  <div key={occ.id} style={{ 
-                    minHeight: '1000px', 
-                    paddingBottom: '20px',
-                    pageBreakAfter: 'always',
-                    display: 'flex',
-                    flexDirection: 'column'
-                  }}>
-                     
-                     {/* Title Strip */}
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', background: '#1B3D2F', color: '#FFFFFF', padding: '15px 20px', borderRadius: '8px 8px 0 0', WebkitPrintColorAdjust: 'exact', colorAdjust: 'exact' }}>
-                       <div style={{ width: '30px', height: '30px', borderRadius: '15px', background: '#D4A373', color: '#1B3D2F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '15px' }}>{i + 1}</div>
-                       <h3 style={{ fontSize: '18px', margin: 0, fontWeight: 'bold', color: '#FFFFFF' }}>{cat ? cat.label : 'Não classificado'} — {item ? item.label : 'Não especificado'}</h3>
-                     </div>
-                     
-                     <div style={{ border: '1px solid #d0d0d0', borderTop: 'none', borderRadius: '0 0 8px 8px', overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                       {/* Photo Area (Full Width Horizontal) */}
-                       {occ.photoUrl && (
-                         <div style={{ width: '100%', background: '#F9F9F9', borderBottom: '1px solid #d0d0d0', padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                           <img 
-                             src={occ.photoUrl} 
-                             crossOrigin="anonymous" 
-                             alt="Evidência Fotográfica" 
-                             style={{ width: '100%', height: 'auto', maxHeight: '500px', objectFit: 'contain', display: 'block', borderRadius: '4px' }} 
-                           />
-                         </div>
-                       )}
-
-                       {/* Text Area Just Below */}
-                       <div style={{ background: '#ffffff', padding: '30px', flex: 1 }}>
-                         <div style={{ borderLeft: '4px solid #D4A373', paddingLeft: '15px' }}>
-                           <h4 style={{ fontSize: '13px', color: '#777', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>Constatação e Orientação Técnica</h4>
-                           <p style={{ fontSize: '16px', lineHeight: '1.7', color: '#222', margin: 0, whiteSpace: 'pre-wrap' }}>{occ.text || 'Nenhuma orientação descrita.'}</p>
-                         </div>
-                       </div>
+                     {/* Texto da constatação */}
+                     <div style={{ flex: 1, background: '#fff', border: '1px solid #e2e2de', borderLeft: '4px solid #D4A373', borderRadius: '4px', padding: '18px 22px' }}>
+                        <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 'bold', marginBottom: '10px' }}>
+                           Constatação e Orientação Técnica
+                        </div>
+                        <div style={{ fontSize: '13px', lineHeight: 1.7, color: '#222', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                           {occ.text || 'Nenhuma orientação descrita.'}
+                        </div>
                      </div>
 
-                     {/* Footer on each page */}
-                     <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', color: '#999', fontSize: '11px', borderTop: '1px solid #eee' }}>
-                        <span>NutriApp — Gestão de Conformidade Alimentar</span>
-                        <span>Página {i + 1} de {occurrences.length}</span>
+                     {/* Rodapé */}
+                     <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid #e2e2de', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: '#999' }}>
+                        <span style={{ wordBreak: 'break-word', maxWidth: '60%' }}>
+                           {profile?.name ? `${profile.name}${profile.crm ? ` · CRN ${profile.crm}` : ''}` : 'NutriApp'}
+                        </span>
+                        <span>Página {i + 2}</span>
                      </div>
                   </div>
-                )
-             })}
+               );
+            })}
 
+            {/* ========== PÁGINA DE ASSINATURA ========== */}
             {signature && (
-               <div style={{ marginTop: '50px', paddingTop: '30px', borderTop: '2px dashed #ccc', textAlign: 'center', pageBreakInside: 'avoid' }}>
-                   <p style={{ fontSize: '18px', color: '#1B3D2F', fontWeight: 'bold', margin: '0 0 15px 0' }}>✓ Selo de Validação Eletrônica</p>
-                   <p style={{ fontSize: '16px', color: '#333', margin: 0 }}>Este laudo técnico foi atestado e assinado pelo representante da unidade:</p>
-                   <p style={{ fontSize: '20px', color: '#000', margin: '15px 0 0 0', fontWeight: 'bold' }}>{signature}</p>
+               <div className="pdf-page-break" style={{ width: '720px', minHeight: '1020px', padding: '36px 32px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', pageBreakBefore: 'always' }}>
+
+                  {/* Cabeçalho da página */}
+                  <div style={{ background: '#1B3D2F', color: '#fff', padding: '16px 20px', borderRadius: '8px', marginBottom: '40px', WebkitPrintColorAdjust: 'exact' }}>
+                     <div style={{ fontSize: '10px', color: '#D4A373', fontWeight: 'bold', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '2px' }}>
+                        Validação do Documento
+                     </div>
+                     <div style={{ fontSize: '15px', fontWeight: 'bold' }}>
+                        Selo de Assinatura Eletrônica
+                     </div>
+                  </div>
+
+                  {/* Bloco central */}
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+                     <div style={{ width: '80px', height: '80px', borderRadius: '40px', background: '#1B3D2F', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '44px', fontWeight: 900, marginBottom: '20px', WebkitPrintColorAdjust: 'exact' }}>
+                        ✓
+                     </div>
+                     <div style={{ fontSize: '20px', color: '#1B3D2F', fontWeight: 900, marginBottom: '14px' }}>
+                        Documento Validado Eletronicamente
+                     </div>
+                     <div style={{ fontSize: '13px', color: '#555', maxWidth: '520px', lineHeight: 1.7, marginBottom: '40px', wordBreak: 'break-word' }}>
+                        Este laudo técnico foi atestado e assinado pelo representante legal do estabelecimento auditado, conferindo validade ao conteúdo aqui registrado em conformidade com as normas sanitárias vigentes.
+                     </div>
+
+                     {/* Linha de assinatura */}
+                     <div style={{ borderTop: '2px solid #1B3D2F', paddingTop: '10px', minWidth: '360px', maxWidth: '520px', width: '80%' }}>
+                        <div style={{ fontSize: '20px', color: '#000', fontWeight: 'bold', wordBreak: 'break-word' }}>{signature}</div>
+                        <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '4px', fontWeight: 'bold' }}>
+                           Representante do Estabelecimento
+                        </div>
+                     </div>
+
+                     <div style={{ fontSize: '11px', color: '#999', marginTop: '32px' }}>
+                        Assinado em {formatDateTime(closedAt) || formatDateTime(startedAt) || '—'}
+                     </div>
+                  </div>
+
+                  {/* Rodapé */}
+                  <div style={{ paddingTop: '24px', borderTop: '1px solid #e2e2de', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: '#999' }}>
+                     <span>NutriApp · Documento gerado eletronicamente</span>
+                     <span>Página {occurrences.length + 2}</span>
+                  </div>
                </div>
             )}
          </div>
