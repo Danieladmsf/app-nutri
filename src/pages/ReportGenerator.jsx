@@ -264,6 +264,7 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
 const formatDateTime = (d) => {
   if (!d) return null;
   const date = d instanceof Date ? d : new Date(d);
+  if (isNaN(date.getTime())) return null; // Previne "NaN/NaN/NaN" se a data for inválida
   const dd = String(date.getDate()).padStart(2, '0');
   const mm = String(date.getMonth() + 1).padStart(2, '0');
   const yyyy = date.getFullYear();
@@ -639,28 +640,30 @@ const ReportGenerator = () => {
                 <div style={{ flex: 1 }}>
                    <h1 style={{ fontSize: '28px', margin: 0, color: '#1B3D2F', fontWeight: '900', letterSpacing: '-0.5px' }}>LAUDO TÉCNICO</h1>
                    <h2 style={{ fontSize: '16px', margin: '4px 0 15px 0', color: '#D4A373', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Auditoria de Conformidade</h2>
-                   <p style={{ fontSize: '14px', color: '#555', margin: '0 0 5px 0' }}><strong>Início:</strong> {formatDateTime(startedAt)}</p>
-                   <p style={{ fontSize: '14px', color: '#555', margin: 0 }}><strong>Encerramento:</strong> {closedAt ? formatDateTime(closedAt) : 'Em aberto'}</p>
+                   <div style={{ display: 'inline-block', background: '#f8f8f8', padding: '10px 15px', borderRadius: '6px', borderLeft: '4px solid #1B3D2F' }}>
+                       <p style={{ fontSize: '14px', color: '#333', margin: '0 0 5px 0' }}><strong>Início:</strong> {formatDateTime(startedAt) || 'Data não registrada'}</p>
+                       <p style={{ fontSize: '14px', color: '#333', margin: 0 }}><strong>Encerramento:</strong> {closedAt ? (formatDateTime(closedAt) || 'Data não registrada') : 'Em aberto'}</p>
+                   </div>
                 </div>
-                <div style={{ flex: 1, textAlign: 'right' }}>
-                   <p style={{ fontSize: '18px', color: '#1B3D2F', margin: '0 0 10px 0', fontWeight: 'bold', textTransform: 'uppercase' }}>{client}</p>
+                <div style={{ flex: 1, textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '15px' }}>
+                   <div style={{ background: '#1B3D2F', color: 'white', padding: '10px 20px', borderRadius: '4px', display: 'inline-block' }}>
+                     <p style={{ fontSize: '18px', margin: 0, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{client}</p>
+                   </div>
                    {profile?.name && (
-                     <div style={{ display: 'inline-block', background: '#f5f5f5', padding: '10px 15px', borderRadius: '8px', border: '1px solid #ddd', textAlign: 'left' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                           {profile.photo && (
-                             <img 
-                               src={profile.photo} 
-                               crossOrigin="anonymous"
-                               alt="Avatar" 
-                               style={{ width: '40px', height: '40px', borderRadius: '20px', objectFit: 'cover', border: '1px solid #1B3D2F' }} 
-                             />
-                           )}
-                           <div style={{ textAlign: 'left' }}>
-                             <p style={{ fontSize: '12px', color: '#777', margin: '0 0 2px 0', textTransform: 'uppercase', fontWeight: 'bold' }}>Resp. Técnico</p>
-                             <p style={{ fontSize: '15px', color: '#333', margin: 0 }}><strong>{profile.name}</strong></p>
-                             {profile.crm && <p style={{ fontSize: '13px', color: '#555', margin: '2px 0 0 0' }}>CRN {profile.crm}</p>}
-                           </div>
-                        </div>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'right' }}>
+                         <div>
+                           <p style={{ fontSize: '11px', color: '#777', margin: '0 0 2px 0', textTransform: 'uppercase', fontWeight: 'bold' }}>Resp. Técnico</p>
+                           <p style={{ fontSize: '15px', color: '#1B3D2F', margin: 0 }}><strong>{profile.name}</strong></p>
+                           {profile.crm && <p style={{ fontSize: '13px', color: '#555', margin: '2px 0 0 0' }}>CRN {profile.crm}</p>}
+                         </div>
+                         {profile.photo && (
+                           <img 
+                             src={profile.photo} 
+                             crossOrigin="anonymous"
+                             alt="Avatar" 
+                             style={{ width: '48px', height: '48px', borderRadius: '24px', objectFit: 'cover', border: '2px solid #D4A373' }} 
+                           />
+                         )}
                      </div>
                    )}
                 </div>
@@ -673,35 +676,44 @@ const ReportGenerator = () => {
                 return (
                   <div key={occ.id} style={{ 
                     minHeight: '1000px', 
-                    paddingBottom: '40px',
-                    pageBreakAfter: 'always' 
+                    paddingBottom: '20px',
+                    pageBreakAfter: 'always',
+                    display: 'flex',
+                    flexDirection: 'column'
                   }}>
                      
                      {/* Title Strip */}
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#1B3D2F', color: 'white', padding: '12px 15px', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}>
-                       <div style={{ width: '28px', height: '28px', borderRadius: '14px', background: '#D4A373', color: '#1B3D2F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '14px' }}>{i + 1}</div>
-                       <h3 style={{ fontSize: '16px', margin: 0, fontWeight: 'bold' }}>{cat ? cat.label : 'Não classificado'} — {item ? item.label : 'Não especificado'}</h3>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', background: '#1B3D2F', color: '#FFFFFF', padding: '15px 20px', borderRadius: '8px 8px 0 0', WebkitPrintColorAdjust: 'exact', colorAdjust: 'exact' }}>
+                       <div style={{ width: '30px', height: '30px', borderRadius: '15px', background: '#D4A373', color: '#1B3D2F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '15px' }}>{i + 1}</div>
+                       <h3 style={{ fontSize: '18px', margin: 0, fontWeight: 'bold', color: '#FFFFFF' }}>{cat ? cat.label : 'Não classificado'} — {item ? item.label : 'Não especificado'}</h3>
                      </div>
                      
-                     <div style={{ border: '2px solid #1B3D2F', borderTop: 'none', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px', overflow: 'hidden' }}>
+                     <div style={{ border: '1px solid #d0d0d0', borderTop: 'none', borderRadius: '0 0 8px 8px', overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
                        {/* Photo Area (Full Width Horizontal) */}
                        {occ.photoUrl && (
-                         <div style={{ width: '100%', background: '#e0e0e0', borderBottom: '2px solid #1B3D2F' }}>
+                         <div style={{ width: '100%', background: '#F9F9F9', borderBottom: '1px solid #d0d0d0', padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                            <img 
                              src={occ.photoUrl} 
                              crossOrigin="anonymous" 
                              alt="Evidência Fotográfica" 
-                             style={{ width: '100%', height: 'auto', maxHeight: '550px', objectFit: 'cover', display: 'block' }} 
+                             style={{ width: '100%', height: 'auto', maxHeight: '500px', objectFit: 'contain', display: 'block', borderRadius: '4px' }} 
                            />
                          </div>
                        )}
 
                        {/* Text Area Just Below */}
-                       <div style={{ background: '#fbfbfb', padding: '25px', position: 'relative' }}>
-                         <div style={{ position: 'absolute', top: 0, left: 0, width: '6px', height: '100%', background: '#D4A373' }}></div>
-                         <h4 style={{ fontSize: '14px', color: '#1B3D2F', margin: '0 0 10px 0', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800' }}>Constatação e Orientação Técnica</h4>
-                         <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#222', margin: 0, whiteSpace: 'pre-wrap' }}>{occ.text || 'Nenhuma orientação descrita.'}</p>
+                       <div style={{ background: '#ffffff', padding: '30px', flex: 1 }}>
+                         <div style={{ borderLeft: '4px solid #D4A373', paddingLeft: '15px' }}>
+                           <h4 style={{ fontSize: '13px', color: '#777', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>Constatação e Orientação Técnica</h4>
+                           <p style={{ fontSize: '16px', lineHeight: '1.7', color: '#222', margin: 0, whiteSpace: 'pre-wrap' }}>{occ.text || 'Nenhuma orientação descrita.'}</p>
+                         </div>
                        </div>
+                     </div>
+
+                     {/* Footer on each page */}
+                     <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', color: '#999', fontSize: '11px', borderTop: '1px solid #eee' }}>
+                        <span>NutriApp — Gestão de Conformidade Alimentar</span>
+                        <span>Página {i + 1} de {occurrences.length}</span>
                      </div>
                   </div>
                 )
