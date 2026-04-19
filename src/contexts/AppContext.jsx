@@ -53,7 +53,7 @@ const DEFAULT_VISIT_TAGS = [
 ];
 
 const DEFAULT_PROFILE = {
-  name: '', email: '', whatsapp: '', crm: '', photo: '', bio: ''
+  name: '', email: '', whatsapp: '', crm: '', photo: '', bio: '', signatureImage: ''
 };
 
 // ─── Firestore doc path (single-user for now) ───
