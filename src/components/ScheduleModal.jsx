@@ -14,7 +14,6 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
   const [visitType, setVisitType] = useState('Auditoria Completa');
   
   // Create state
-  const [isRecurring, setIsRecurring] = useState(false);
   const [clients, setClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState('');
   const [saving, setSaving] = useState(false);
@@ -52,8 +51,9 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
       setTimeSection('08:00');
       setDuration('2h');
       setVisitType('Auditoria Completa');
-      setIsRecurring(false);
+      setVisitType('Auditoria Completa');
       setSelectedClientId('');
+      setSelectedTag('');
     }
   }, [initialData, isOpen]);
 
@@ -75,9 +75,9 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
         client: selectedClient.name,
         address: selectedClient.address || '',
         status: 'Em aberto',
-        isRecurring: isRecurring,
+        isRecurring: (selectedTag || 'pontual') === 'rotina_fixa',
         visitType: visitType,
-        tag: selectedTag || (isRecurring ? 'rotina_fixa' : 'pontual'),
+        tag: selectedTag || 'pontual',
         clientData: {
           contact: selectedClient.contactRole || selectedClient.contact || 'Contato',
           lastVisitDate: selectedClient.lastVisitDate || '—',
@@ -236,9 +236,9 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
                     type="button"
                     onClick={() => setSelectedTag(tag.id)}
                     style={{
-                      padding: '0.4rem 0.8rem',
+                      padding: '0.3rem 0.6rem',
                       borderRadius: '100px',
-                      fontSize: '0.65rem',
+                      fontSize: '0.6rem',
                       fontWeight: 700,
                       border: '2px solid',
                       borderColor: selectedTag === tag.id ? tag.color : 'var(--border-dim)',
@@ -259,15 +259,7 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
           {/* Conditional Controls */}
           <div style={{ borderTop: '1px solid var(--border-dim)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
             
-            {mode === 'create' ? (
-              <div>
-                 <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Frequência da Visita</label>
-                 <select value={isRecurring ? 'fixa' : 'avulsa'} onChange={e => setIsRecurring(e.target.value === 'fixa')} style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem', color: 'var(--text-main)', outline: 'none' }}>
-                   <option value="avulsa">Visita Avulsa / Esporádica (Apenas nesta data)</option>
-                   <option value="fixa">Visita Permanente (Toda Semana)</option>
-                 </select>
-              </div>
-            ) : (
+            {mode === 'create' ? null : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                  {!isTargetRecurring ? (
                     <div style={{ padding: '0.5rem 0' }}>
