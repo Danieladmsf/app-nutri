@@ -356,7 +356,7 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
                    Trocar Imagem
                  </div>
                )}
-               <input type="file" accept="image/*" capture="environment" ref={fileInputRef} onChange={handlePhotoUpload} style={{ display: 'none' }} disabled={isUploading} />
+               <input type="file" accept="image/*" ref={fileInputRef} onChange={handlePhotoUpload} style={{ display: 'none' }} disabled={isUploading} />
              </div>
            </div>
 
