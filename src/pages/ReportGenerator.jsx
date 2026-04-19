@@ -1,35 +1,103 @@
 import React, { useState, useRef } from 'react';
 import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, ChevronDown, Trash2, Plus, PenTool, Share2, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
+import Anthropic from '@anthropic-ai/sdk';
+
+// Configuração do Anthropic SDK (Uso em navegador habilitado explicitamente para esta prova de conceito)
+const anthropic = new Anthropic({
+  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY || '',
+  dangerouslyAllowBrowser: true,
+});
+
+const getBase64FromBlobUrl = async (blobUrl) => {
+  const response = await fetch(blobUrl);
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64data = reader.result;
+      const b64 = base64data.split(',')[1];
+      const mime = base64data.substring(base64data.indexOf(':') + 1, base64data.indexOf(';'));
+      resolve({ b64, mime });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
 
 const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrence, removeOccurrence, moveUp, moveDown }) => {
   const fileInputRef = useRef(null);
+  const [isGeneratingIA, setIsGeneratingIA] = useState(false);
 
   const handleCategoryChange = (e) => {
     const catId = e.target.value;
     updateOccurrence(occurrence.id, { categoryId: catId, itemId: '', text: '' });
   };
 
+  const selectedCategory = categories.find(c => c.id === occurrence.categoryId);
+  const selectedItem = selectedCategory?.items.find(i => i.id === occurrence.itemId);
+
   const handleItemChange = (e) => {
-    const itemId = e.target.value;
-    const cat = categories.find(c => c.id === occurrence.categoryId);
-    const item = cat?.items.find(i => i.id === itemId);
-    
-    // Simulate AI Text generation based on pre-written knowledge
-    const aiText = item ? `Identificada não conformidade: ${item.text} Recomenda-se a adequação imediata para evitar contaminações cruzadas e garantir a segurança alimentar conforme RDC 216.` : '';
-    
-    updateOccurrence(occurrence.id, { itemId, text: aiText });
+    updateOccurrence(occurrence.id, { itemId: e.target.value });
   };
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       const url = URL.createObjectURL(file);
-      updateOccurrence(occurrence.id, { photoUrl: url });
+      updateOccurrence(occurrence.id, { photoUrl: url, file }); // salvamos o blob tbm
     }
   };
 
-  const selectedCategory = categories.find(c => c.id === occurrence.categoryId);
+  const callAnthropicAI = async () => {
+    if (!selectedCategory || !selectedItem) {
+      return alert("Selecione primeiro a Categoria e o Assunto para orientar a Inteligência Artificial.");
+    }
+
+    setIsGeneratingIA(true);
+    
+    try {
+      let contentArray = [];
+      
+      if (occurrence.photoUrl) {
+         try {
+           const { b64, mime } = await getBase64FromBlobUrl(occurrence.photoUrl);
+           contentArray.push({
+             type: "image",
+             source: {
+               type: "base64",
+               media_type: mime || "image/jpeg",
+               data: b64,
+             }
+           });
+         } catch (e) {
+           console.warn("Falha ao converter imagem para base64", e);
+         }
+      }
+
+      contentArray.push({
+        type: "text",
+        text: `Atue como um Nutricionista Auditor rigoroso inspecionando uma cozinha industrial. Categoria do problema: ${selectedCategory.label}. Assunto Específico: ${selectedItem.label}. Descrição padrão do problema: ${selectedItem.text}. \n\n${occurrence.photoUrl ? "Analise a imagem anexada sobre este quesito." : ""}\nEscreva de forma técnica, impessoal e direta, APENAS A CONSTATAÇÃO DO FATO E A ORIENTAÇÃO TÉCNICA/AÇÃO CORRETIVA para regularizar a situação. Máximo de 4 linhas. Não use saudações.`
+      });
+
+      const msg = await anthropic.messages.create({
+        model: "claude-3-haiku-20240307",
+        max_tokens: 250,
+        temperature: 0.2,
+        messages: [
+          { role: "user", content: contentArray }
+        ]
+      });
+
+      const responseText = msg.content[0].text;
+      updateOccurrence(occurrence.id, { text: responseText });
+    } catch (err) {
+      console.error("Erro na API da IA:", err);
+      alert("Houve um erro ao se comunicar com a IA. Verifique sua conexão e a chave de API.");
+    } finally {
+       setIsGeneratingIA(false);
+    }
+  };
 
   return (
     <div className="card reveal-staggered" style={{ padding: 0, marginBottom: '1.5rem', border: '1px solid var(--border-dim)', overflow: 'hidden' }}>
@@ -116,17 +184,34 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
 
            {/* AI Text Area */}
            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-             <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-               <Sparkles size={14} color="var(--primary)" /> ORIENTAÇÃO TÉCNICA (EDITÁVEL)
-             </label>
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.5rem' }}>
+               <label className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                 <Sparkles size={14} color={occurrence.text ? 'var(--primary)' : 'var(--text-muted)'} /> ORIENTAÇÃO TÉCNICA
+               </label>
+               <button 
+                 onClick={callAnthropicAI} 
+                 disabled={isGeneratingIA || !occurrence.categoryId || !occurrence.itemId}
+                 style={{ 
+                   display: 'flex', alignItems: 'center', gap: '0.4rem', 
+                   background: 'rgba(0,255,136,0.1)', border: '1px solid var(--primary)', 
+                   color: 'var(--primary)', padding: '0.4rem 0.8rem', borderRadius: '4px', 
+                   fontSize: '0.7rem', fontWeight: 800, cursor: (isGeneratingIA || !occurrence.categoryId || !occurrence.itemId) ? 'not-allowed' : 'pointer',
+                   opacity: (isGeneratingIA || !occurrence.categoryId || !occurrence.itemId) ? 0.5 : 1
+                 }}
+               >
+                 {isGeneratingIA ? <RefreshCcw size={12} className="spin" /> : <Sparkles size={12} />}
+                 {isGeneratingIA ? 'ANALISANDO...' : 'GERAR TEXTO COM IA'}
+               </button>
+             </div>
+             
              <textarea 
                value={occurrence.text || ''}
                onChange={(e) => updateOccurrence(occurrence.id, { text: e.target.value })}
-               placeholder="Selecione um assunto para a IA gerar o texto ou digite aqui as orientações..."
+               placeholder="Clique em 'Gerar Texto com IA' ou digite manualmente a constatação e as correções necessárias..."
                style={{ 
                  width: '100%', 
                  flex: 1,
-                 minHeight: '150px',
+                 minHeight: '130px',
                  padding: '1rem', 
                  border: '1px solid var(--border-dim)', 
                  borderRadius: '4px', 
@@ -138,6 +223,7 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
                  resize: 'vertical',
                  fontFamily: 'inherit'
                }}
+
              />
            </div>
         </div>
