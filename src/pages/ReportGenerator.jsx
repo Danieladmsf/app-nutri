@@ -652,22 +652,67 @@ const ReportGenerator = () => {
             {/* ========== PÁGINA 1 — CAPA / IDENTIFICAÇÃO ========== */}
             <div style={{ width: '720px', minHeight: '1020px', padding: '36px 32px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
 
-               {/* Banner superior */}
-               <div style={{ background: '#1B3D2F', color: '#fff', padding: '28px 28px', borderRadius: '10px', marginBottom: '26px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact', display: 'flex', alignItems: 'center', gap: '20px' }}>
+               {/* Faixa de título */}
+               <div style={{ fontSize: '10px', color: '#1B3D2F', fontWeight: 'bold', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                  Laudo Técnico · Auditoria de Conformidade Sanitária
+               </div>
+
+               {/* Cartão de visita do profissional */}
+               <div style={{ background: '#1B3D2F', color: '#fff', padding: '24px 26px', borderRadius: '10px', marginBottom: '24px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact', display: 'flex', alignItems: 'center', gap: '20px' }}>
+
+                  {/* Foto do profissional */}
+                  {profile?.photo ? (
+                     <img
+                        src={profile.photo}
+                        crossOrigin="anonymous"
+                        alt="Profissional"
+                        style={{ width: '96px', height: '96px', borderRadius: '48px', objectFit: 'cover', border: '3px solid #D4A373', flexShrink: 0 }}
+                     />
+                  ) : (
+                     <div style={{ width: '96px', height: '96px', borderRadius: '48px', background: 'rgba(255,255,255,0.08)', border: '3px solid #D4A373', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: '#D4A373', fontWeight: 900 }}>
+                        {(profile?.name || '?').charAt(0).toUpperCase()}
+                     </div>
+                  )}
+
+                  {/* Dados profissionais */}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                     <div style={{ fontSize: '10px', color: '#D4A373', fontWeight: 'bold', letterSpacing: '3px', marginBottom: '8px' }}>
-                        NUTRIAPP · GESTÃO DE CONFORMIDADE ALIMENTAR
+                     <div style={{ fontSize: '22px', fontWeight: 900, letterSpacing: '-0.3px', lineHeight: 1.15, marginBottom: '2px', wordBreak: 'break-word' }}>
+                        {profile?.name || 'Nome do Profissional'}
                      </div>
-                     <div style={{ fontSize: '34px', fontWeight: 900, letterSpacing: '-0.5px', lineHeight: 1.1, margin: '0 0 6px 0' }}>
-                        LAUDO TÉCNICO
+                     <div style={{ fontSize: '11px', color: '#D4A373', fontWeight: 'bold', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                        Nutricionista{profile?.crm ? ` · ${profile.crm}` : ''}
                      </div>
-                     <div style={{ fontSize: '13px', color: '#D4A373', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>
-                        Auditoria de Conformidade Sanitária
+
+                     {/* Contatos */}
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '11px', color: '#e8eae2' }}>
+                        {profile?.email && (
+                           <div style={{ wordBreak: 'break-word' }}>
+                              <span style={{ color: '#D4A373', fontWeight: 'bold', letterSpacing: '0.5px' }}>E-MAIL</span>
+                              <span style={{ margin: '0 8px', color: '#D4A373' }}>·</span>
+                              {profile.email}
+                           </div>
+                        )}
+                        {profile?.whatsapp && (
+                           <div>
+                              <span style={{ color: '#D4A373', fontWeight: 'bold', letterSpacing: '0.5px' }}>WHATSAPP</span>
+                              <span style={{ margin: '0 8px', color: '#D4A373' }}>·</span>
+                              {profile.whatsapp}
+                           </div>
+                        )}
                      </div>
+
+                     {/* Bio */}
+                     {profile?.bio && (
+                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.65)', fontStyle: 'italic', lineHeight: 1.5, marginTop: '10px', wordBreak: 'break-word', paddingTop: '8px', borderTop: '1px solid rgba(212, 163, 115, 0.25)' }}>
+                           {profile.bio}
+                        </div>
+                     )}
                   </div>
+
+                  {/* Símbolo da nutrição */}
                   <div
                      aria-label="Símbolo da Nutrição"
-                     style={{ width: '110px', height: '110px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                     style={{ width: '96px', height: '96px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                      dangerouslySetInnerHTML={{ __html: nutritionSvg }}
                   />
                </div>
@@ -691,31 +736,6 @@ const ReportGenerator = () => {
                   <div style={{ flex: 1, background: '#f8f8f8', border: '1px solid #e2e2de', borderRadius: '6px', padding: '14px 16px', boxSizing: 'border-box' }}>
                      <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 'bold', marginBottom: '4px' }}>Encerramento</div>
                      <div style={{ fontSize: '14px', color: closedAt ? '#1B3D2F' : '#D4A373', fontWeight: 'bold', wordBreak: 'break-word' }}>{closedAt ? formatDateTime(closedAt) : 'Em aberto'}</div>
-                  </div>
-               </div>
-
-               {/* Responsável técnico */}
-               <div style={{ background: '#fff', border: '1px solid #e2e2de', borderRadius: '6px', padding: '18px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  {profile?.photo && (
-                     <img
-                        src={profile.photo}
-                        crossOrigin="anonymous"
-                        alt="Responsável"
-                        style={{ width: '64px', height: '64px', borderRadius: '32px', objectFit: 'cover', border: '3px solid #D4A373', flexShrink: 0 }}
-                     />
-                  )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                     <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 'bold', marginBottom: '4px' }}>
-                        Nutricionista Responsável Técnico
-                     </div>
-                     <div style={{ fontSize: '17px', color: '#1B3D2F', fontWeight: 'bold', wordBreak: 'break-word' }}>
-                        {profile?.name || 'Não informado'}
-                     </div>
-                     {profile?.crm && (
-                        <div style={{ fontSize: '12px', color: '#555', marginTop: '2px' }}>
-                           CRN <strong>{profile.crm}</strong>
-                        </div>
-                     )}
                   </div>
                </div>
 
