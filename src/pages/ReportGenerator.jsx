@@ -690,7 +690,7 @@ const ReportGenerator = () => {
                   {/* Símbolo da nutrição (posicionado absolutamente sobre o cartão verde, vazando por cima e por baixo) */}
                   <div
                      aria-label="Símbolo da Nutrição"
-                     style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', width: '220px', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}
+                     style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', width: '190px', height: '190px', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}
                      dangerouslySetInnerHTML={{ __html: nutritionSvg || '' }}
                   />
                </div>
