@@ -254,6 +254,7 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
           itemLabel: selectedItem.label,
           itemText: selectedItem.text,
           image,
+          existingText: occurrence.text || '',
         }),
       });
 
