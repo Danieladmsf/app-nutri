@@ -125,7 +125,7 @@ const Agenda = () => {
   }
 
   return (
-    <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className="reveal-staggered agenda-fixed-wrapper" style={{ display: 'flex', flexDirection: 'column' }}>
       
       {/* Header Toolbar */}
       <header style={{ marginBottom: '2.5rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
@@ -261,7 +261,7 @@ const Agenda = () => {
                 )}
              </div>
 
-             <div className="hourly-grid-container" style={{ flex: 1, minHeight: '600px', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', overflowY: 'auto', position: 'relative' }}>
+             <div className="hourly-grid-container" style={{ flex: 1, height: 0, border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', overflowY: 'auto', position: 'relative' }}>
                 {(() => {
                    const gridStartHour = parseInt((workStart || '07:00').split(':')[0], 10);
                    const gridEndHour = parseInt((workEnd || '18:00').split(':')[0], 10);
@@ -389,11 +389,11 @@ const Agenda = () => {
       </div>
 
       {/* Content Area: List vs Side Panel */}
-      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', gap: '2rem', alignItems: 'stretch', height: '100%' }}>
         
         {/* Agenda List Column */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '5rem' }} className="reveal-staggered">
-           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '5rem', overflowY: 'auto', height: 0, paddingRight: '0.5rem' }} className="reveal-staggered no-scrollbar">
+           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexShrink: 0 }}>
               <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Visitas Agendadas</h3>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                  {isSelectMode && activeVisits.length > 0 && (

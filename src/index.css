@@ -364,7 +364,28 @@ h1, h2, h3, h4, .serif {
 .hourly-grid-container {
   overflow-y: auto;
   position: relative;
-  scrollbar-width: thin;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.hourly-grid-container::-webkit-scrollbar, .no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+@media (min-width: 1025px) {
+  .agenda-fixed-wrapper {
+    height: calc(100vh - 4rem);
+    overflow: hidden;
+  }
+  .agenda-hero-layout {
+    height: 100%;
+    overflow: hidden;
+  }
 }
 
 /* Agenda Week Days Responsive */
