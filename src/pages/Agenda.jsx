@@ -563,23 +563,47 @@ const Agenda = () => {
           position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: 'calc(75px + env(safe-area-inset-bottom))'
         }}>
           <div style={{ background: 'var(--bg-surface)', width: '100%', maxHeight: '80vh', borderTopLeftRadius: '20px', borderTopRightRadius: '20px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-             <div style={{ padding: '1rem', textAlign: 'center', borderBottom: '1px solid var(--border-dim)', position: 'relative', flexShrink: 0 }}>
+             <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-dim)', background: 'rgba(27, 61, 47, 0.05)', position: 'relative', flexShrink: 0 }}>
                 <div style={{ width: '40px', height: '4px', background: 'var(--border-dim)', borderRadius: '2px', margin: '0 auto 1rem' }}></div>
-                <h4 style={{ fontSize: '1rem', fontWeight: 800 }}>{selectedVisit.client}</h4>
-                <button onClick={() => setSelectedVisit(null)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'var(--text-muted)' }}><X size={20}/></button>
+                <button onClick={() => setSelectedVisit(null)} style={{ position: 'absolute', top: '1.5rem', right: '1rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={20}/></button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-minimal)', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                     {selectedVisit.client.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedVisit.client}</h4>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
+                       <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--bg-deep)', borderRadius: '4px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedVisit.status.toUpperCase()}</span>
+                       <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: selectedVisit.isRecurring ? 'rgba(27,61,47,0.1)' : 'rgba(212,163,115,0.1)', color: selectedVisit.isRecurring ? 'var(--primary)' : 'var(--secondary)', borderRadius: '4px', fontWeight: 700 }}>
+                          {selectedVisit.isRecurring ? 'ROTINA FIXA' : 'VISITA PONTUAL'}
+                       </span>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                   <Clock size={14} color="var(--primary)" /> Hoje, {selectedVisit.time} <span>({selectedVisit.duration})</span>
+                </div>
              </div>
              
              <div style={{ padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem', flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-main)', border: '1px solid var(--border-dim)', padding: '1rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-deep)' }}>
-                   <Clock size={16} color="var(--primary)" /> {selectedVisit.time} <span>({selectedVisit.duration})</span>
-                </div>
-                
-                <div>
-                  <h5 className="stat-label" style={{ marginBottom: '0.5rem' }}>CONTEXTO DA ÚLTIMA VISITA</h5>
-                  <p style={{ fontSize: '0.8rem', lineHeight: '1.6', color: 'var(--text-muted)', background: 'rgba(212,163,115,0.05)', padding: '1rem', borderLeft: '3px solid var(--secondary)' }}>
-                     {selectedVisit.clientData.historicIssues}
-                  </p>
-                </div>
+               {/* CRM Info */}
+               <div>
+                 <h5 className="stat-label" style={{ marginBottom: '0.5rem' }}>CONTATO RESPONSÁVEL</h5>
+                 <div style={{ fontSize: '0.85rem' }}>{selectedVisit.clientData.contact}</div>
+               </div>
+
+               {/* Historic Context */}
+               <div style={{ background: 'var(--bg-deep)', padding: '1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
+                 <h5 className="stat-label" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <FileCheck size={14} /> ÚLTIMA AUDITORIA ({selectedVisit.clientData.lastVisitDate})
+                 </h5>
+                 <div style={{ display: 'inline-block', padding: '0.2rem 0.6rem', fontSize: '0.65rem', fontWeight: 700, borderRadius: '4px', background: selectedVisit.clientData.lastReportStatus === 'Conforme' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(212, 163, 115, 0.1)', color: selectedVisit.clientData.lastReportStatus === 'Conforme' ? 'var(--primary)' : 'var(--secondary)', marginBottom: '0.8rem' }}>
+                    STATUS: {selectedVisit.clientData.lastReportStatus}
+                 </div>
+                 <p style={{ fontSize: '0.8rem', lineHeight: '1.5', color: 'var(--text-muted)' }}>
+                    <strong>Foco de Atenção:</strong> {selectedVisit.clientData.historicIssues}
+                 </p>
+               </div>
              </div>
 
              <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-surface)', display: 'flex', gap: '1rem', flexShrink: 0 }}>
