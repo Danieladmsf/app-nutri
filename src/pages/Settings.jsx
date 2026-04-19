@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Save, Plus, Trash2, Camera, GripVertical, ChevronRight, Calendar, User, Sparkles, Clock, X, AlertTriangle, Database, RefreshCcw } from 'lucide-react';
+import { Save, Plus, Trash2, Camera, GripVertical, ChevronRight, Calendar, User, Sparkles, Clock, X, AlertTriangle, Database, RefreshCcw, PenTool } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 import { uploadProfilePhoto } from '../services/storage';
 
