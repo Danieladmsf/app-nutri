@@ -192,8 +192,9 @@ const Agenda = () => {
                               setWeekStartObj(dayObj.fullDate);
                               setSelectedVisit(null);
                            }}
+                           className="cal-day-cell"
                            style={{ 
-                             height: '40px', width: '40px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                             margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center',
                              background: isSelected ? 'var(--primary)' : 'var(--bg-surface)', 
                              color: isSelected ? 'white' : 'var(--text-main)',
                              borderRadius: 'var(--radius-minimal)', fontSize: '0.8rem', fontWeight: isSelected ? 800 : 500,
@@ -243,7 +244,7 @@ const Agenda = () => {
            </div>
 
            {/* Hourly Grid View */}
-           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+           <div className="agenda-timeline-col" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
              {/* Header Day */}
              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-dim)' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>

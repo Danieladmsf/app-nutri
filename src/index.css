@@ -339,10 +339,60 @@ h1, h2, h3, h4, .serif {
   animation: spin 1s linear infinite;
 }
 
+/* Calendar day cells */
+.cal-day-cell {
+  height: 40px;
+  width: 40px;
+}
+
 .agenda-sidebar {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+/* Desktop only: side-by-side calendar + timeline */
+@media (min-width: 1025px) {
+  .agenda-hero-layout {
+    flex-direction: row !important;
+    height: calc(100vh - 12rem);
+    overflow: hidden;
+  }
+  .agenda-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border-dim);
+    padding-right: 1.5rem;
+    overflow-y: auto;
+  }
+  .agenda-sidebar .card {
+    padding: 1rem !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+  .cal-day-cell {
+    height: 28px;
+    width: 28px;
+    font-size: 0.7rem !important;
+    border-radius: 50% !important;
+    border: none !important;
+    background: transparent !important;
+  }
+  .cal-day-cell:hover {
+    background: var(--bg-deep) !important;
+  }
+  .agenda-timeline-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .agenda-timeline-col .hourly-grid-container {
+    flex: 1;
+    overflow-y: auto;
+  }
 }
 .hourly-grid-container {
   overflow-y: auto;
