@@ -37,12 +37,12 @@ export default async function handler(req, res) {
     // O auditor pode ter feito uma anotação manual que deve guiar a visão da IA
     let auditorNotes = '';
     if (existingText && existingText.trim().length > 3) {
-      auditorNotes = `\n\nO auditor fez a seguinte anotação/draft neste quesito:\n"${existingText.trim()}"\n\nDiretriz: Utilize a anotação do auditor como o CONTEXTO PRINCIPAL e expanda-a. Se a anotação for breve ou informal, formalize, elabore e detalhe o problema com riqueza de detalhes, confirmando com o que você vê na imagem (se houver). Se a anotação já for um texto final e formal, o usuário está pedindo uma versão alternativa, então gere um texto reescrito diferente do original.`;
+      auditorNotes = `\n\nO auditor fez a seguinte anotação neste quesito:\n"${existingText.trim()}"\n\nDiretriz: Utilize a anotação do auditor como o CONTEXTO PRINCIPAL e expanda-a. Se a anotação for breve ou informal, detalhe o problema com base na imagem (se houver). Se a anotação já for um texto longo, crie uma versão alternativa estruturada de forma diferente.`;
     }
 
     contentArray.push({
       type: 'text',
-      text: `Atue como um Nutricionista Auditor especializado inspecionando uma cozinha industrial.\nCategoria: ${categoryLabel}\nAssunto: ${itemLabel}\nPadrão Exigido: ${itemText}${auditorNotes}\n\n${image ? 'Analise minuciosamente a evidência fotográfica anexada.' : ''}\nProduza o laudo escrevendo de forma técnica, impessoal e rica em detalhes visuais e contextuais. Estruture apenas com o texto da CONSTATAÇÃO DA NÃO-CONFORMIDADE e a respectiva AÇÃO CORRETIVA/ORIENTAÇÃO. Máximo de 5 linhas corridas. Não use saudações.`,
+      text: `Atue como um Nutricionista Consultor (perfil parceiro, amigável e extremamente profissional) orientando uma cozinha industrial.\nCategoria: ${categoryLabel}\nAssunto: ${itemLabel}\nPadrão Exigido: ${itemText}${auditorNotes}\n\n${image ? 'Analise a evidência fotográfica anexada.' : ''}\n\nEscreva a descrição do problema e a sugestão de melhoria. Use uma linguagem técnica, porém acessível, empática e positiva de quem está ajudando o cliente a melhorar (ex: "Notamos que...", "Sugerimos que..."), evitando um tom punitivo, policial ou exageradamente rígido. Redija em parágrafo(s) contínuo(s) e fluido(s). NÃO crie títulos em letras maiúsculas tipo "**AÇÃO CORRETIVA:**". Diga no máximo 5 a 6 linhas.`,
     });
 
     const msg = await anthropic.messages.create({
