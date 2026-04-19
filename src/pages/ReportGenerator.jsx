@@ -653,26 +653,12 @@ const ReportGenerator = () => {
                         Auditoria de Conformidade Sanitária
                      </div>
                   </div>
-                  <svg width="96" height="96" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-                     {/* Folhas da palmeira */}
-                     <g fill="#ffffff">
-                        <path d="M60 22 Q 32 14, 16 28 Q 38 24, 58 34 Z" />
-                        <path d="M60 24 Q 22 28, 12 50 Q 34 38, 58 38 Z" />
-                        <path d="M60 26 Q 18 44, 18 66 Q 38 48, 58 42 Z" />
-                        <path d="M60 22 Q 88 14, 104 28 Q 82 24, 62 34 Z" />
-                        <path d="M60 24 Q 98 28, 108 50 Q 86 38, 62 38 Z" />
-                        <path d="M60 26 Q 102 44, 102 66 Q 82 48, 62 42 Z" />
-                        {/* Detalhe central das folhas */}
-                        <circle cx="60" cy="30" r="4" />
-                     </g>
-                     {/* Tronco */}
-                     <path d="M 56 32 Q 54 65, 52 102 L 68 102 Q 66 65, 64 32 Z" fill="#ffffff" />
-                     {/* Serpente */}
-                     <path d="M 46 44 Q 76 50, 58 62 Q 40 74, 74 80 Q 44 90, 62 102"
-                           fill="none" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                     {/* Cabeça da serpente */}
-                     <circle cx="46" cy="44" r="3.5" fill="#ffffff" />
-                  </svg>
+                  <img
+                     src="/nutrition-symbol.svg"
+                     crossOrigin="anonymous"
+                     alt="Símbolo da Nutrição"
+                     style={{ width: '110px', height: '110px', objectFit: 'contain', flexShrink: 0 }}
+                  />
                </div>
 
                {/* Estabelecimento (linha de destaque) */}
