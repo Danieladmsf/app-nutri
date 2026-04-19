@@ -642,54 +642,58 @@ const ReportGenerator = () => {
             {/* ========== PÁGINA 1 — CAPA / IDENTIFICAÇÃO ========== */}
             <div style={{ width: '720px', minHeight: '1020px', padding: '36px 32px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
 
-               {/* Faixa de título */}
-               <div style={{ fontSize: '10px', color: '#1B3D2F', fontWeight: 'bold', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '10px' }}>
-                  Laudo Técnico · Auditoria de Conformidade Sanitária
-               </div>
-
-               {/* Cartão de visita do profissional */}
-               <div style={{ background: '#1B3D2F', color: '#fff', padding: '4px 24px', borderRadius: '10px', marginBottom: '20px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact', display: 'flex', alignItems: 'center', gap: '20px' }}>
-
-                  {/* Dados profissionais */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                     <div style={{ fontSize: '22px', fontWeight: 900, letterSpacing: '-0.3px', lineHeight: 1.15, marginBottom: '2px', wordBreak: 'break-word' }}>
-                        {profile?.name || 'Nome do Profissional'}
-                     </div>
-                     <div style={{ fontSize: '11px', color: '#D4A373', fontWeight: 'bold', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '10px' }}>
-                        Nutricionista{profile?.crm ? ` · ${profile.crm}` : ''}
+               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                  {/* Coluna Esquerda: Faixa de título e Cartão */}
+                  <div style={{ flex: 1, minWidth: 0, paddingRight: '24px' }}>
+                     {/* Faixa de título */}
+                     <div style={{ fontSize: '10px', color: '#1B3D2F', fontWeight: 'bold', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                        Laudo Técnico · Auditoria de Conformidade Sanitária
                      </div>
 
-                     {/* Contatos */}
-                     <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '11px', color: '#e8eae2' }}>
-                        {profile?.email && (
-                           <div style={{ wordBreak: 'break-word' }}>
-                              <span style={{ color: '#D4A373', fontWeight: 'bold', letterSpacing: '0.5px' }}>E-MAIL</span>
-                              <span style={{ margin: '0 8px', color: '#D4A373' }}>·</span>
-                              {profile.email}
+                     {/* Cartão de visita do profissional */}
+                     <div style={{ background: '#1B3D2F', color: '#fff', padding: '8px 24px', borderRadius: '10px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                        {/* Dados profissionais */}
+                        <div style={{ minWidth: 0 }}>
+                           <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.3px', lineHeight: 1.15, marginBottom: '2px', wordBreak: 'break-word' }}>
+                              {profile?.name || 'Nome do Profissional'}
                            </div>
-                        )}
-                        {profile?.whatsapp && (
-                           <div>
-                              <span style={{ color: '#D4A373', fontWeight: 'bold', letterSpacing: '0.5px' }}>WHATSAPP</span>
-                              <span style={{ margin: '0 8px', color: '#D4A373' }}>·</span>
-                              {profile.whatsapp}
+                           <div style={{ fontSize: '11px', color: '#D4A373', fontWeight: 'bold', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '8px' }}>
+                              Nutricionista{profile?.crm ? ` · ${profile.crm}` : ''}
                            </div>
-                        )}
-                     </div>
 
-                     {/* Bio */}
-                     {profile?.bio && (
-                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.65)', fontStyle: 'italic', lineHeight: 1.5, marginTop: '10px', wordBreak: 'break-word', paddingTop: '8px', borderTop: '1px solid rgba(212, 163, 115, 0.25)' }}>
-                           {profile.bio}
+                           {/* Contatos */}
+                           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '11px', color: '#e8eae2' }}>
+                              {profile?.email && (
+                                 <div style={{ wordBreak: 'break-word' }}>
+                                    <span style={{ color: '#D4A373', fontWeight: 'bold', letterSpacing: '0.5px' }}>E-MAIL</span>
+                                    <span style={{ margin: '0 8px', color: '#D4A373' }}>·</span>
+                                    {profile.email}
+                                 </div>
+                              )}
+                              {profile?.whatsapp && (
+                                 <div>
+                                    <span style={{ color: '#D4A373', fontWeight: 'bold', letterSpacing: '0.5px' }}>WHATSAPP</span>
+                                    <span style={{ margin: '0 8px', color: '#D4A373' }}>·</span>
+                                    {profile.whatsapp}
+                                 </div>
+                              )}
+                           </div>
+
+                           {/* Bio */}
+                           {profile?.bio && (
+                              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.65)', fontStyle: 'italic', lineHeight: 1.5, marginTop: '10px', wordBreak: 'break-word', paddingTop: '8px', borderTop: '1px solid rgba(212, 163, 115, 0.25)' }}>
+                                 {profile.bio}
+                              </div>
+                           )}
                         </div>
-                     )}
+                     </div>
                   </div>
 
-                  {/* Símbolo da nutrição (lado direito, destaque) */}
+                  {/* Símbolo da nutrição (lado direito, fora do cartão, destacado) */}
                   <div
                      aria-label="Símbolo da Nutrição"
-                     style={{ width: '170px', height: '170px', margin: '-10px 0', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                     dangerouslySetInnerHTML={{ __html: nutritionSvg }}
+                     style={{ width: '220px', height: '220px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                     dangerouslySetInnerHTML={{ __html: nutritionSvg ? nutritionSvg.replace(/#ffffff/gi, '#1B3D2F') : '' }}
                   />
                </div>
 
