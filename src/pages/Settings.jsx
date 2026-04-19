@@ -347,7 +347,6 @@ const UserProfile = ({ profile, setProfile }) => {
             accept="image/*" 
             style={{ display: 'none' }} 
           />
-        </div>
           </div>
         </section>
 
