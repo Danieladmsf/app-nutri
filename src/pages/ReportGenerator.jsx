@@ -658,21 +658,14 @@ const ReportGenerator = () => {
                </div>
 
                {/* Cartão de visita do profissional */}
-               <div style={{ background: '#1B3D2F', color: '#fff', padding: '24px 26px', borderRadius: '10px', marginBottom: '24px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact', display: 'flex', alignItems: 'center', gap: '20px' }}>
+               <div style={{ background: '#1B3D2F', color: '#fff', padding: '24px 26px', borderRadius: '10px', marginBottom: '24px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact', display: 'flex', alignItems: 'center', gap: '24px' }}>
 
-                  {/* Foto do profissional */}
-                  {profile?.photo ? (
-                     <img
-                        src={profile.photo}
-                        crossOrigin="anonymous"
-                        alt="Profissional"
-                        style={{ width: '96px', height: '96px', borderRadius: '48px', objectFit: 'cover', border: '3px solid #D4A373', flexShrink: 0 }}
-                     />
-                  ) : (
-                     <div style={{ width: '96px', height: '96px', borderRadius: '48px', background: 'rgba(255,255,255,0.08)', border: '3px solid #D4A373', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: '#D4A373', fontWeight: 900 }}>
-                        {(profile?.name || '?').charAt(0).toUpperCase()}
-                     </div>
-                  )}
+                  {/* Símbolo da nutrição (lado esquerdo, destaque) */}
+                  <div
+                     aria-label="Símbolo da Nutrição"
+                     style={{ width: '130px', height: '130px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                     dangerouslySetInnerHTML={{ __html: nutritionSvg }}
+                  />
 
                   {/* Dados profissionais */}
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -708,13 +701,6 @@ const ReportGenerator = () => {
                         </div>
                      )}
                   </div>
-
-                  {/* Símbolo da nutrição */}
-                  <div
-                     aria-label="Símbolo da Nutrição"
-                     style={{ width: '96px', height: '96px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                     dangerouslySetInnerHTML={{ __html: nutritionSvg }}
-                  />
                </div>
 
                {/* Estabelecimento (linha de destaque) */}
