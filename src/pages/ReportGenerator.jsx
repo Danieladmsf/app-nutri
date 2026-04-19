@@ -7,13 +7,8 @@ import { saveLaudo, getLaudo, deleteLaudo } from '../services/firestore';
 import { uploadAuditPhoto } from '../services/storage';
 import { db } from '../firebase';
 import { doc, collection } from 'firebase/firestore';
-import Anthropic from '@anthropic-ai/sdk';
-
-// Configuração do Anthropic SDK (Uso em navegador habilitado explicitamente para esta prova de conceito)
-const anthropic = new Anthropic({
-  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY || '',
-  dangerouslyAllowBrowser: true,
-});
+// A chave da API Anthropic agora fica segura no servidor (api/generate-ai-note.js).
+// O front-end apenas chama a rota /api/generate-ai-note via fetch.
 
 const getBase64FromBlobUrl = async (blobUrl) => {
   const response = await fetch(blobUrl);
@@ -78,43 +73,38 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
     setIsGeneratingIA(true);
     
     try {
-      let contentArray = [];
+      let image = null;
       
       if (occurrence.photoUrl) {
          try {
            const { b64, mime } = await getBase64FromBlobUrl(occurrence.photoUrl);
-           contentArray.push({
-             type: "image",
-             source: {
-               type: "base64",
-               media_type: mime || "image/jpeg",
-               data: b64,
-             }
-           });
+           image = { b64, mime: mime || 'image/jpeg' };
          } catch (e) {
            console.warn("Falha ao converter imagem para base64", e);
          }
       }
 
-      contentArray.push({
-        type: "text",
-        text: `Atue como um Nutricionista Auditor rigoroso inspecionando uma cozinha industrial. Categoria do problema: ${selectedCategory.label}. Assunto Específico: ${selectedItem.label}. Descrição padrão do problema: ${selectedItem.text}. \n\n${occurrence.photoUrl ? "Analise a imagem anexada sobre este quesito." : ""}\nEscreva de forma técnica, impessoal e direta, APENAS A CONSTATAÇÃO DO FATO E A ORIENTAÇÃO TÉCNICA/AÇÃO CORRETIVA para regularizar a situação. Máximo de 4 linhas. Não use saudações.`
+      const res = await fetch('/api/generate-ai-note', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          categoryLabel: selectedCategory.label,
+          itemLabel: selectedItem.label,
+          itemText: selectedItem.text,
+          image,
+        }),
       });
 
-      const msg = await anthropic.messages.create({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 250,
-        temperature: 0.2,
-        messages: [
-          { role: "user", content: contentArray }
-        ]
-      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Erro ${res.status}`);
+      }
 
-      const responseText = msg.content[0].text;
-      updateOccurrence(occurrence.id, { text: responseText });
+      const data = await res.json();
+      updateOccurrence(occurrence.id, { text: data.text });
     } catch (err) {
       console.error("Erro na API da IA:", err);
-      alert("Houve um erro ao se comunicar com a IA. Verifique sua conexão e a chave de API.");
+      alert("Houve um erro ao se comunicar com a IA. Verifique sua conexão.");
     } finally {
        setIsGeneratingIA(false);
     }
