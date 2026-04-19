@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, ChevronDown, Trash2, Plus, PenTool, Share2, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, ChevronDown, Trash2, Plus, PenTool, Share2, AlertTriangle, CheckCircle2, FileText, Search, ArrowLeft } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { useAppContext } from '../contexts/AppContext';
+import { saveLaudo, getLaudo, deleteLaudo } from '../services/firestore';
 import Anthropic from '@anthropic-ai/sdk';
 
 // Configuração do Anthropic SDK (Uso em navegador habilitado explicitamente para esta prova de conceito)
@@ -246,20 +247,118 @@ const formatDateTime = (d) => {
   return `${dd}/${mm}/${yyyy} · ${hh}:${min}`;
 };
 
+// Strip non-serializable bits from occurrences before saving to Firestore.
+// Blob URLs (blob:http://...) don't survive a reload — drop them so we don't
+// persist dead pointers. Base64/https URLs are kept.
+// The `file` handle is a File object and cannot be serialized.
+const sanitizeOccurrences = (occs) => (occs || []).map(({ file, photoUrl, ...rest }) => ({
+  ...rest,
+  photoUrl: photoUrl && typeof photoUrl === 'string' && !photoUrl.startsWith('blob:') ? photoUrl : null
+}));
+
 const ReportGenerator = () => {
-  const { categories: INSPECTION_CATEGORIES, profile } = useAppContext();
+  const { categories: INSPECTION_CATEGORIES, profile, laudos } = useAppContext();
   const location = useLocation();
-  const lockedClient = location.state?.client || '';
-  const [client, setClient] = useState(lockedClient);
+  const navigate = useNavigate();
+
+  const stateLaudoId = location.state?.laudoId || null;
+  const stateVisitId = location.state?.visitId || null;
+  const stateClient = location.state?.client || '';
+  const hasEditorContext = !!(stateLaudoId || stateVisitId || stateClient);
+
+  const [mode, setMode] = useState(hasEditorContext ? 'editor' : 'list');
+
+  // Editor state
+  const [laudoId, setLaudoId] = useState(stateLaudoId);
+  const [visitId, setVisitId] = useState(stateVisitId);
+  const [client, setClient] = useState(stateClient);
   const [occurrences, setOccurrences] = useState([]);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [signature, setSignature] = useState(null);
-  const [startedAt] = useState(() => new Date());
+  const [startedAt, setStartedAt] = useState(null);
   const [closedAt, setClosedAt] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved' | 'error'
+  const isHydratingRef = useRef(true);
+
+  // Hydrate editor state from Firestore / route state when entering editor mode.
+  useEffect(() => {
+    if (mode !== 'editor') return;
+    let cancelled = false;
+    isHydratingRef.current = true;
+
+    const apply = (laudo) => {
+      if (cancelled) return;
+      setLaudoId(laudo.id);
+      setVisitId(laudo.visitId || null);
+      setClient(laudo.client || stateClient || '');
+      setOccurrences(laudo.occurrences || []);
+      setSignature(laudo.signature || null);
+      setStartedAt(laudo.startedAt || new Date().toISOString());
+      setClosedAt(laudo.closedAt || null);
+      setIsReady(true);
+      setTimeout(() => { isHydratingRef.current = false; }, 0);
+    };
+
+    const blank = () => {
+      if (cancelled) return;
+      setStartedAt(new Date().toISOString());
+      setIsReady(true);
+      setTimeout(() => { isHydratingRef.current = false; }, 0);
+    };
+
+    if (stateLaudoId) {
+      getLaudo(stateLaudoId).then((laudo) => laudo ? apply(laudo) : blank());
+    } else if (stateVisitId) {
+      const existing = laudos.find((l) => l.visitId === stateVisitId);
+      if (existing) apply(existing);
+      else blank();
+    } else {
+      blank();
+    }
+
+    return () => { cancelled = true; };
+    // Intentionally not depending on `laudos` — we only check it once at hydration.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, stateLaudoId, stateVisitId]);
+
+  // Auto-save to Firestore when relevant fields change (debounced).
+  useEffect(() => {
+    if (mode !== 'editor' || !isReady || isHydratingRef.current) return;
+    // Skip save when nothing meaningful has been filled yet.
+    if (!client && occurrences.length === 0 && !signature) return;
+
+    setSaveStatus('saving');
+    const timeout = setTimeout(async () => {
+      try {
+        const payload = {
+          id: laudoId,
+          visitId,
+          client,
+          occurrences: sanitizeOccurrences(occurrences),
+          signature,
+          startedAt,
+          closedAt,
+          status: signature ? 'signed' : 'draft',
+          professional: profile ? { name: profile.name || '', crm: profile.crm || '' } : null,
+          dateKey: startedAt ? String(startedAt).slice(0, 10) : null
+        };
+        const newId = await saveLaudo(payload);
+        if (!laudoId) setLaudoId(newId);
+        setSaveStatus('saved');
+      } catch (e) {
+        console.error('Falha ao salvar laudo:', e);
+        setSaveStatus('error');
+      }
+    }, 1200);
+
+    return () => clearTimeout(timeout);
+  }, [mode, isReady, client, occurrences, signature, closedAt, laudoId, visitId, startedAt, profile]);
 
   const invalidateSignature = () => {
     if (signature) {
       setSignature(null);
+      setClosedAt(null);
       alert('Atenção: Como você fez uma edição no laudo, a assinatura anterior do cliente foi removida. Será necessária uma nova assinatura.');
     }
   };
@@ -340,15 +439,74 @@ const ReportGenerator = () => {
     </div>
   );
 
+  if (mode === 'list') {
+    return (
+      <div className="laudos-list-page reveal-staggered" style={{ padding: '1rem' }}>
+        <header style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>Laudos Técnicos</h1>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Gerencie seus relatórios de auditoria</p>
+          </div>
+          <button onClick={() => { setMode('editor'); setLaudoId(null); setVisitId(null); setClient(''); setOccurrences([]); setSignature(null); setStartedAt(new Date().toISOString()); setClosedAt(null); }} className="btn btn-primary" style={{ padding: '0.6rem 1rem' }}>
+            <Plus size={16} /> Novo Laudo
+          </button>
+        </header>
+
+        {laudos.length === 0 ? (
+           <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-dim)', marginTop: '1rem' }}>
+             <FileText size={48} color="var(--text-muted)" style={{ opacity: 0.3, marginBottom: '1rem' }} />
+             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem' }}>Nenhum laudo encontrado</h3>
+             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Os relatórios salvos aparecerão aqui.</p>
+           </div>
+        ) : (
+           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+             {laudos.map(l => (
+               <div key={l.id} className="card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-dim)' }} onClick={() => navigate('/laudos', { state: { laudoId: l.id } })}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                   <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>{l.client || 'Sem Estabelecimento'}</div>
+                   {l.status === 'signed' ? (
+                     <span style={{ fontSize: '0.6rem', background: 'rgba(0,255,136,0.1)', color: 'var(--primary)', padding: '0.3rem 0.6rem', borderRadius: '12px', fontWeight: 800 }}>ASSINADO</span>
+                   ) : (
+                     <span style={{ fontSize: '0.6rem', background: 'rgba(212,163,115,0.1)', color: 'var(--secondary)', padding: '0.3rem 0.6rem', borderRadius: '12px', fontWeight: 800 }}>RASCUNHO</span>
+                   )}
+                 </div>
+                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                   <span>{l.dateKey ? l.dateKey.split('-').reverse().join('/') : 'Data não registrada'}</span>
+                   <span>{l.occurrences?.length || 0} ocorrência(s)</span>
+                 </div>
+                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'auto', paddingTop: '0.5rem' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <PenTool size={14} /> Abrir
+                    </div>
+                 </div>
+               </div>
+             ))}
+           </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="laudo-editor-page reveal-staggered" style={{ display: 'flex', flexDirection: 'column' }}>
 
       {/* Header Toolbar */}
       <header className="laudo-editor-head" style={{ marginBottom: '1rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
-        <div className="flex-toolbar" style={{ gap: '1rem', alignItems: 'center' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
-             Laudo em Edição
-          </h1>
+        <div className="flex-toolbar" style={{ gap: '1rem', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            {!hasEditorContext && (
+              <button onClick={() => setMode('list')} className="btn" style={{ padding: '0.4rem', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)' }}>
+                <ArrowLeft size={16} />
+              </button>
+            )}
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
+               Laudo em Edição
+            </h1>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            {saveStatus === 'saving' && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><RefreshCcw size={12} className="spin" /> Salvando...</span>}
+            {saveStatus === 'saved' && <span style={{ fontSize: '0.75rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><CheckCircle2 size={14} /> Salvo</span>}
+          </div>
         </div>
       </header>
 
@@ -364,7 +522,7 @@ const ReportGenerator = () => {
          />
       </div>
 
-      {!lockedClient && (
+      {!stateClient && (
         <div style={{ marginBottom: '1rem', background: 'var(--bg-surface)', padding: '0.75rem 1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Selecione o cliente:</span>
           <select

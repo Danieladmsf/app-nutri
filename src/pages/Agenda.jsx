@@ -89,7 +89,7 @@ import { subscribeToVisits } from '../services/firestore';
 
 const Agenda = () => {
   const navigate = useNavigate();
-  const { workDays, workStart, workEnd } = useAppContext();
+  const { workDays, workStart, workEnd, laudos } = useAppContext();
   const [viewMode, setViewMode] = useState('diaria'); // 'diaria' | 'mensal'
   const [weekStartObj, setWeekStartObj] = useState('2026-04-12'); // O domingo base
   const [selectedDate, setSelectedDate] = useState('2026-04-15');
@@ -227,15 +227,18 @@ const Agenda = () => {
            {/* Hourly Grid View */}
            <div className="agenda-timeline-col">
              {/* Context Action Menu for Selected Visit (only renders when a visit is selected) */}
-             {selectedVisit && (
-               <div className="agenda-timeline-header reveal-staggered" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginBottom: '1rem', padding: '0.5rem 1rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>FOCO: <span style={{color: 'var(--primary)'}}>{selectedVisit.client}</span></span>
-                  <span style={{ width: '1px', height: '20px', background: 'var(--border-dim)', margin: '0 0.5rem' }}></span>
-                  <button onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Reagendar</button>
-                  <button onClick={() => navigate('/laudos', { state: { client: selectedVisit.client } })} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Avaliar</button>
-                  <button onClick={() => setSelectedVisit(null)} className="btn" style={{ padding: '0.4rem', border: 'none', marginLeft: 'auto' }}><X size={16}/></button>
-               </div>
-             )}
+             {selectedVisit && (() => {
+               const linkedLaudo = (laudos || []).find(l => l.visitId === selectedVisit.id);
+               return (
+                 <div className="agenda-timeline-header reveal-staggered" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', marginBottom: '1rem', padding: '0.5rem 1rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>FOCO: <span style={{color: 'var(--primary)'}}>{selectedVisit.client}</span></span>
+                    <span style={{ width: '1px', height: '20px', background: 'var(--border-dim)', margin: '0 0.5rem' }}></span>
+                    <button onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Reagendar</button>
+                    <button onClick={() => navigate('/laudos', { state: { client: selectedVisit.client, visitId: selectedVisit.id, laudoId: linkedLaudo?.id } })} className={linkedLaudo ? "btn" : "btn btn-primary"} style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', border: linkedLaudo ? '1px solid var(--primary)' : 'none', color: linkedLaudo ? 'var(--primary)' : 'white' }}>{linkedLaudo ? 'Ver Laudo' : 'Avaliar'}</button>
+                    <button onClick={() => setSelectedVisit(null)} className="btn" style={{ padding: '0.4rem', border: 'none', marginLeft: 'auto' }}><X size={16}/></button>
+                 </div>
+               );
+             })()}
 
              <div className="hourly-grid-container" style={{ border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', position: 'relative' }}>
                 {(() => {
@@ -389,6 +392,7 @@ const Agenda = () => {
            {activeVisits.length > 0 ? activeVisits.map((visit) => {
              const isSelected = selectedVisit?.id === visit.id;
              const isChecked = selectedVisits.some(v => v.id === visit.id);
+             const linkedLaudo = (laudos || []).find(l => l.visitId === visit.id);
              return (
                <div 
                  key={visit.id}
@@ -420,6 +424,7 @@ const Agenda = () => {
                  <div>
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                        {visit.client} 
+                       {linkedLaudo && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.4rem', background: 'var(--primary)', color: 'white', borderRadius: '4px', fontWeight: 800, whiteSpace: 'nowrap' }}>AUDITADO</span>}
                        {visit.isRecurring === false && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(212,163,115,0.1)', color: 'var(--secondary)', borderRadius: '4px', border: '1px solid currentColor', whiteSpace: 'nowrap' }}>PONTUAL</span>}
                        {visit.isRecurring === true && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(27,61,47,0.1)', color: 'var(--primary)', borderRadius: '4px', border: '1px solid currentColor', whiteSpace: 'nowrap' }}>ROTINA FIXA</span>}
                        {visit.rescheduleType === 'provisional' && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: '#fff9ed', color: '#b27a00', borderRadius: '4px', border: '1px dashed currentColor', whiteSpace: 'nowrap' }}>&bull; EXCEPCIONAL</span>}
@@ -467,7 +472,8 @@ const Agenda = () => {
                   </div>
                   <div>
                     <h4 style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedVisit.client}</h4>
-                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
+                       {(laudos || []).find(l => l.visitId === selectedVisit.id) && <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--primary)', borderRadius: '4px', fontWeight: 800, color: 'white' }}>AUDITADO</span>}
                        <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--bg-deep)', borderRadius: '4px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedVisit.status.toUpperCase()}</span>
                        <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: selectedVisit.isRecurring ? 'rgba(27,61,47,0.1)' : 'rgba(212,163,115,0.1)', color: selectedVisit.isRecurring ? 'var(--primary)' : 'var(--secondary)', borderRadius: '4px', fontWeight: 700 }}>
                           {selectedVisit.isRecurring ? 'ROTINA FIXA' : 'VISITA PONTUAL'}
@@ -512,13 +518,18 @@ const Agenda = () => {
                  >
                     Reagendar
                  </button>
-                 <button
-                   onClick={() => navigate('/laudos', { state: { client: selectedVisit.client } })}
-                   className="btn btn-primary"
-                   style={{ flex: 2, justifyContent: 'center', padding: '1rem' }}
-                 >
-                    <FileText size={16} /> Auditar
-                 </button>
+                 {(() => {
+                    const linkedLaudo = (laudos || []).find(l => l.visitId === selectedVisit.id);
+                    return (
+                      <button
+                        onClick={() => navigate('/laudos', { state: { client: selectedVisit.client, visitId: selectedVisit.id, laudoId: linkedLaudo?.id } })}
+                        className={linkedLaudo ? "btn" : "btn btn-primary"}
+                        style={{ flex: 2, justifyContent: 'center', padding: '1rem', border: linkedLaudo ? '1px solid var(--primary)' : 'none', color: linkedLaudo ? 'var(--primary)' : 'white' }}
+                      >
+                         <FileText size={16} /> {linkedLaudo ? 'Ver Laudo' : 'Auditar'}
+                      </button>
+                    );
+                 })()}
              </div>
           </div>
         )}
@@ -540,6 +551,7 @@ const Agenda = () => {
                   <div>
                     <h4 style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedVisit.client}</h4>
                     <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
+                       {(laudos || []).find(l => l.visitId === selectedVisit.id) && <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--primary)', borderRadius: '4px', fontWeight: 800, color: 'white' }}>AUDITADO</span>}
                        <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--bg-deep)', borderRadius: '4px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedVisit.status.toUpperCase()}</span>
                        <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: selectedVisit.isRecurring ? 'rgba(27,61,47,0.1)' : 'rgba(212,163,115,0.1)', color: selectedVisit.isRecurring ? 'var(--primary)' : 'var(--secondary)', borderRadius: '4px', fontWeight: 700 }}>
                           {selectedVisit.isRecurring ? 'ROTINA FIXA' : 'VISITA PONTUAL'}
@@ -581,13 +593,18 @@ const Agenda = () => {
                  >
                     Reagendar
                  </button>
-                 <button
-                   onClick={() => navigate('/laudos', { state: { client: selectedVisit.client } })}
-                   className="btn btn-primary"
-                   style={{ flex: 2, justifyContent: 'center', padding: '1rem' }}
-                 >
-                    <FileText size={16} /> Auditar
-                 </button>
+                 {(() => {
+                    const linkedLaudo = (laudos || []).find(l => l.visitId === selectedVisit.id);
+                    return (
+                      <button
+                        onClick={() => navigate('/laudos', { state: { client: selectedVisit.client, visitId: selectedVisit.id, laudoId: linkedLaudo?.id } })}
+                        className={linkedLaudo ? "btn" : "btn btn-primary"}
+                        style={{ flex: 2, justifyContent: 'center', padding: '1rem', border: linkedLaudo ? '1px solid var(--primary)' : 'none', color: linkedLaudo ? 'var(--primary)' : 'white' }}
+                      >
+                         <FileText size={16} /> {linkedLaudo ? 'Ver Laudo' : 'Auditar'}
+                      </button>
+                    );
+                 })()}
              </div>
           </div>
         </div>

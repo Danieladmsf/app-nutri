@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { subscribeToLaudos } from '../services/firestore';
 
 // ─── Default Values ───
 const DEFAULT_WORK_DAYS = {
@@ -86,6 +87,14 @@ export const AppProvider = ({ children }) => {
   // Visit Tags
   const [visitTags, setVisitTags] = useState(DEFAULT_VISIT_TAGS);
 
+  // Laudos (subscribed live so Agenda can show "auditado" badges and Laudos page can list them)
+  const [laudos, setLaudos] = useState([]);
+
+  useEffect(() => {
+    const unsub = subscribeToLaudos((data) => setLaudos(data));
+    return () => unsub();
+  }, []);
+
   // ─── Load from Firestore on mount ───
   useEffect(() => {
     const loadSettings = async () => {
@@ -158,6 +167,9 @@ export const AppProvider = ({ children }) => {
 
     // Visit Tags
     visitTags, setVisitTags,
+
+    // Laudos (read-only from context; writes go through saveLaudo in firestore service)
+    laudos,
   };
 
   return (

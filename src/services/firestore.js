@@ -1,18 +1,20 @@
 import { db } from '../firebase';
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  deleteDoc, 
-  onSnapshot, 
-  query, 
+import {
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  onSnapshot,
+  query,
   orderBy,
   serverTimestamp
 } from 'firebase/firestore';
 
 export const collections = {
   CLIENTS: 'clients',
-  VISITS: 'visits'
+  VISITS: 'visits',
+  LAUDOS: 'laudos'
 };
 
 // --- Clients ---
@@ -95,4 +97,45 @@ export const saveVisit = async (visitData) => {
 
 export const deleteVisit = async (visitId) => {
   await deleteDoc(doc(db, collections.VISITS, String(visitId)));
+};
+
+// --- Laudos ---
+export const subscribeToLaudos = (callback) => {
+  const q = query(collection(db, collections.LAUDOS));
+  return onSnapshot(q, (snapshot) => {
+    const laudos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    callback(laudos);
+  }, (error) => {
+    console.error("Error subscribing to laudos:", error);
+    callback([]);
+  });
+};
+
+export const getLaudo = async (laudoId) => {
+  const snap = await getDoc(doc(db, collections.LAUDOS, String(laudoId)));
+  if (!snap.exists()) return null;
+  return { id: snap.id, ...snap.data() };
+};
+
+// Creates a new laudo when no id is passed; otherwise merges an update into the existing doc.
+// Returns the Firestore id so the caller can persist it on the next save.
+export const saveLaudo = async (laudoData) => {
+  const hasId = laudoData.id && !String(laudoData.id).startsWith('_temp_');
+  const docRef = hasId
+    ? doc(db, collections.LAUDOS, String(laudoData.id))
+    : doc(collection(db, collections.LAUDOS));
+
+  const payload = {
+    ...laudoData,
+    updatedAt: serverTimestamp()
+  };
+  if (!hasId) payload.createdAt = serverTimestamp();
+  delete payload.id;
+
+  await setDoc(docRef, payload, { merge: true });
+  return docRef.id;
+};
+
+export const deleteLaudo = async (laudoId) => {
+  await deleteDoc(doc(db, collections.LAUDOS, String(laudoId)));
 };
