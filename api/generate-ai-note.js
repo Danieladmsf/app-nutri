@@ -34,15 +34,15 @@ export default async function handler(req, res) {
       });
     }
 
-    // Instrução para evitar repetir texto anterior
-    let avoidRepeat = '';
-    if (existingText && existingText.trim().length > 10) {
-      avoidRepeat = `\n\nIMPORTANTE: O texto anterior foi rejeitado pelo auditor. NÃO repita o texto abaixo. Produza uma versão COMPLETAMENTE DIFERENTE com outra abordagem, outras palavras e outra estrutura:\n---\n${existingText.trim()}\n---`;
+    // O auditor pode ter feito uma anotação manual que deve guiar a visão da IA
+    let auditorNotes = '';
+    if (existingText && existingText.trim().length > 3) {
+      auditorNotes = `\n\nO auditor fez a seguinte anotação/draft neste quesito:\n"${existingText.trim()}"\n\nDiretriz: Utilize a anotação do auditor como o CONTEXTO PRINCIPAL e expanda-a. Se a anotação for breve ou informal, formalize, elabore e detalhe o problema com riqueza de detalhes, confirmando com o que você vê na imagem (se houver). Se a anotação já for um texto final e formal, o usuário está pedindo uma versão alternativa, então gere um texto reescrito diferente do original.`;
     }
 
     contentArray.push({
       type: 'text',
-      text: `Atue como um Nutricionista Auditor rigoroso inspecionando uma cozinha industrial. Categoria do problema: ${categoryLabel}. Assunto Específico: ${itemLabel}. Descrição padrão do problema: ${itemText}. \n\n${image ? 'Analise a imagem anexada sobre este quesito.' : ''}\nEscreva de forma técnica, impessoal e direta, APENAS A CONSTATAÇÃO DO FATO E A ORIENTAÇÃO TÉCNICA/AÇÃO CORRETIVA para regularizar a situação. Máximo de 4 linhas. Não use saudações.${avoidRepeat}`,
+      text: `Atue como um Nutricionista Auditor especializado inspecionando uma cozinha industrial.\nCategoria: ${categoryLabel}\nAssunto: ${itemLabel}\nPadrão Exigido: ${itemText}${auditorNotes}\n\n${image ? 'Analise minuciosamente a evidência fotográfica anexada.' : ''}\nProduza o laudo escrevendo de forma técnica, impessoal e rica em detalhes visuais e contextuais. Estruture apenas com o texto da CONSTATAÇÃO DA NÃO-CONFORMIDADE e a respectiva AÇÃO CORRETIVA/ORIENTAÇÃO. Máximo de 5 linhas corridas. Não use saudações.`,
     });
 
     const msg = await anthropic.messages.create({
