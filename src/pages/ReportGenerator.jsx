@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, ChevronDown, Trash2, Plus, PenTool, Share2, AlertTriangle, CheckCircle2, FileText, Search, ArrowLeft } from 'lucide-react';
+import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, ChevronDown, Trash2, Plus, PenTool, Share2, AlertTriangle, CheckCircle2, FileText, Search, ArrowLeft, ImagePlus } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { useAppContext } from '../contexts/AppContext';
 import { saveLaudo, getLaudo, deleteLaudo } from '../services/firestore';
@@ -189,6 +189,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave }) => {
 
 const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrence, updateOccurrenceSilent, removeOccurrence, moveUp, moveDown, laudoId, ensureLaudoId }) => {
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
   const [isGeneratingIA, setIsGeneratingIA] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -322,43 +323,59 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
            {/* Photo Area */}
            <div style={{ flexShrink: 0, width: '100%' }}>
              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Evidência (Opcional)</label>
-             <div 
-               onClick={() => fileInputRef.current?.click()}
-               style={{ 
+             {occurrence.photoUrl && !isUploading ? (
+               /* Já tem foto - mostra preview com opções para trocar */
+               <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-dim)' }}>
+                 <img src={occurrence.photoUrl} alt="Evidência" style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }} />
+                 <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', background: 'rgba(0,0,0,0.65)', padding: '0.5rem', display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
+                   <button onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }} style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', padding: '0.35rem 0.7rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', touchAction: 'manipulation' }}>
+                     <Camera size={12} /> Trocar via Câmera
+                   </button>
+                   <button onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }} style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', padding: '0.35rem 0.7rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', touchAction: 'manipulation' }}>
+                     <ImagePlus size={12} /> Trocar via Galeria
+                   </button>
+                 </div>
+               </div>
+             ) : (
+               /* Sem foto - mostra área com 2 botões */
+               <div style={{ 
                  height: '180px', 
                  border: '2px dashed var(--border-dim)', 
                  borderRadius: 'var(--radius-md)', 
-                 background: occurrence.photoUrl ? `url(${occurrence.photoUrl}) center/cover` : 'var(--bg-deep)',
+                 background: 'var(--bg-deep)',
                  display: 'flex', 
                  flexDirection: 'column',
                  alignItems: 'center', 
                  justifyContent: 'center',
-                 cursor: 'pointer',
                  color: 'var(--text-muted)',
-                 position: 'relative',
-                 overflow: 'hidden'
-               }}
-             >
-               {(!occurrence.photoUrl && !isUploading) && (
-                 <>
-                   <Camera size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
-                   <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Câmera / Galeria</span>
-                   <span style={{ fontSize: '0.6rem', color: 'var(--primary)', marginTop: '0.4rem', fontWeight: 700, padding: '0.2rem 0.5rem', border: '1px dashed var(--primary)', borderRadius: '4px' }}>Tire fotos na HORIZONTAL</span>
-                 </>
-               )}
-               {isUploading && (
-                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.7rem' }}>
-                   <RefreshCcw size={32} className="spin" color="var(--primary)" />
-                   <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--primary)' }}>ENVIANDO...</span>
-                 </div>
-               )}
-               {(occurrence.photoUrl && !isUploading) && (
-                 <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', background: 'rgba(0,0,0,0.6)', padding: '0.5rem', textAlign: 'center', color: '#fff', fontSize: '0.7rem' }}>
-                   Trocar Imagem
-                 </div>
-               )}
-               <input type="file" accept="image/*" ref={fileInputRef} onChange={handlePhotoUpload} style={{ display: 'none' }} disabled={isUploading} />
-             </div>
+                 gap: '0.8rem'
+               }}>
+                 {isUploading ? (
+                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.7rem' }}>
+                     <RefreshCcw size={32} className="spin" color="var(--primary)" />
+                     <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--primary)' }}>ENVIANDO...</span>
+                   </div>
+                 ) : (
+                   <>
+                     <span style={{ fontSize: '0.6rem', color: 'var(--primary)', fontWeight: 700, padding: '0.2rem 0.5rem', border: '1px dashed var(--primary)', borderRadius: '4px' }}>Tire fotos na HORIZONTAL</span>
+                     <div style={{ display: 'flex', gap: '0.75rem' }}>
+                       <button onClick={() => cameraInputRef.current?.click()} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.3rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: '8px', padding: '0.7rem 1.2rem', cursor: 'pointer', color: 'var(--text-main)', touchAction: 'manipulation' }}>
+                         <Camera size={24} color="var(--primary)" />
+                         <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>Câmera</span>
+                       </button>
+                       <button onClick={() => fileInputRef.current?.click()} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.3rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: '8px', padding: '0.7rem 1.2rem', cursor: 'pointer', color: 'var(--text-main)', touchAction: 'manipulation' }}>
+                         <ImagePlus size={24} color="var(--secondary)" />
+                         <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>Galeria</span>
+                       </button>
+                     </div>
+                   </>
+                 )}
+               </div>
+             )}
+             {/* Input CÂMERA (com capture) */}
+             <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} onChange={handlePhotoUpload} style={{ display: 'none' }} disabled={isUploading} />
+             {/* Input GALERIA (sem capture) */}
+             <input type="file" accept="image/*" ref={fileInputRef} onChange={handlePhotoUpload} style={{ display: 'none' }} disabled={isUploading} />
            </div>
 
            {/* AI Text Area */}
