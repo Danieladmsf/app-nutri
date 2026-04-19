@@ -170,7 +170,7 @@ const Agenda = () => {
       {viewMode === 'mensal' ? (
         <div className="reveal-staggered agenda-hero-layout" style={{ flex: 1, width: '100%' }}>
            
-              <div className="agenda-sidebar" style={{ width: '100%' }}>
+              <div className="agenda-sidebar">
               <div>
                  <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem' }}>Mês Base</h3>
                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.2rem', marginBottom: '0.5rem' }}>
@@ -242,7 +242,7 @@ const Agenda = () => {
            </div>
 
            {/* Hourly Grid View */}
-           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
+           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
              {/* Header Day */}
              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-dim)' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
