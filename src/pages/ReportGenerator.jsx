@@ -57,67 +57,71 @@ const SignaturePadModal = ({ isOpen, onClose, onSave }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [name, setName] = useState('');
 
+  // Inicializa o canvas com fundo branco e configura o traço.
+  // requestAnimationFrame garante que o DOM do canvas já esteja montado.
   useEffect(() => {
-    if (isOpen && canvasRef.current) {
+    if (!isOpen) return;
+    const init = () => {
       const canvas = canvasRef.current;
+      if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = "#1B3D2F";
+      ctx.strokeStyle = '#1B3D2F';
       ctx.lineWidth = 3;
-      ctx.lineCap = "round";
-      
-      const preventScroll = (e) => e.preventDefault();
-      canvas.addEventListener('touchstart', preventScroll, { passive: false });
-      canvas.addEventListener('touchmove', preventScroll, { passive: false });
-      return () => {
-        canvas.removeEventListener('touchstart', preventScroll);
-        canvas.removeEventListener('touchmove', preventScroll);
-      };
-    }
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+    };
+    // Agenda a inicialização pro próximo frame para garantir que o <canvas> existe
+    const raf = requestAnimationFrame(init);
+
+    // Bloqueia scroll na tela enquanto o modal estiver aberto
+    const preventScroll = (e) => e.preventDefault();
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener('touchmove', preventScroll);
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
+  const getPos = (e) => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+  };
+
   const startDrawing = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
     const ctx = canvas.getContext('2d');
-    
-    // Suporte a scaling CSS vs. resolução real do Canvas
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-    
+    // Re-seta o estilo do traço em cada início de desenho (segurança)
+    ctx.strokeStyle = '#1B3D2F';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    const { x, y } = getPos(e);
     ctx.beginPath();
-    ctx.moveTo(x * scaleX, y * scaleY);
+    ctx.moveTo(x, y);
     setIsDrawing(true);
   };
 
   const draw = (e) => {
     if (!isDrawing || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext('2d');
-    
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-    
-    ctx.lineTo(x * scaleX, y * scaleY);
+    const ctx = canvasRef.current.getContext('2d');
+    const { x, y } = getPos(e);
+    ctx.lineTo(x, y);
     ctx.stroke();
   };
 
   const stopDrawing = () => {
     if (!isDrawing || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.closePath();
+    canvasRef.current.getContext('2d').closePath();
     setIsDrawing(false);
   };
 
@@ -125,13 +129,22 @@ const SignaturePadModal = ({ isOpen, onClose, onSave }) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   };
 
   const handleSave = () => {
     if (!name.trim()) return alert("Digite o nome ou cargo de quem está assinando.");
-    const base64 = canvasRef.current.toDataURL("image/jpeg", 0.8);
+    const canvas = canvasRef.current;
+    // Cria um canvas auxiliar com fundo branco GARANTIDO e copia o desenho por cima
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = canvas.width;
+    exportCanvas.height = canvas.height;
+    const ectx = exportCanvas.getContext('2d');
+    ectx.fillStyle = '#ffffff';
+    ectx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+    ectx.drawImage(canvas, 0, 0);
+    const base64 = exportCanvas.toDataURL('image/jpeg', 0.7);
     onSave({ name: name.trim(), imageObj: base64 });
   };
 
@@ -149,8 +162,8 @@ const SignaturePadModal = ({ isOpen, onClose, onSave }) => {
         <div style={{ background: '#fff', borderRadius: '6px', border: '2px solid var(--border-dim)', overflow: 'hidden' }}>
           <canvas 
             ref={canvasRef}
-            width={600} 
-            height={300} 
+            width={500} 
+            height={250} 
             onMouseDown={startDrawing}
             onMouseMove={draw}
             onMouseUp={stopDrawing}
@@ -158,7 +171,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave }) => {
             onTouchStart={startDrawing}
             onTouchMove={draw}
             onTouchEnd={stopDrawing}
-            style={{ display: 'block', width: '100%', touchAction: 'none' }}
+            style={{ display: 'block', width: '100%', touchAction: 'none', background: '#fff' }}
           />
         </div>
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-between', marginTop: '10px' }}>
