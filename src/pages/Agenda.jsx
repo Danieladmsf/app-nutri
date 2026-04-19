@@ -261,7 +261,7 @@ const Agenda = () => {
                 )}
              </div>
 
-             <div className="hourly-grid-container" style={{ flex: 1, minHeight: '600px', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', overflowY: 'auto', position: 'relative' }}>
+             <div className="hourly-grid-container" style={{ border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', position: 'relative' }}>
                 {(() => {
                    const gridStartHour = parseInt((workStart || '07:00').split(':')[0], 10);
                    const gridEndHour = parseInt((workEnd || '18:00').split(':')[0], 10);
