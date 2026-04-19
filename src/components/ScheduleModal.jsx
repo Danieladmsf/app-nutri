@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, AlertTriangle, RefreshCcw } from 'lucide-react';
+import { saveVisit, subscribeToClients } from '../services/firestore';
 
 const ScheduleModal = ({ isOpen, onClose, initialData }) => {
   // Modes: 'create', 'reschedule'
@@ -7,15 +8,25 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
   
   const [client, setClient] = useState('');
   const [date, setDate] = useState('');
-  const [timeSection, setTimeSection] = useState('08:00 - 10:00');
+  const [timeSection, setTimeSection] = useState('08:00');
+  const [duration, setDuration] = useState('2h');
   const [visitType, setVisitType] = useState('Auditoria Completa');
   
   // Create state
-  const [isRecurring, setIsRecurring] = useState(true);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [clients, setClients] = useState([]);
+  const [selectedClientId, setSelectedClientId] = useState('');
+  const [saving, setSaving] = useState(false);
   
   // Reschedule state
   const [rescheduleType, setRescheduleType] = useState('provisional'); // provisional | permanent
   const [reason, setReason] = useState('');
+
+  // Load clients from Firestore for the dropdown
+  useEffect(() => {
+    const unsub = subscribeToClients((data) => setClients(data));
+    return () => unsub();
+  }, []);
 
   // Auto-fill if editing/rescheduling
   useEffect(() => {
@@ -26,14 +37,86 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
          setTimeSection('--:--');
       } else {
          setClient(initialData.client || '');
-         setDate(initialData.date || '2026-04-15');
-         setTimeSection(initialData.time || '10:00 - 12:00');
+         setDate(initialData.date || initialData.dateKey || '2026-04-15');
+         setTimeSection(initialData.time || '10:00');
       }
+    } else {
+      // Reset for create mode
+      setClient('');
+      setDate('');
+      setTimeSection('08:00');
+      setDuration('2h');
+      setVisitType('Auditoria Completa');
+      setIsRecurring(false);
+      setSelectedClientId('');
     }
   }, [initialData, isOpen]);
 
   const isBatchMode = Array.isArray(initialData);
   const isTargetRecurring = isBatchMode ? true : initialData?.isRecurring;
+
+  // ═══ SAVE: Create new visit ═══
+  const handleCreate = async () => {
+    const selectedClient = clients.find(c => c.id === selectedClientId);
+    if (!selectedClient) return alert('Selecione um cliente.');
+    if (!date) return alert('Selecione uma data.');
+
+    setSaving(true);
+    try {
+      await saveVisit({
+        dateKey: date,
+        time: timeSection,
+        duration: duration,
+        client: selectedClient.name,
+        address: selectedClient.address || '',
+        status: 'Em aberto',
+        isRecurring: isRecurring,
+        visitType: visitType,
+        clientData: {
+          contact: selectedClient.contactRole || selectedClient.contact || 'Contato',
+          lastVisitDate: selectedClient.lastVisitDate || '—',
+          lastReportStatus: selectedClient.lastReportStatus || 'Conforme',
+          historicIssues: selectedClient.historicIssues || '—'
+        }
+      });
+      onClose();
+    } catch (err) {
+      console.error('Erro ao salvar visita:', err);
+      alert('Erro ao salvar visita. Tente novamente.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ═══ SAVE: Reschedule existing visit(s) ═══
+  const handleReschedule = async () => {
+    if (!date) return alert('Selecione a nova data.');
+
+    setSaving(true);
+    try {
+      const visitsToUpdate = isBatchMode ? initialData : [initialData];
+      
+      for (const visit of visitsToUpdate) {
+        await saveVisit({
+          ...visit,
+          dateKey: date,
+          time: timeSection !== '--:--' ? timeSection : visit.time,
+          rescheduleType: rescheduleType,
+        });
+      }
+      onClose();
+    } catch (err) {
+      console.error('Erro ao reagendar:', err);
+      alert('Erro ao reagendar. Tente novamente.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSave = () => {
+    if (mode === 'create') handleCreate();
+    else handleReschedule();
+  };
 
   if (!isOpen) return null;
 
@@ -81,10 +164,15 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
           {mode === 'create' && (
             <div>
               <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Cliente / Estabelecimento</label>
-              <select style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem' }}>
-                <option>Selecione um cliente...</option>
-                <option>Cozinha Industrial Matriz</option>
-                <option>Supermercado Nova Era</option>
+              <select 
+                value={selectedClientId} 
+                onChange={e => setSelectedClientId(e.target.value)} 
+                style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem', color: 'var(--text-main)' }}
+              >
+                <option value="">Selecione um cliente...</option>
+                {clients.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
               </select>
             </div>
           )}
@@ -94,26 +182,40 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
                 <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Nova Data</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid var(--border-dim)', padding: '0.8rem', borderRadius: '4px', background: 'var(--bg-deep)' }}>
                   <Calendar size={16} color="var(--text-muted)" />
-                  <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ border: 'none', background: 'transparent', width: '100%', fontSize: '0.8rem', outline: 'none' }} />
+                  <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ border: 'none', background: 'transparent', width: '100%', fontSize: '0.8rem', outline: 'none', color: 'var(--text-main)' }} />
                 </div>
              </div>
              <div>
-                <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Horário (Slot)</label>
+                <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Horário</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid var(--border-dim)', padding: '0.8rem', borderRadius: '4px', background: 'var(--bg-deep)' }}>
                   <Clock size={16} color="var(--text-muted)" />
-                  <input type="text" value={timeSection} onChange={e => setTimeSection(e.target.value)} style={{ border: 'none', background: 'transparent', width: '100%', fontSize: '0.8rem', outline: 'none' }} />
+                  <input type="time" value={timeSection} onChange={e => setTimeSection(e.target.value)} style={{ border: 'none', background: 'transparent', width: '100%', fontSize: '0.8rem', outline: 'none', color: 'var(--text-main)' }} />
                 </div>
              </div>
           </div>
 
-          <div>
-             <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Objetivo Principal</label>
-             <select value={visitType} onChange={e => setVisitType(e.target.value)} style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem' }}>
-               <option>Auditoria Completa</option>
-               <option>Treinamento de Equipe</option>
-               <option>Checklist Operacional</option>
-             </select>
-          </div>
+          {mode === 'create' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Duração</label>
+                <select value={duration} onChange={e => setDuration(e.target.value)} style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                  <option>1h</option>
+                  <option>1h 30m</option>
+                  <option>2h</option>
+                  <option>2h 30m</option>
+                  <option>3h</option>
+                </select>
+              </div>
+              <div>
+                <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Objetivo</label>
+                <select value={visitType} onChange={e => setVisitType(e.target.value)} style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                  <option>Auditoria Completa</option>
+                  <option>Treinamento de Equipe</option>
+                  <option>Checklist Operacional</option>
+                </select>
+              </div>
+            </div>
+          )}
 
           {/* Conditional Controls */}
           <div style={{ borderTop: '1px solid var(--border-dim)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
@@ -156,7 +258,7 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
 
                  <div>
                    <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Motivo (Opcional)</label>
-                   <input type="text" placeholder="Feriado nacional, pedido do gerente, etc..." style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem' }} />
+                   <input type="text" value={reason} onChange={e => setReason(e.target.value)} placeholder="Feriado nacional, pedido do gerente, etc..." style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem', color: 'var(--text-main)' }} />
                  </div>
               </div>
             )}
@@ -168,13 +270,8 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
         {/* Footer Actions */}
         <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-deep)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <button className="btn" onClick={onClose}>Cancelar</button>
-          <button className="btn btn-primary" onClick={() => {
-              window.dispatchEvent(new CustomEvent('saveSchedule', { 
-                  detail: { newDate: date, visits: initialData, rescheduleType } 
-              }));
-              onClose();
-          }}>
-            {mode === 'create' ? 'Salvar Agendamento' : 'Confirmar Reagendamento'}
+          <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ opacity: saving ? 0.6 : 1 }}>
+            {saving ? 'Salvando...' : (mode === 'create' ? 'Salvar Agendamento' : 'Confirmar Reagendamento')}
           </button>
         </div>
       </div>
