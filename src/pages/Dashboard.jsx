@@ -5,7 +5,7 @@ import { useAppContext } from '../contexts/AppContext';
 import { subscribeToVisits, subscribeToClients } from '../services/firestore';
 
 const Dashboard = () => {
-  const { visitTags } = useAppContext();
+    const { visitTags, workDays } = useAppContext();
   const [visitsData, setVisitsData] = useState({});
   const [clients, setClients] = useState([]);
 
@@ -19,6 +19,10 @@ const Dashboard = () => {
   const today = new Date();
   const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   const todayVisits = visitsData[todayKey] || [];
+  
+  const dayIndexMap = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+  const todayDayKey = dayIndexMap[today.getDay()];
+  const isWorkingDay = workDays?.[todayDayKey] !== false; // defaults to true if loading
 
   // Build tag summary for today
   const tagSummary = {};
@@ -51,12 +55,12 @@ const Dashboard = () => {
     icon: <Users size={16} />
   });
 
-  // If no visits today, show a "no visits" card
+  // If no visits today, show a message card
   if (todayVisits.length === 0) {
     dynamicCards.unshift({
       label: 'Visitas Hoje',
       value: '00',
-      detail: 'Nenhuma visita agendada',
+      detail: !isWorkingDay ? 'Dia de descanso' : 'Nenhuma visita agendada',
       color: 'var(--text-muted)',
       icon: <Calendar size={16} />
     });
@@ -101,38 +105,53 @@ const Dashboard = () => {
              <Link to="/" style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'none' }}>VER ROTA COMPLETA</Link>
           </div>
           <div style={{ width: '100%' }}>
-            {todayVisits.length === 0 ? (
+            {!isWorkingDay && todayVisits.length === 0 ? (
+              <div style={{ padding: '3rem 2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <Calendar size={32} style={{ opacity: 0.2, margin: '0 auto 1rem auto' }} />
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-main)' }}>Dia de Descanso</h4>
+                <p style={{ fontSize: '0.8rem', lineHeight: '1.5' }}>
+                  Conforme suas configurações, hoje não é um dia de rotina padrão. Aproveite sua folga!
+                </p>
+              </div>
+            ) : todayVisits.length === 0 ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                 Nenhuma visita agendada para hoje.
               </div>
             ) : (
-              todayVisits.sort((a, b) => a.time.localeCompare(b.time)).map((item, idx) => {
-                const isPast = new Date(`${todayKey}T${item.time}`) < new Date();
-                const status = item.status === 'Concluído' ? 'Concluído' : (isPast ? 'Pendente' : 'Em Rota');
-                const tagColor = visitTags?.find(t => t.id === item.tag)?.color || 'var(--primary)';
-
-                return (
-                  <div key={item.id || idx} style={{ 
-                    padding: '1.2rem 2rem', 
-                    borderBottom: idx === todayVisits.length - 1 ? 'none' : '1px solid var(--border-dim)',
-                    display: 'grid',
-                    gridTemplateColumns: '60px 1fr auto',
-                    gap: '1rem',
-                    alignItems: 'center',
-                    fontSize: '0.85rem'
-                  }}>
-                    <div style={{ fontWeight: 600, color: 'var(--primary)' }}>{item.time}</div>
-                    <div>
-                       <div style={{ fontWeight: 600 }}>{item.client}</div>
-                       <div className="desktop-only" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.visitType || 'Auditoria'}</div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                       <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: status === 'Concluído' ? tagColor : (status === 'Pendente' ? 'var(--secondary)' : 'var(--primary)') }}></div>
-                       <span className="desktop-only" style={{ fontSize: '0.75rem', color: status === 'Concluído' ? tagColor : 'inherit' }}>{status}</span>
-                    </div>
+              <>
+                {!isWorkingDay && (
+                  <div style={{ padding: '0.8rem 2rem', background: 'rgba(212, 163, 115, 0.1)', color: 'var(--secondary)', fontSize: '0.75rem', fontWeight: 600, borderBottom: '1px solid var(--border-dim)' }}>
+                    Apesar de hoje ser marcado como descanso nas configurações, você possui {todayVisits.length} visita(s) excepcional(is) agendada(s).
                   </div>
-                );
-              })
+                )}
+                {todayVisits.sort((a, b) => a.time.localeCompare(b.time)).map((item, idx) => {
+                  const isPast = new Date(`${todayKey}T${item.time}`) < new Date();
+                  const status = item.status === 'Concluído' ? 'Concluído' : (isPast ? 'Pendente' : 'Em Rota');
+                  const tagColor = visitTags?.find(t => t.id === item.tag)?.color || 'var(--primary)';
+
+                  return (
+                    <div key={item.id || idx} style={{ 
+                      padding: '1.2rem 2rem', 
+                      borderBottom: idx === todayVisits.length - 1 ? 'none' : '1px solid var(--border-dim)',
+                      display: 'grid',
+                      gridTemplateColumns: '60px 1fr auto',
+                      gap: '1rem',
+                      alignItems: 'center',
+                      fontSize: '0.85rem'
+                    }}>
+                      <div style={{ fontWeight: 600, color: 'var(--primary)' }}>{item.time}</div>
+                      <div>
+                         <div style={{ fontWeight: 600 }}>{item.client}</div>
+                         <div className="desktop-only" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{item.visitType || 'Auditoria'}</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: status === 'Concluído' ? tagColor : (status === 'Pendente' ? 'var(--secondary)' : 'var(--primary)') }}></div>
+                         <span className="desktop-only" style={{ fontSize: '0.75rem', color: status === 'Concluído' ? tagColor : 'inherit' }}>{status}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
             )}
           </div>
         </section>
