@@ -1,8 +1,67 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Calendar, FileText, ChevronRight, Plus, ArrowUpRight, TrendingUp, Clock, CheckCircle2 } from 'lucide-react';
+import { Users, Calendar, FileText, ChevronRight, Plus, ArrowUpRight, TrendingUp, Clock, CheckCircle2, Tag } from 'lucide-react';
+import { useAppContext } from '../contexts/AppContext';
+import { subscribeToVisits, subscribeToClients } from '../services/firestore';
 
 const Dashboard = () => {
+  const { visitTags } = useAppContext();
+  const [visitsData, setVisitsData] = useState({});
+  const [clients, setClients] = useState([]);
+
+  useEffect(() => {
+    const unsub1 = subscribeToVisits((data) => setVisitsData(data));
+    const unsub2 = subscribeToClients((data) => setClients(data));
+    return () => { unsub1(); unsub2(); };
+  }, []);
+
+  // Today's date key
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const todayVisits = visitsData[todayKey] || [];
+
+  // Build tag summary for today
+  const tagSummary = {};
+  todayVisits.forEach(v => {
+    // Determine tag: use saved tag, or infer from isRecurring
+    const tagId = v.tag || (v.isRecurring ? 'rotina_fixa' : 'pontual');
+    if (!tagSummary[tagId]) tagSummary[tagId] = { count: 0, visits: [] };
+    tagSummary[tagId].count++;
+    tagSummary[tagId].visits.push(v);
+  });
+
+  // Build dynamic cards from tags that have visits today
+  const dynamicCards = Object.entries(tagSummary).map(([tagId, data]) => {
+    const tagDef = visitTags?.find(t => t.id === tagId);
+    return {
+      label: tagDef?.label || tagId.toUpperCase(),
+      value: String(data.count).padStart(2, '0'),
+      detail: data.visits.map(v => v.client).slice(0, 2).join(', ') + (data.count > 2 ? ` +${data.count - 2}` : ''),
+      color: tagDef?.color || 'var(--primary)',
+      icon: <Tag size={16} />
+    };
+  });
+
+  // Always add total clients card
+  dynamicCards.push({
+    label: 'Total Clientes',
+    value: String(clients.length).padStart(2, '0'),
+    detail: 'Cadastrados no sistema',
+    color: 'var(--primary)',
+    icon: <Users size={16} />
+  });
+
+  // If no visits today, show a "no visits" card
+  if (todayVisits.length === 0) {
+    dynamicCards.unshift({
+      label: 'Visitas Hoje',
+      value: '00',
+      detail: 'Nenhuma visita agendada',
+      color: 'var(--text-muted)',
+      icon: <Calendar size={16} />
+    });
+  }
+
   return (
     <div className="reveal-staggered" style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
       
@@ -18,21 +77,16 @@ const Dashboard = () => {
         </div>
       </header>
 
-      {/* SaaS Stat Grid */}
+      {/* Dynamic Tag-Based Stat Grid */}
       <div className="grid-stats">
-        {[
-          { label: 'Visitas Hoje', value: '03', detail: '+1 desde ontem', icon: <Calendar size={16}/>, color: 'var(--primary)' },
-          { label: 'Laudos Pendentes', value: '05', detail: '2 urgentes', icon: <Clock size={16}/>, color: 'var(--secondary)' },
-          { label: 'Total Clientes', value: '24', detail: '+3 este mês', icon: <Users size={16}/>, color: 'var(--primary)' },
-          { label: 'Taxa de Retenção', value: '98%', detail: 'Alto nível', icon: <TrendingUp size={16}/>, color: 'var(--primary)' },
-        ].map((stat, idx) => (
-          <div key={idx} className="card" style={{ padding: '1.5rem', border: '1px solid var(--border-dim)' }}>
+        {dynamicCards.map((stat, idx) => (
+          <div key={idx} className="card" style={{ padding: '1.5rem', border: '1px solid var(--border-dim)', borderLeft: `4px solid ${stat.color}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: '1rem' }}>
                <span style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em' }}>{stat.label}</span>
-               {stat.icon}
+               <div style={{ color: stat.color }}>{stat.icon}</div>
             </div>
-            <div style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem' }}>{stat.value}</div>
-            <div style={{ fontSize: '0.65rem', color: stat.color, fontWeight: 600 }}>{stat.detail}</div>
+            <div style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem', color: stat.color }}>{stat.value}</div>
+            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{stat.detail}</div>
           </div>
         ))}
       </div>
