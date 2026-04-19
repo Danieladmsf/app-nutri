@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Save, Plus, Trash2, Camera, GripVertical, ChevronRight, Calendar, User, Sparkles, Clock, X, AlertTriangle, Database } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Save, Plus, Trash2, Camera, GripVertical, ChevronRight, Calendar, User, Sparkles, Clock, X, AlertTriangle, Database, RefreshCcw } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
+import { uploadProfilePhoto } from '../services/storage';
 
 import { clientsMock, visitsMock } from '../data/mockDatabase';
 import { saveClient, saveVisit } from '../services/firestore';
@@ -241,33 +242,66 @@ const AgendaSettings = ({ workDays, setWorkDays, workStart, setWorkStart, workEn
 
 // ─── Tab: Perfil do Usuário ───
 const UserProfile = ({ profile, setProfile }) => {
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setIsUploading(true);
+      try {
+        const url = await uploadProfilePhoto(file);
+        setProfile(prev => ({ ...prev, photo: url }));
+      } catch (err) {
+        console.error("Upload failed:", err);
+        alert("Erro ao enviar foto. Verifique o tamanho (máx 5MB) e sua conexão.");
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
 
       {/* Avatar */}
       <section style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div style={{
-          width: '80px', height: '80px', borderRadius: '50%',
-          background: 'var(--bg-deep)', border: '2px dashed var(--border-dim)',
-          display: 'grid', placeItems: 'center', position: 'relative', cursor: 'pointer', flexShrink: 0,
-          backgroundImage: profile.photo ? `url(${profile.photo})` : 'none',
-          backgroundSize: 'cover', backgroundPosition: 'center'
-        }}>
-          {!profile.photo && <Camera size={24} color="var(--text-muted)" />}
+        <div 
+          onClick={() => !isUploading && fileInputRef.current?.click()}
+          style={{
+            width: '80px', height: '80px', borderRadius: '50%',
+            background: 'var(--bg-deep)', border: '2px dashed var(--border-dim)',
+            display: 'grid', placeItems: 'center', position: 'relative', cursor: isUploading ? 'not-allowed' : 'pointer', flexShrink: 0,
+            backgroundImage: (profile.photo && !isUploading) ? `url(${profile.photo})` : 'none',
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            opacity: isUploading ? 0.7 : 1
+          }}
+        >
+          {(!profile.photo && !isUploading) && <Camera size={24} color="var(--text-muted)" />}
+          {isUploading && <RefreshCcw size={20} className="spin" color="var(--primary)" />}
+          
           <div style={{
             position: 'absolute', bottom: '-4px', right: '-4px',
             width: '28px', height: '28px', borderRadius: '50%',
             background: 'var(--primary)', color: 'white',
-            display: 'grid', placeItems: 'center', border: '2px solid var(--bg-surface)'
+            display: 'grid', placeItems: 'center', border: '2px solid var(--bg-surface)',
+            opacity: isUploading ? 0.5 : 1
           }}>
             <Camera size={12} />
           </div>
         </div>
         <div>
           <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Foto de Perfil</div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-            JPG ou PNG. Máximo 2MB. Será exibida nos laudos gerados.
+          <div style={{ fontSize: '0.7rem', color: isUploading ? 'var(--primary)' : 'var(--text-muted)', marginTop: '0.25rem' }}>
+            {isUploading ? 'ENVIANDO FOTO...' : 'JPG ou PNG. Máximo 5MB. Será exibida nos laudos.'}
           </div>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleAvatarUpload} 
+            accept="image/*" 
+            style={{ display: 'none' }} 
+          />
         </div>
       </section>
 

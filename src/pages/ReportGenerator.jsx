@@ -4,6 +4,9 @@ import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, Chevron
 import html2pdf from 'html2pdf.js';
 import { useAppContext } from '../contexts/AppContext';
 import { saveLaudo, getLaudo, deleteLaudo } from '../services/firestore';
+import { uploadAuditPhoto } from '../services/storage';
+import { db } from '../firebase';
+import { doc, collection } from 'firebase/firestore';
 import Anthropic from '@anthropic-ai/sdk';
 
 // Configuração do Anthropic SDK (Uso em navegador habilitado explicitamente para esta prova de conceito)
@@ -28,9 +31,10 @@ const getBase64FromBlobUrl = async (blobUrl) => {
   });
 };
 
-const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrence, removeOccurrence, moveUp, moveDown }) => {
+const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrence, removeOccurrence, moveUp, moveDown, laudoId, ensureLaudoId }) => {
   const fileInputRef = useRef(null);
   const [isGeneratingIA, setIsGeneratingIA] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleCategoryChange = (e) => {
     const catId = e.target.value;
@@ -44,11 +48,25 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
     updateOccurrence(occurrence.id, { itemId: e.target.value });
   };
 
-  const handlePhotoUpload = (e) => {
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      updateOccurrence(occurrence.id, { photoUrl: url, file }); // salvamos o blob tbm
+      setIsUploading(true);
+      try {
+        // Garantir que temos um ID de laudo antes do upload para organizar a pasta
+        const currentLaudoId = await ensureLaudoId();
+        
+        // Upload para o Firebase Storage
+        const downloadURL = await uploadAuditPhoto(file, currentLaudoId, occurrence.id);
+        
+        // Atualiza a ocorrência com a URL pública do Firebase
+        updateOccurrence(occurrence.id, { photoUrl: downloadURL });
+      } catch (err) {
+        console.error("Erro no upload:", err);
+        alert("Falha ao salvar imagem no servidor. Verifique sua conexão.");
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -170,19 +188,25 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
                  overflow: 'hidden'
                }}
              >
-               {!occurrence.photoUrl && (
+               {(!occurrence.photoUrl && !isUploading) && (
                  <>
                    <Camera size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Câmera / Galeria</span>
                    <span style={{ fontSize: '0.6rem', color: 'var(--primary)', marginTop: '0.4rem', fontWeight: 700, padding: '0.2rem 0.5rem', border: '1px dashed var(--primary)', borderRadius: '4px' }}>Tire fotos na HORIZONTAL</span>
                  </>
                )}
-               {occurrence.photoUrl && (
+               {isUploading && (
+                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.7rem' }}>
+                   <RefreshCcw size={32} className="spin" color="var(--primary)" />
+                   <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--primary)' }}>ENVIANDO...</span>
+                 </div>
+               )}
+               {(occurrence.photoUrl && !isUploading) && (
                  <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', background: 'rgba(0,0,0,0.6)', padding: '0.5rem', textAlign: 'center', color: '#fff', fontSize: '0.7rem' }}>
                    Trocar Imagem
                  </div>
                )}
-               <input type="file" accept="image/*" capture="environment" ref={fileInputRef} onChange={handlePhotoUpload} style={{ display: 'none' }} />
+               <input type="file" accept="image/*" capture="environment" ref={fileInputRef} onChange={handlePhotoUpload} style={{ display: 'none' }} disabled={isUploading} />
              </div>
            </div>
 
@@ -248,10 +272,8 @@ const formatDateTime = (d) => {
   return `${dd}/${mm}/${yyyy} · ${hh}:${min}`;
 };
 
-// Strip non-serializable bits from occurrences before saving to Firestore.
-// Blob URLs (blob:http://...) don't survive a reload — drop them so we don't
-// persist dead pointers. Base64/https URLs are kept.
-// The `file` handle is a File object and cannot be serialized.
+// Strip non-serializable bits or temporary blobs from occurrences before saving to Firestore.
+// Firebase Storage URLs (https://firebasestorage...) are KEPT.
 const sanitizeOccurrences = (occs) => (occs || []).map(({ file, photoUrl, ...rest }) => ({
   ...rest,
   photoUrl: photoUrl && typeof photoUrl === 'string' && !photoUrl.startsWith('blob:') ? photoUrl : null
@@ -281,6 +303,15 @@ const ReportGenerator = () => {
   const [isReady, setIsReady] = useState(false);
   const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved' | 'error'
   const isHydratingRef = useRef(true);
+
+  // Garante que o laudo tenha um ID no Firestore (necessário para uploads de fotos)
+  const ensureLaudoId = async () => {
+    if (laudoId && !laudoId.startsWith('_temp_')) return laudoId;
+    const newRef = doc(collection(db, 'laudos'));
+    const id = newRef.id;
+    setLaudoId(id);
+    return id;
+  };
 
   // Hydrate editor state from Firestore / route state when entering editor mode.
   useEffect(() => {
@@ -574,6 +605,8 @@ const ReportGenerator = () => {
                   removeOccurrence={() => removeOccurrence(occ.id)}
                   moveUp={() => moveUp(index)}
                   moveDown={() => moveDown(index)}
+                  laudoId={laudoId}
+                  ensureLaudoId={ensureLaudoId}
                 />
               ))}
               <div style={{ padding: '1rem 0', display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>

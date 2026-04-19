@@ -1,0 +1,26 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Regras gerais para Imagens
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    function isUnder5MB() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Fotos de Ocorrências nos Laudos
+    match /laudos/{laudoId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isImage() && isUnder5MB();
+    }
+
+    // Fotos de Perfil do Usuário
+    match /profiles/{allPaths=**} {
+      allow read: if true;
+      allow write: if isImage() && isUnder5MB();
+    }
+  }
+}
