@@ -194,10 +194,11 @@ const Agenda = () => {
                            }}
                            style={{ 
                              height: '40px', width: '40px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                             background: isSelected ? 'var(--primary)' : 'transparent', 
+                             background: isSelected ? 'var(--primary)' : 'var(--bg-surface)', 
                              color: isSelected ? 'white' : 'var(--text-main)',
-                             borderRadius: '50%', fontSize: '0.8rem', fontWeight: isSelected ? 800 : 500,
-                             cursor: 'pointer', position: 'relative', transition: 'all 0.15s ease'
+                             borderRadius: 'var(--radius-minimal)', fontSize: '0.8rem', fontWeight: isSelected ? 800 : 500,
+                             cursor: 'pointer', position: 'relative', transition: 'all 0.15s ease',
+                             border: isSelected ? '1px solid var(--primary)' : '1px solid var(--border-dim)'
                            }}>
                             {dayObj.date}
                             {hasVisits && !isSelected && <div style={{ position: 'absolute', bottom: '3px', width: '4px', height: '4px', borderRadius: '50%', background: 'var(--primary)' }}></div>}
