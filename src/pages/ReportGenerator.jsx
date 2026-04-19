@@ -646,9 +646,21 @@ const ReportGenerator = () => {
                    <p style={{ fontSize: '18px', color: '#1B3D2F', margin: '0 0 10px 0', fontWeight: 'bold', textTransform: 'uppercase' }}>{client}</p>
                    {profile?.name && (
                      <div style={{ display: 'inline-block', background: '#f5f5f5', padding: '10px 15px', borderRadius: '8px', border: '1px solid #ddd', textAlign: 'left' }}>
-                       <p style={{ fontSize: '12px', color: '#777', margin: '0 0 2px 0', textTransform: 'uppercase', fontWeight: 'bold' }}>Resp. Técnico</p>
-                       <p style={{ fontSize: '15px', color: '#333', margin: 0 }}><strong>{profile.name}</strong></p>
-                       {profile.crm && <p style={{ fontSize: '13px', color: '#555', margin: '2px 0 0 0' }}>CRN {profile.crm}</p>}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                           {profile.photo && (
+                             <img 
+                               src={profile.photo} 
+                               crossOrigin="anonymous"
+                               alt="Avatar" 
+                               style={{ width: '40px', height: '40px', borderRadius: '20px', objectFit: 'cover', border: '1px solid #1B3D2F' }} 
+                             />
+                           )}
+                           <div style={{ textAlign: 'left' }}>
+                             <p style={{ fontSize: '12px', color: '#777', margin: '0 0 2px 0', textTransform: 'uppercase', fontWeight: 'bold' }}>Resp. Técnico</p>
+                             <p style={{ fontSize: '15px', color: '#333', margin: 0 }}><strong>{profile.name}</strong></p>
+                             {profile.crm && <p style={{ fontSize: '13px', color: '#555', margin: '2px 0 0 0' }}>CRN {profile.crm}</p>}
+                           </div>
+                        </div>
                      </div>
                    )}
                 </div>
@@ -659,7 +671,11 @@ const ReportGenerator = () => {
                 const cat = INSPECTION_CATEGORIES.find(c => c.id === occ.categoryId);
                 const item = cat?.items.find(it => it.id === occ.itemId);
                 return (
-                  <div key={occ.id} style={{ marginBottom: '50px', pageBreakInside: 'avoid' }}>
+                  <div key={occ.id} style={{ 
+                    minHeight: '1000px', 
+                    paddingBottom: '40px',
+                    pageBreakAfter: 'always' 
+                  }}>
                      
                      {/* Title Strip */}
                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#1B3D2F', color: 'white', padding: '12px 15px', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}>
@@ -671,7 +687,12 @@ const ReportGenerator = () => {
                        {/* Photo Area (Full Width Horizontal) */}
                        {occ.photoUrl && (
                          <div style={{ width: '100%', background: '#e0e0e0', borderBottom: '2px solid #1B3D2F' }}>
-                           <img src={occ.photoUrl} alt="Evidência Fotográfica" style={{ width: '100%', height: 'auto', maxHeight: '460px', objectFit: 'cover', display: 'block' }} />
+                           <img 
+                             src={occ.photoUrl} 
+                             crossOrigin="anonymous" 
+                             alt="Evidência Fotográfica" 
+                             style={{ width: '100%', height: 'auto', maxHeight: '550px', objectFit: 'cover', display: 'block' }} 
+                           />
                          </div>
                        )}
 
