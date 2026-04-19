@@ -351,6 +351,12 @@ h1, h2, h3, h4, .serif {
   gap: 1.5rem;
 }
 
+.agenda-timeline-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Desktop only: CSS Grid — each block in its own area */
 @media (min-width: 1025px) {
   .agenda-hero-layout {

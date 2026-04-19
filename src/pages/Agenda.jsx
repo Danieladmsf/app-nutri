@@ -244,9 +244,9 @@ const Agenda = () => {
            </div>
 
            {/* Hourly Grid View */}
-           <div className="agenda-timeline-col" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+           <div className="agenda-timeline-col">
              {/* Header Day */}
-             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-dim)' }}>
+             <div className="agenda-timeline-header" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-dim)' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
                   <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, textTransform: 'capitalize' }}>{weekDays.find(d => d.fullDate === selectedDate)?.dayStr || 'Data'},</h2>
                   <span style={{ fontSize: '1.1rem', color: 'var(--text-muted)', fontWeight: 600 }}>{selectedDate.split('-').reverse().join('/')}</span>
