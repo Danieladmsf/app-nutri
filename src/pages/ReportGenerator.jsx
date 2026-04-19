@@ -663,7 +663,7 @@ const ReportGenerator = () => {
                   {/* Símbolo da nutrição (lado esquerdo, destaque) */}
                   <div
                      aria-label="Símbolo da Nutrição"
-                     style={{ width: '130px', height: '130px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                     style={{ width: '260px', height: '260px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                      dangerouslySetInnerHTML={{ __html: nutritionSvg }}
                   />
 
