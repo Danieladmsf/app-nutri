@@ -985,7 +985,7 @@ const ReportGenerator = () => {
                      <div style={{ width: '80px', height: '80px', borderRadius: '40px', background: '#1B3D2F', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '44px', fontWeight: 900, marginBottom: '20px', WebkitPrintColorAdjust: 'exact' }}>
                         ✓
                      </div>
-                     <div style={{ fontSize: '20px', color: '#1B3D2F', fontWeight: 900, marginBottom: '14px' }}>
+                     <div style={{ fontSize: '20px', color: '#1B3D2F', fontWeight: 900, marginBottom: '14px', letterSpacing: '0.5px', wordSpacing: '4px' }}>
                         Documento Validado Eletronicamente
                      </div>
                      <div style={{ fontSize: '13px', color: '#555', maxWidth: '520px', lineHeight: 1.7, marginBottom: '40px', wordBreak: 'break-word' }}>
