@@ -212,10 +212,29 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
       
       setIsUploading(true);
       try {
+        // --- Conversão HEIC/HEIF → JPEG (iPhone) ---
+        let sourceFile = rawFile;
+        const isHeic = /image\/heic|image\/heif/i.test(rawFile.type) || /\.(heic|heif)$/i.test(rawFile.name);
+        if (isHeic) {
+          try {
+            const { default: heic2any } = await import('heic2any');
+            const converted = await heic2any({ blob: rawFile, toType: 'image/jpeg', quality: 0.9 });
+            const convertedBlob = Array.isArray(converted) ? converted[0] : converted;
+            sourceFile = new File(
+              [convertedBlob],
+              rawFile.name.replace(/\.(heic|heif)$/i, '.jpg'),
+              { type: 'image/jpeg' }
+            );
+          } catch (heicErr) {
+            console.error('Falha ao converter HEIC:', heicErr);
+            throw new Error('HEIC_CONVERSION_FAIL');
+          }
+        }
+
         // --- Algoritmo de Compressão e Conversão para JPEG ---
         const file = await new Promise((resolve, reject) => {
           const reader = new FileReader();
-          reader.readAsDataURL(rawFile);
+          reader.readAsDataURL(sourceFile);
           reader.onload = (event) => {
             const img = new Image();
             img.src = event.target.result;
@@ -243,7 +262,7 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
 
               canvas.toBlob((blob) => {
                 if (blob) {
-                  resolve(new File([blob], rawFile.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: "image/jpeg" }));
+                  resolve(new File([blob], sourceFile.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: "image/jpeg" }));
                 } else {
                   reject(new Error('UNSUPPORTED_IMAGE'));
                 }
@@ -274,7 +293,9 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
         }
       } catch (err) {
         console.error("Erro no upload:", err);
-        if (err?.message === 'UNSUPPORTED_IMAGE' || err?.message === 'READ_FAIL') {
+        if (err?.message === 'HEIC_CONVERSION_FAIL') {
+          alert("Não foi possível converter a foto HEIC. Tente novamente ou mude o formato no iPhone para 'Mais compatível' em Ajustes > Câmera > Formatos.");
+        } else if (err?.message === 'UNSUPPORTED_IMAGE' || err?.message === 'READ_FAIL') {
           alert("Formato de imagem não suportado pelo navegador. Tente outra foto (JPEG ou PNG).");
         } else {
           alert("Falha ao salvar imagem. Verifique a conexão ou tente outra foto.");
