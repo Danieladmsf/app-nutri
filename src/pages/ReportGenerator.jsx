@@ -904,7 +904,7 @@ const ReportGenerator = () => {
         ) : (
            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
              {laudos.map(l => (
-               <div key={l.id} className="card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-dim)' }} onClick={() => navigate('/laudos', { state: { laudoId: l.id } })}>
+               <div key={l.id} className="card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-dim)' }} onClick={() => { setLaudoId(l.id); setVisitId(l.visitId || null); setClient(l.client || ''); setMode('editor'); window.scrollTo(0, 0); }}>
                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                    <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>{l.client || 'Sem Estabelecimento'}</div>
                    {l.status === 'signed' ? (

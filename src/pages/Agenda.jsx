@@ -85,7 +85,7 @@ const parseDurationToMinutes = (durationStr) => {
   return mins;
 };
 
-import { subscribeToVisits, deleteVisit } from '../services/firestore';
+import { subscribeToVisits, deleteVisit, subscribeToClients } from '../services/firestore';
 
 const Agenda = () => {
   const navigate = useNavigate();
