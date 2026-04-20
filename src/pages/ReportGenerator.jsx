@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, ChevronDown, Trash2, Plus, PenTool, Share2, AlertTriangle, CheckCircle2, FileText, Search, ArrowLeft, ImagePlus } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { useAppContext } from '../contexts/AppContext';
-import { saveLaudo, getLaudo, deleteLaudo } from '../services/firestore';
+import { saveLaudo, getLaudo, deleteLaudo, saveClient } from '../services/firestore';
 import { uploadAuditPhoto, deleteAuditPhoto } from '../services/storage';
 import { db } from '../firebase';
 import { doc, collection } from 'firebase/firestore';
@@ -537,6 +537,7 @@ const ReportGenerator = () => {
   const stateLaudoId = location.state?.laudoId || null;
   const stateVisitId = location.state?.visitId || null;
   const stateClient = location.state?.client || '';
+  const stateClientId = location.state?.clientId || null;
   const hasEditorContext = !!(stateLaudoId || stateVisitId || stateClient);
 
   const [mode, setMode] = useState(hasEditorContext ? 'editor' : 'list');
@@ -789,6 +790,57 @@ const ReportGenerator = () => {
     setClientSignatureImage(imageObj);
     setClosedAt(new Date());
     setIsSignatureModalOpen(false);
+    // Dispara em background — não deve bloquear o fluxo de assinatura
+    persistAuditFocusToClient().catch(err => console.warn('Falha ao persistir foco no cliente:', err));
+  };
+
+  // Gera um "foco de atenção" curto via IA e atualiza o cliente no Firestore.
+  // Próximos agendamentos desse cliente mostrarão esses dados na Agenda.
+  const persistAuditFocusToClient = async () => {
+    if (!stateClientId) return; // laudo criado direto de /laudos sem cliente identificado
+    const textsWithContent = occurrences.filter(o => o.text && o.text.trim().length > 10);
+    const hoje = new Date().toISOString().slice(0, 10);
+    const lastReportStatus = textsWithContent.length === 0 ? 'Conforme' : 'Atenção Necessária';
+
+    let historicIssues = '';
+    if (textsWithContent.length > 0) {
+      try {
+        const bulletPoints = textsWithContent.map((o, i) => {
+          const cat = INSPECTION_CATEGORIES.find(c => c.id === o.categoryId);
+          const item = cat?.items.find(it => it.id === o.itemId);
+          return `${i+1}. [${cat?.label || 'Geral'} > ${item?.label || 'Item'}] ${o.text}`;
+        }).join('\n');
+
+        const res = await fetch('/api/generate-ai-note', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            categoryLabel: 'Foco de Atenção',
+            itemLabel: 'Alerta para Próxima Visita',
+            itemText: `Você é um nutricionista auditor. Com base nas ocorrências abaixo da auditoria em "${client || 'estabelecimento'}", escreva 1 ou 2 frases curtas (máximo 30 palavras no total) destacando os pontos que o auditor da PRÓXIMA visita deve verificar primeiro. Tom direto e prático. NÃO use saudações, listas ou bullets. Comece direto pelo ponto.\n\nOcorrências:\n${bulletPoints}`,
+            maxTokens: 150,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          historicIssues = (data.text || '').trim();
+        }
+      } catch (err) {
+        console.warn('IA falhou para historicIssues, usando fallback:', err.message);
+      }
+      if (!historicIssues) {
+        historicIssues = `${textsWithContent.length} ocorrência${textsWithContent.length !== 1 ? 's' : ''} registrada${textsWithContent.length !== 1 ? 's' : ''} na última auditoria — verificar reincidência.`;
+      }
+    } else {
+      historicIssues = 'Última auditoria sem não-conformidades. Manter o padrão.';
+    }
+
+    await saveClient({
+      id: stateClientId,
+      lastVisitDate: hoje,
+      lastReportStatus,
+      historicIssues,
+    });
   };
 
   const InfoField = ({ label, value, highlight }) => (

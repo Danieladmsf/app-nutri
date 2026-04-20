@@ -234,7 +234,7 @@ const Agenda = () => {
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>FOCO: <span style={{color: 'var(--primary)'}}>{selectedVisit.client}</span></span>
                     <span style={{ width: '1px', height: '20px', background: 'var(--border-dim)', margin: '0 0.5rem' }}></span>
                     <button onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}>Reagendar</button>
-                    <button onClick={() => navigate('/laudos', { state: { client: selectedVisit.client, visitId: selectedVisit.id, laudoId: linkedLaudo?.id } })} className={linkedLaudo ? "btn" : "btn btn-primary"} style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', border: linkedLaudo ? '1px solid var(--primary)' : 'none', color: linkedLaudo ? 'var(--primary)' : 'white' }}>{linkedLaudo ? 'Ver Laudo' : 'Avaliar'}</button>
+                    <button onClick={() => navigate('/laudos', { state: { client: selectedVisit.client, clientId: selectedVisit.clientId, visitId: selectedVisit.id, laudoId: linkedLaudo?.id } })} className={linkedLaudo ? "btn" : "btn btn-primary"} style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', border: linkedLaudo ? '1px solid var(--primary)' : 'none', color: linkedLaudo ? 'var(--primary)' : 'white' }}>{linkedLaudo ? 'Ver Laudo' : 'Avaliar'}</button>
                     <button onClick={() => setSelectedVisit(null)} className="btn" style={{ padding: '0.4rem', border: 'none', marginLeft: 'auto' }}><X size={16}/></button>
                  </div>
                );
@@ -522,7 +522,7 @@ const Agenda = () => {
                     const linkedLaudo = (laudos || []).find(l => l.visitId === selectedVisit.id);
                     return (
                       <button
-                        onClick={() => navigate('/laudos', { state: { client: selectedVisit.client, visitId: selectedVisit.id, laudoId: linkedLaudo?.id } })}
+                        onClick={() => navigate('/laudos', { state: { client: selectedVisit.client, clientId: selectedVisit.clientId, visitId: selectedVisit.id, laudoId: linkedLaudo?.id } })}
                         className={linkedLaudo ? "btn" : "btn btn-primary"}
                         style={{ flex: 2, justifyContent: 'center', padding: '1rem', border: linkedLaudo ? '1px solid var(--primary)' : 'none', color: linkedLaudo ? 'var(--primary)' : 'white' }}
                       >
@@ -597,7 +597,7 @@ const Agenda = () => {
                     const linkedLaudo = (laudos || []).find(l => l.visitId === selectedVisit.id);
                     return (
                       <button
-                        onClick={() => navigate('/laudos', { state: { client: selectedVisit.client, visitId: selectedVisit.id, laudoId: linkedLaudo?.id } })}
+                        onClick={() => navigate('/laudos', { state: { client: selectedVisit.client, clientId: selectedVisit.clientId, visitId: selectedVisit.id, laudoId: linkedLaudo?.id } })}
                         className={linkedLaudo ? "btn" : "btn btn-primary"}
                         style={{ flex: 2, justifyContent: 'center', padding: '1rem', border: linkedLaudo ? '1px solid var(--primary)' : 'none', color: linkedLaudo ? 'var(--primary)' : 'white' }}
                       >
