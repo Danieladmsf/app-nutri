@@ -89,7 +89,7 @@ import { subscribeToVisits } from '../services/firestore';
 
 const Agenda = () => {
   const navigate = useNavigate();
-  const { workDays, workStart, workEnd, laudos } = useAppContext();
+  const { workDays, workStart, workEnd, laudos, visitTags } = useAppContext();
   const [viewMode, setViewMode] = useState('diaria'); // 'diaria' | 'mensal'
   const [weekStartObj, setWeekStartObj] = useState('2026-04-12'); // O domingo base
   const [selectedDate, setSelectedDate] = useState('2026-04-15');
@@ -425,8 +425,19 @@ const Agenda = () => {
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                        {visit.client} 
                        {linkedLaudo && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.4rem', background: 'var(--primary)', color: 'white', borderRadius: '4px', fontWeight: 800, whiteSpace: 'nowrap' }}>AUDITADO</span>}
-                       {visit.isRecurring === false && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(212,163,115,0.1)', color: 'var(--secondary)', borderRadius: '4px', border: '1px solid currentColor', whiteSpace: 'nowrap' }}>PONTUAL</span>}
-                       {visit.isRecurring === true && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(27,61,47,0.1)', color: 'var(--primary)', borderRadius: '4px', border: '1px solid currentColor', whiteSpace: 'nowrap' }}>ROTINA FIXA</span>}
+                       {(() => {
+                         const tagObj = visitTags?.find(t => t.id === visit.tag);
+                         if (tagObj) {
+                           return <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: `${tagObj.color}15`, color: tagObj.color, borderRadius: '4px', border: '1px solid currentColor', whiteSpace: 'nowrap', textTransform: 'uppercase' }}>{tagObj.label}</span>;
+                         } else {
+                           return (
+                             <>
+                               {visit.isRecurring === false && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(212,163,115,0.1)', color: 'var(--secondary)', borderRadius: '4px', border: '1px solid currentColor', whiteSpace: 'nowrap' }}>PONTUAL</span>}
+                               {visit.isRecurring === true && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: 'rgba(27,61,47,0.1)', color: 'var(--primary)', borderRadius: '4px', border: '1px solid currentColor', whiteSpace: 'nowrap' }}>ROTINA FIXA</span>}
+                             </>
+                           );
+                         }
+                       })()}
                        {visit.rescheduleType === 'provisional' && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.3rem', background: '#fff9ed', color: '#b27a00', borderRadius: '4px', border: '1px dashed currentColor', whiteSpace: 'nowrap' }}>&bull; EXCEPCIONAL</span>}
                     </h4>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -475,9 +486,18 @@ const Agenda = () => {
                     <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
                        {(laudos || []).find(l => l.visitId === selectedVisit.id) && <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--primary)', borderRadius: '4px', fontWeight: 800, color: 'white' }}>AUDITADO</span>}
                        <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--bg-deep)', borderRadius: '4px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedVisit.status.toUpperCase()}</span>
-                       <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: selectedVisit.isRecurring ? 'rgba(27,61,47,0.1)' : 'rgba(212,163,115,0.1)', color: selectedVisit.isRecurring ? 'var(--primary)' : 'var(--secondary)', borderRadius: '4px', fontWeight: 700 }}>
-                          {selectedVisit.isRecurring ? 'ROTINA FIXA' : 'VISITA PONTUAL'}
-                       </span>
+                       {(() => {
+                         const tagObj = visitTags?.find(t => t.id === selectedVisit.tag);
+                         if (tagObj) {
+                           return <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: `${tagObj.color}15`, color: tagObj.color, borderRadius: '4px', fontWeight: 700, textTransform: 'uppercase' }}>{tagObj.label}</span>;
+                         } else {
+                           return (
+                             <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: selectedVisit.isRecurring ? 'rgba(27,61,47,0.1)' : 'rgba(212,163,115,0.1)', color: selectedVisit.isRecurring ? 'var(--primary)' : 'var(--secondary)', borderRadius: '4px', fontWeight: 700 }}>
+                                {selectedVisit.isRecurring ? 'ROTINA FIXA' : 'VISITA PONTUAL'}
+                             </span>
+                           );
+                         }
+                       })()}
                     </div>
                   </div>
                 </div>
