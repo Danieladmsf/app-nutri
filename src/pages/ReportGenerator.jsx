@@ -682,6 +682,7 @@ const ReportGenerator = () => {
           categoryLabel: 'Sumário Executivo',
           itemLabel: 'Resumo Geral da Auditoria',
           itemText: `Você é um nutricionista auditor. Escreva um PARÁGRAFO ÚNICO de sumário executivo (4 a 6 linhas) para a capa de um laudo técnico de auditoria sanitária do estabelecimento "${client || 'não informado'}". O sumário deve consolidar as seguintes ${textsWithContent.length} ocorrências encontradas durante a inspeção:\n\n${bulletPoints}\n\nO texto deve ser impessoal, formal e técnico. NÃO use listas, bullets, numeração ou saudações. Apenas o parágrafo corrido. Comece direto pelo resumo.`,
+          maxTokens: 800,
         }),
       });
       if (res.ok) {

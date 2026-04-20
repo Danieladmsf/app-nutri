@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { categoryLabel, itemLabel, itemText, image, existingText } = req.body || {};
+    const { categoryLabel, itemLabel, itemText, image, existingText, maxTokens } = req.body || {};
 
     if (!categoryLabel || !itemLabel || !itemText) {
       return res.status(400).json({ error: 'Parâmetros obrigatórios ausentes.' });
@@ -45,9 +45,11 @@ export default async function handler(req, res) {
       text: `Atue como um Nutricionista Consultor (perfil parceiro, amigável e extremamente profissional) orientando uma cozinha industrial.\nCategoria: ${categoryLabel}\nAssunto: ${itemLabel}\nPadrão Exigido: ${itemText}${auditorNotes}\n\n${image ? 'Analise a evidência fotográfica anexada.' : ''}\n\nEscreva a descrição do problema e a sugestão de melhoria. Use uma linguagem técnica, porém acessível, empática e positiva de quem está ajudando o cliente a melhorar (ex: "Notamos que...", "Sugerimos que..."), evitando um tom punitivo, policial ou exageradamente rígido. Redija em parágrafo(s) contínuo(s) e fluido(s). NÃO crie títulos em letras maiúsculas tipo "**AÇÃO CORRETIVA:**". Diga no máximo 5 a 6 linhas.`,
     });
 
+    const tokenBudget = Number.isFinite(maxTokens) && maxTokens > 0 ? Math.min(Math.floor(maxTokens), 1500) : 250;
+
     const msg = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 250,
+      max_tokens: tokenBudget,
       temperature: 0.6,
       messages: [{ role: 'user', content: contentArray }],
     });
