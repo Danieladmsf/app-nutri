@@ -4,7 +4,7 @@ import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, Chevron
 import html2pdf from 'html2pdf.js';
 import { useAppContext } from '../contexts/AppContext';
 import { saveLaudo, getLaudo, deleteLaudo } from '../services/firestore';
-import { uploadAuditPhoto } from '../services/storage';
+import { uploadAuditPhoto, deleteAuditPhoto } from '../services/storage';
 import { db } from '../firebase';
 import { doc, collection } from 'firebase/firestore';
 // A chave da API Anthropic agora fica segura no servidor (api/generate-ai-note.js).
@@ -213,7 +213,7 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
       setIsUploading(true);
       try {
         // --- Algoritmo de Compressão e Conversão para JPEG ---
-        const file = await new Promise((resolve) => {
+        const file = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.readAsDataURL(rawFile);
           reader.onload = (event) => {
@@ -224,7 +224,7 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
               let width = img.width;
               let height = img.height;
               const MAX_SIZE = 1200; // Resolução segura e nítida
-              
+
               if (width > height) {
                 if (width > MAX_SIZE) {
                   height *= MAX_SIZE / width;
@@ -240,20 +240,23 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
               canvas.height = height;
               const ctx = canvas.getContext('2d');
               ctx.drawImage(img, 0, 0, width, height);
-              
+
               canvas.toBlob((blob) => {
                 if (blob) {
                   resolve(new File([blob], rawFile.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: "image/jpeg" }));
                 } else {
-                  resolve(rawFile); // Fallback se falhar
+                  reject(new Error('UNSUPPORTED_IMAGE'));
                 }
               }, 'image/jpeg', 0.85); // Qualidade 85% otimizada
             };
-            img.onerror = () => resolve(rawFile);
+            img.onerror = () => reject(new Error('UNSUPPORTED_IMAGE'));
           };
-          reader.onerror = () => resolve(rawFile);
+          reader.onerror = () => reject(new Error('READ_FAIL'));
         });
         // --- Fim da Compressão ---
+
+        // Guarda a URL anterior para apagar DEPOIS do upload da nova dar certo
+        const previousPhotoUrl = occurrence.photoUrl;
 
         // Garantir que temos um ID de laudo antes do upload para organizar a pasta
         const currentLaudoId = await ensureLaudoId();
@@ -264,12 +267,18 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
         if (downloadURL) {
           // Atualiza a ocorrência com a URL pública do Firebase (via silent para não perder estado de outras)
           updateOccurrenceSilent(occurrence.id, { photoUrl: downloadURL });
+          // Limpa a foto anterior do Storage (evita lixo). Roda em background.
+          if (previousPhotoUrl) deleteAuditPhoto(previousPhotoUrl);
         } else {
           throw new Error("Download URL inválida");
         }
       } catch (err) {
         console.error("Erro no upload:", err);
-        alert("Falha ao salvar imagem. Verifique a conexão ou tente outra foto.");
+        if (err?.message === 'UNSUPPORTED_IMAGE' || err?.message === 'READ_FAIL') {
+          alert("Formato de imagem não suportado pelo navegador. Tente outra foto (JPEG ou PNG).");
+        } else {
+          alert("Falha ao salvar imagem. Verifique a conexão ou tente outra foto.");
+        }
       } finally {
         setIsUploading(false);
       }
@@ -692,6 +701,8 @@ const ReportGenerator = () => {
 
   const removeOccurrence = (id) => {
     invalidateSignature();
+    const target = occurrences.find(o => o.id === id);
+    if (target?.photoUrl) deleteAuditPhoto(target.photoUrl);
     setOccurrences(occurrences.filter(o => o.id !== id));
   };
 

@@ -1,5 +1,5 @@
 import { storage } from '../firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 /**
  * Uploads a photo to Firebase Storage
@@ -23,6 +23,22 @@ export const uploadAuditPhoto = async (file, laudoId, occurrenceId) => {
     return downloadURL;
   } catch (error) {
     console.error("Error uploading photo to Storage:", error);
+  }
+};
+
+/**
+ * Deletes a photo from Firebase Storage given its https download URL.
+ * Swallows errors (404 "object-not-found" é esperado se o arquivo já sumiu).
+ */
+export const deleteAuditPhoto = async (photoUrl) => {
+  if (!photoUrl || typeof photoUrl !== 'string' || !photoUrl.startsWith('http')) return;
+  try {
+    const fileRef = ref(storage, photoUrl);
+    await deleteObject(fileRef);
+  } catch (error) {
+    if (error?.code !== 'storage/object-not-found') {
+      console.warn("Falha ao apagar foto antiga do Storage:", error);
+    }
   }
 };
 
