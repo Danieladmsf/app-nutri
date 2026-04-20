@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, ChevronDown, Trash2, Plus, PenTool, Share2, AlertTriangle, CheckCircle2, FileText, Search, ArrowLeft, ImagePlus } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { useAppContext } from '../contexts/AppContext';
-import { saveLaudo, getLaudo, deleteLaudo, saveClient } from '../services/firestore';
+import { saveLaudo, getLaudo, deleteLaudo, saveClient, findClientByName } from '../services/firestore';
 import { uploadAuditPhoto, deleteAuditPhoto } from '../services/storage';
 import { db } from '../firebase';
 import { doc, collection } from 'firebase/firestore';
@@ -816,7 +816,19 @@ const ReportGenerator = () => {
   // Gera um "foco de atenção" curto via IA e atualiza o cliente no Firestore.
   // Próximos agendamentos desse cliente mostrarão esses dados na Agenda.
   const persistAuditFocusToClient = async () => {
-    if (!stateClientId) return; // laudo criado direto de /laudos sem cliente identificado
+    // Descobre o clientId. Visitas antigas não traziam clientId no state de navegação —
+    // cai pra busca pelo nome do cliente.
+    let clientId = stateClientId;
+    if (!clientId && client) {
+      try {
+        const found = await findClientByName(client);
+        clientId = found?.id || null;
+      } catch (e) {
+        console.warn('Falha ao buscar cliente pelo nome:', e);
+      }
+    }
+    if (!clientId) return; // sem forma de identificar o cliente
+
     const textsWithContent = occurrences.filter(o => o.text && o.text.trim().length > 10);
     const hoje = new Date().toISOString().slice(0, 10);
     const lastReportStatus = textsWithContent.length === 0 ? 'Conforme' : 'Atenção Necessária';
@@ -855,7 +867,7 @@ const ReportGenerator = () => {
     }
 
     await saveClient({
-      id: stateClientId,
+      id: clientId,
       lastVisitDate: hoje,
       lastReportStatus,
       historicIssues,
