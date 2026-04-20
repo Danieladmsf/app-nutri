@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Save, Plus, Trash2, Camera, GripVertical, ChevronRight, Calendar, User, Sparkles, Clock, X, AlertTriangle, Database, RefreshCcw, PenTool } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
+import { useAuth } from '../contexts/AuthContext';
 import { uploadProfilePhoto } from '../services/storage';
 
 import { clientsMock, visitsMock } from '../data/mockDatabase';
@@ -653,6 +654,7 @@ const LaudoIASettings = ({ categories, setCategories }) => {
 // ─── Main Settings Page ───
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('agenda');
+  const { logout, currentUser } = useAuth();
 
   // All state comes from AppContext (shared + auto-persisted to Firestore)
   const {
@@ -688,9 +690,22 @@ const Settings = () => {
       {/* Header */}
       <header style={{ marginBottom: '2rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '1rem', alignItems: 'center' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
-            Configurações
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
+              Configurações
+            </h1>
+            <button 
+              onClick={async () => {
+                if(window.confirm('Deseja realmente sair?')) {
+                  await logout();
+                }
+              }}
+              className="btn"
+              style={{ background: 'rgba(212, 163, 115, 0.1)', color: 'var(--secondary)', border: '1px solid var(--secondary)', fontSize: '0.7rem', padding: '0.3rem 0.6rem' }}
+            >
+              Sair da Conta
+            </button>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.7rem', fontWeight: 600, color: isSynced ? 'var(--primary)' : 'var(--text-muted)' }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: isSynced ? 'var(--primary)' : 'var(--secondary)', transition: 'background 0.3s' }}></div>
             {isSynced ? 'Salvo na nuvem' : 'Salvando...'}

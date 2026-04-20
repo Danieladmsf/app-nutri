@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { subscribeToLaudos } from '../services/firestore';
 
@@ -56,8 +56,7 @@ const DEFAULT_PROFILE = {
   name: '', email: '', whatsapp: '', crm: '', photo: '', bio: '', signatureImage: ''
 };
 
-// ─── Firestore doc path (single-user for now) ───
-const SETTINGS_DOC = 'settings/main';
+
 
 // ─── Context ───
 const AppContext = createContext(null);
@@ -98,8 +97,13 @@ export const AppProvider = ({ children }) => {
   // ─── Load from Firestore on mount ───
   useEffect(() => {
     const loadSettings = async () => {
+      const userId = auth.currentUser?.uid;
+      if (!userId) {
+        setIsLoading(false);
+        return;
+      }
       try {
-        const snap = await getDoc(doc(db, SETTINGS_DOC));
+        const snap = await getDoc(doc(db, 'settings', userId));
         if (snap.exists()) {
           const data = snap.data();
           if (data.workDays) setWorkDays(data.workDays);
@@ -124,8 +128,11 @@ export const AppProvider = ({ children }) => {
 
   // ─── Save to Firestore (debounced) ───
   const saveToFirestore = useCallback(async (data) => {
+    const userId = auth.currentUser?.uid;
+    if (!userId) return;
+
     try {
-      await setDoc(doc(db, SETTINGS_DOC), {
+      await setDoc(doc(db, 'settings', userId), {
         ...data,
         updatedAt: new Date().toISOString()
       }, { merge: true });
@@ -139,11 +146,11 @@ export const AppProvider = ({ children }) => {
 
   // ─── Auto-save on changes (with debounce) ───
   useEffect(() => {
-    if (isLoading) return; // Don't save initial load
+    if (isLoading) return;
     
     const timeout = setTimeout(() => {
       saveToFirestore({ workDays, workStart, workEnd, slotDuration, profile, categories, visitTags });
-    }, 1500); // 1.5s debounce
+    }, 1500);
 
     setIsSynced(false);
     return () => clearTimeout(timeout);

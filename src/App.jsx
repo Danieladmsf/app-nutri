@@ -1,5 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AppProvider } from './contexts/AppContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -7,20 +8,28 @@ import ReportGenerator from './pages/ReportGenerator';
 import ClientList from './pages/ClientList';
 import Agenda from './pages/Agenda';
 import Settings from './pages/Settings';
+import Login from './pages/Login';
+
+const PrivateRoute = ({ children }) => {
+  const { currentUser } = useAuth();
+  if (!currentUser) return <Navigate to="/login" replace />;
+  return <AppProvider>{children}</AppProvider>;
+};
 
 function App() {
   return (
-    <AppProvider>
+    <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Layout><Agenda /></Layout>} />
-          <Route path="/clientes" element={<Layout><ClientList /></Layout>} />
-          <Route path="/indicadores" element={<Layout><Dashboard /></Layout>} />
-          <Route path="/laudos" element={<Layout><ReportGenerator /></Layout>} />
-          <Route path="/config" element={<Layout><Settings /></Layout>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<PrivateRoute><Layout><Agenda /></Layout></PrivateRoute>} />
+          <Route path="/clientes" element={<PrivateRoute><Layout><ClientList /></Layout></PrivateRoute>} />
+          <Route path="/indicadores" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
+          <Route path="/laudos" element={<PrivateRoute><Layout><ReportGenerator /></Layout></PrivateRoute>} />
+          <Route path="/config" element={<PrivateRoute><Layout><Settings /></Layout></PrivateRoute>} />
         </Routes>
       </Router>
-    </AppProvider>
+    </AuthProvider>
   );
 }
 

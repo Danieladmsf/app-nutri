@@ -1,4 +1,4 @@
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import {
   collection,
   doc,
@@ -9,7 +9,6 @@ import {
   onSnapshot,
   query,
   where,
-  orderBy,
   serverTimestamp
 } from 'firebase/firestore';
 
@@ -21,9 +20,16 @@ export const collections = {
 
 // --- Clients ---
 export const subscribeToClients = (callback) => {
-  const q = query(collection(db, collections.CLIENTS), orderBy('name', 'asc'));
+  const userId = auth.currentUser?.uid;
+  if (!userId) {
+    callback([]);
+    return () => {};
+  }
+  
+  const q = query(collection(db, collections.CLIENTS), where('userId', '==', userId));
   return onSnapshot(q, (snapshot) => {
     const clients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    clients.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     callback(clients);
   }, (error) => {
     console.error("Error subscribing to clients:", error);
@@ -32,19 +38,21 @@ export const subscribeToClients = (callback) => {
 };
 
 export const saveClient = async (clientData, overrides = {}) => {
+  const userId = auth.currentUser?.uid;
+  if (!userId) throw new Error("Usuário não autenticado");
+
   const isNew = String(clientData.id).startsWith('_temp_') || !clientData.id;
-  // If no real ID, create a new document reference
   const docRef = isNew ? doc(collection(db, collections.CLIENTS)) : doc(db, collections.CLIENTS, String(clientData.id));
   
   const payload = {
     ...clientData,
     ...overrides,
+    userId,
     updatedAt: serverTimestamp()
   };
   
   if (isNew) payload.createdAt = serverTimestamp();
   
-  // Clean up UI temp properties if they exist
   delete payload.id;
   
   await setDoc(docRef, payload, { merge: true });
@@ -55,10 +63,12 @@ export const deleteClient = async (clientId) => {
   await deleteDoc(doc(db, collections.CLIENTS, String(clientId)));
 };
 
-// Busca um cliente pelo campo 'name'. Retorna o 1o match ou null.
 export const findClientByName = async (name) => {
   if (!name) return null;
-  const q = query(collection(db, collections.CLIENTS), where('name', '==', name));
+  const userId = auth.currentUser?.uid;
+  if (!userId) return null;
+
+  const q = query(collection(db, collections.CLIENTS), where('userId', '==', userId), where('name', '==', name));
   const snap = await getDocs(q);
   if (snap.empty) return null;
   const d = snap.docs[0];
@@ -67,18 +77,23 @@ export const findClientByName = async (name) => {
 
 // --- Visits ---
 export const subscribeToVisits = (callback) => {
-  const q = query(collection(db, collections.VISITS));
+  const userId = auth.currentUser?.uid;
+  if (!userId) {
+    callback({});
+    return () => {};
+  }
+
+  const q = query(collection(db, collections.VISITS), where('userId', '==', userId));
   return onSnapshot(q, (snapshot) => {
     const visits = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    // Client-side grouping logic matches the required grouped data format
+    
     const grouped = {};
     visits.forEach(v => {
-      const dateKey = v.dateKey; // YYYY-MM-DD
+      const dateKey = v.dateKey; 
       if (!grouped[dateKey]) grouped[dateKey] = [];
       grouped[dateKey].push(v);
     });
     
-    // Sort visits by time internally
     for(let date in grouped) {
       grouped[date].sort((a,b) => a.time.localeCompare(b.time));
     }
@@ -91,11 +106,15 @@ export const subscribeToVisits = (callback) => {
 };
 
 export const saveVisit = async (visitData) => {
+  const userId = auth.currentUser?.uid;
+  if (!userId) throw new Error("Usuário não autenticado");
+
   const isNew = String(visitData.id).startsWith('_temp_') || !visitData.id;
   const docRef = isNew ? doc(collection(db, collections.VISITS)) : doc(db, collections.VISITS, String(visitData.id));
   
   const payload = {
     ...visitData,
+    userId,
     updatedAt: serverTimestamp()
   };
   
@@ -113,7 +132,13 @@ export const deleteVisit = async (visitId) => {
 
 // --- Laudos ---
 export const subscribeToLaudos = (callback) => {
-  const q = query(collection(db, collections.LAUDOS));
+  const userId = auth.currentUser?.uid;
+  if (!userId) {
+    callback([]);
+    return () => {};
+  }
+
+  const q = query(collection(db, collections.LAUDOS), where('userId', '==', userId));
   return onSnapshot(q, (snapshot) => {
     const laudos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     callback(laudos);
@@ -129,9 +154,10 @@ export const getLaudo = async (laudoId) => {
   return { id: snap.id, ...snap.data() };
 };
 
-// Creates a new laudo when no id is passed; otherwise merges an update into the existing doc.
-// Returns the Firestore id so the caller can persist it on the next save.
 export const saveLaudo = async (laudoData) => {
+  const userId = auth.currentUser?.uid;
+  if (!userId) throw new Error("Usuário não autenticado");
+
   const hasId = laudoData.id && !String(laudoData.id).startsWith('_temp_');
   const docRef = hasId
     ? doc(db, collections.LAUDOS, String(laudoData.id))
@@ -139,6 +165,7 @@ export const saveLaudo = async (laudoData) => {
 
   const payload = {
     ...laudoData,
+    userId,
     updatedAt: serverTimestamp()
   };
   if (!hasId) payload.createdAt = serverTimestamp();
