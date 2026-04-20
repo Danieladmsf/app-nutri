@@ -1272,6 +1272,7 @@ const ReportGenerator = () => {
                            </div>
                            <div style={{ fontSize: '10px', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '4px', fontWeight: 'bold' }}>
                               Nutricionista Responsável {profile?.crm ? ` · ${profile.crm}` : ''}
+                              {(profile?.name && profile?.signatureImage) && <div style={{ fontSize: '8px', color: '#999', marginTop: '2px', textTransform: 'none', letterSpacing: 'normal', fontStyle: 'italic' }}>{profile.name}</div>}
                            </div>
                         </div>
                      </div>

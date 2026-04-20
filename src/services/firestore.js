@@ -3,10 +3,12 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   setDoc,
   deleteDoc,
   onSnapshot,
   query,
+  where,
   orderBy,
   serverTimestamp
 } from 'firebase/firestore';
@@ -51,6 +53,16 @@ export const saveClient = async (clientData, overrides = {}) => {
 
 export const deleteClient = async (clientId) => {
   await deleteDoc(doc(db, collections.CLIENTS, String(clientId)));
+};
+
+// Busca um cliente pelo campo 'name'. Retorna o 1o match ou null.
+export const findClientByName = async (name) => {
+  if (!name) return null;
+  const q = query(collection(db, collections.CLIENTS), where('name', '==', name));
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  const d = snap.docs[0];
+  return { id: d.id, ...d.data() };
 };
 
 // --- Visits ---
