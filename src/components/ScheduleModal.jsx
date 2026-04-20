@@ -66,22 +66,29 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
 
     setSaving(true);
     try {
+      // Dados de auditoria so entram no snapshot se ja houve uma auditoria real assinada
+      const clientData = {
+        contact: selectedClient.contactRole || selectedClient.contact || 'Contato',
+      };
+      if (selectedClient.hasRealAudit) {
+        clientData.hasRealAudit = true;
+        clientData.lastVisitDate = selectedClient.lastVisitDate;
+        clientData.lastReportStatus = selectedClient.lastReportStatus;
+        clientData.historicIssues = selectedClient.historicIssues;
+      }
+
       await saveVisit({
         dateKey: date,
         time: timeSection,
         duration: duration,
         client: selectedClient.name,
+        clientId: selectedClient.id,
         address: selectedClient.address || '',
         status: 'Em aberto',
         isRecurring: (selectedTag || 'pontual') === 'rotina_fixa',
         visitType: visitTags.find(t => t.id === selectedTag)?.label || 'Visita / Auditoria',
         tag: selectedTag,
-        clientData: {
-          contact: selectedClient.contactRole || selectedClient.contact || 'Contato',
-          lastVisitDate: selectedClient.lastVisitDate || '—',
-          lastReportStatus: selectedClient.lastReportStatus || 'Conforme',
-          historicIssues: selectedClient.historicIssues || '—'
-        }
+        clientData,
       });
       onClose();
     } catch (err) {
@@ -210,7 +217,6 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
                   <option>3h</option>
                 </select>
               </div>
-              <div>
               <div>
                 <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Objetivo</label>
                 <select value={selectedTag} onChange={e => setSelectedTag(e.target.value)} style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem', color: 'var(--text-main)' }}>

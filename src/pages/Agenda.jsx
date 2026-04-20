@@ -495,25 +495,27 @@ const Agenda = () => {
                  <div style={{ fontSize: '0.85rem' }}>{selectedVisit.clientData.contact}</div>
                </div>
 
-               {/* Historic Context */}
-               <div style={{ background: 'var(--bg-deep)', padding: '1rem', border: '1px solid var(--border-dim)' }}>
-                 <h5 className="stat-label" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <FileCheck size={14} /> ÚLTIMA AUDITORIA ({selectedVisit.clientData.lastVisitDate})
-                 </h5>
-                 <div style={{ display: 'inline-block', padding: '0.2rem 0.6rem', fontSize: '0.65rem', fontWeight: 700, borderRadius: '4px', background: selectedVisit.clientData.lastReportStatus === 'Conforme' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(212, 163, 115, 0.1)', color: selectedVisit.clientData.lastReportStatus === 'Conforme' ? 'var(--primary)' : 'var(--secondary)', marginBottom: '0.8rem' }}>
-                    STATUS: {selectedVisit.clientData.lastReportStatus}
+               {/* Historic Context — so aparece apos primeira auditoria real */}
+               {selectedVisit.clientData?.hasRealAudit && (
+                 <div style={{ background: 'var(--bg-deep)', padding: '1rem', border: '1px solid var(--border-dim)' }}>
+                   <h5 className="stat-label" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <FileCheck size={14} /> ÚLTIMA AUDITORIA ({selectedVisit.clientData.lastVisitDate})
+                   </h5>
+                   <div style={{ display: 'inline-block', padding: '0.2rem 0.6rem', fontSize: '0.65rem', fontWeight: 700, borderRadius: '4px', background: selectedVisit.clientData.lastReportStatus === 'Conforme' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(212, 163, 115, 0.1)', color: selectedVisit.clientData.lastReportStatus === 'Conforme' ? 'var(--primary)' : 'var(--secondary)', marginBottom: '0.8rem' }}>
+                      STATUS: {selectedVisit.clientData.lastReportStatus}
+                   </div>
+                   <p style={{ fontSize: '0.8rem', lineHeight: '1.5', color: 'var(--text-muted)' }}>
+                      <strong>Foco de Atenção:</strong> {selectedVisit.clientData.historicIssues}
+                   </p>
                  </div>
-                 <p style={{ fontSize: '0.8rem', lineHeight: '1.5', color: 'var(--text-muted)' }}>
-                    <strong>Foco de Atenção:</strong> {selectedVisit.clientData.historicIssues}
-                 </p>
-               </div>
+               )}
              </div>
 
              {/* Actions Footers */}
              <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-surface)', display: 'flex', gap: '1rem' }}>
-                 <button 
-                   onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))} 
-                   className="btn" 
+                 <button
+                   onClick={() => window.dispatchEvent(new CustomEvent('openScheduleModal', { detail: selectedVisit }))}
+                   className="btn"
                    style={{ flex: 1, justifyContent: 'center', padding: '1rem' }}
                  >
                     Reagendar
@@ -571,18 +573,20 @@ const Agenda = () => {
                  <div style={{ fontSize: '0.85rem' }}>{selectedVisit.clientData.contact}</div>
                </div>
 
-               {/* Historic Context */}
-               <div style={{ background: 'var(--bg-deep)', padding: '1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
-                 <h5 className="stat-label" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <FileCheck size={14} /> ÚLTIMA AUDITORIA ({selectedVisit.clientData.lastVisitDate})
-                 </h5>
-                 <div style={{ display: 'inline-block', padding: '0.2rem 0.6rem', fontSize: '0.65rem', fontWeight: 700, borderRadius: '4px', background: selectedVisit.clientData.lastReportStatus === 'Conforme' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(212, 163, 115, 0.1)', color: selectedVisit.clientData.lastReportStatus === 'Conforme' ? 'var(--primary)' : 'var(--secondary)', marginBottom: '0.8rem' }}>
-                    STATUS: {selectedVisit.clientData.lastReportStatus}
+               {/* Historic Context — so aparece apos primeira auditoria real */}
+               {selectedVisit.clientData?.hasRealAudit && (
+                 <div style={{ background: 'var(--bg-deep)', padding: '1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
+                   <h5 className="stat-label" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <FileCheck size={14} /> ÚLTIMA AUDITORIA ({selectedVisit.clientData.lastVisitDate})
+                   </h5>
+                   <div style={{ display: 'inline-block', padding: '0.2rem 0.6rem', fontSize: '0.65rem', fontWeight: 700, borderRadius: '4px', background: selectedVisit.clientData.lastReportStatus === 'Conforme' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(212, 163, 115, 0.1)', color: selectedVisit.clientData.lastReportStatus === 'Conforme' ? 'var(--primary)' : 'var(--secondary)', marginBottom: '0.8rem' }}>
+                      STATUS: {selectedVisit.clientData.lastReportStatus}
+                   </div>
+                   <p style={{ fontSize: '0.8rem', lineHeight: '1.5', color: 'var(--text-muted)' }}>
+                      <strong>Foco de Atenção:</strong> {selectedVisit.clientData.historicIssues}
+                   </p>
                  </div>
-                 <p style={{ fontSize: '0.8rem', lineHeight: '1.5', color: 'var(--text-muted)' }}>
-                    <strong>Foco de Atenção:</strong> {selectedVisit.clientData.historicIssues}
-                 </p>
-               </div>
+               )}
              </div>
 
              <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-dim)', background: 'var(--bg-surface)', display: 'flex', gap: '1rem', flexShrink: 0 }}>

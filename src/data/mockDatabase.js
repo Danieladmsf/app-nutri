@@ -171,9 +171,9 @@ export const clientsMock = [
 // ═══════════════════════════════════════════════
 // 2. VISITAS DO MÊS (Abril 2026)
 // ═══════════════════════════════════════════════
-const v = (id, time, duration, clientId, client, address, isRecurring, contact, lastReportStatus, historicIssues, rescheduleType = null) => ({
-  id, time, duration, client, address, status: 'Em aberto', isRecurring, rescheduleType,
-  clientData: { contact, lastVisitDate: '—', lastReportStatus, historicIssues }
+const v = (id, time, duration, clientId, client, address, isRecurring, contact, _lastReportStatus, _historicIssues, rescheduleType = null) => ({
+  id, time, duration, client, clientId, address, status: 'Em aberto', isRecurring, rescheduleType,
+  clientData: { contact }
 });
 
 export const visitsMock = {

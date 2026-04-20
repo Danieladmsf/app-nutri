@@ -840,6 +840,7 @@ const ReportGenerator = () => {
       lastVisitDate: hoje,
       lastReportStatus,
       historicIssues,
+      hasRealAudit: true,
     });
   };
 

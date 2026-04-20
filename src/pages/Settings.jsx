@@ -751,12 +751,14 @@ const Settings = () => {
                       let vCount = 0;
                       // Sync clients
                       for(let c of clientsMock) {
-                        const payload = { ...c, 
-                          phone: c.whatsapp || c.phone || '', 
-                          id: undefined // Force create new or if string ID, firestore service handles it properly with matching ID. 
+                        const payload = { ...c,
+                          phone: c.whatsapp || c.phone || '',
+                          id: String(c.id),
                         };
-                        // To keep IDs exactly as mock:
-                        payload.id = String(c.id);
+                        // Campos de auditoria nao vao mais no seed — so sao preenchidos apos assinar um laudo real
+                        delete payload.lastVisitDate;
+                        delete payload.lastReportStatus;
+                        delete payload.historicIssues;
                         await saveClient(payload);
                         cCount++;
                       }
