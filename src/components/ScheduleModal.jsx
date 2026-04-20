@@ -11,7 +11,6 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
   const [date, setDate] = useState('');
   const [timeSection, setTimeSection] = useState('08:00');
   const [duration, setDuration] = useState('2h');
-  const [visitType, setVisitType] = useState('Auditoria Completa');
   
   // Create state
   const [clients, setClients] = useState([]);
@@ -50,8 +49,6 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
       setDate('');
       setTimeSection('08:00');
       setDuration('2h');
-      setVisitType('Auditoria Completa');
-      setVisitType('Auditoria Completa');
       setSelectedClientId('');
       setSelectedTag('');
     }
@@ -65,6 +62,7 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
     const selectedClient = clients.find(c => c.id === selectedClientId);
     if (!selectedClient) return alert('Selecione um cliente.');
     if (!date) return alert('Selecione uma data.');
+    if (!selectedTag) return alert('Selecione um objetivo para a visita.');
 
     setSaving(true);
     try {
@@ -76,8 +74,8 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
         address: selectedClient.address || '',
         status: 'Em aberto',
         isRecurring: (selectedTag || 'pontual') === 'rotina_fixa',
-        visitType: visitType,
-        tag: selectedTag || 'pontual',
+        visitType: visitTags.find(t => t.id === selectedTag)?.label || 'Visita / Auditoria',
+        tag: selectedTag,
         clientData: {
           contact: selectedClient.contactRole || selectedClient.contact || 'Contato',
           lastVisitDate: selectedClient.lastVisitDate || '—',
@@ -213,45 +211,14 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
                 </select>
               </div>
               <div>
+              <div>
                 <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Objetivo</label>
-                <select value={visitType} onChange={e => setVisitType(e.target.value)} style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem', color: 'var(--text-main)' }}>
-                  <option>Auditoria Completa</option>
-                  <option>Treinamento de Equipe</option>
-                  <option>Checklist Operacional</option>
+                <select value={selectedTag} onChange={e => setSelectedTag(e.target.value)} style={{ width: '100%', padding: '0.8rem', border: '1px solid var(--border-dim)', borderRadius: '4px', background: 'var(--bg-deep)', fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                  <option value="" disabled>Selecione um objetivo...</option>
+                  {visitTags.map(tag => (
+                    <option key={tag.id} value={tag.id}>{tag.label}</option>
+                  ))}
                 </select>
-              </div>
-            </div>
-          )}
-
-          {/* Tag Selector */}
-          {mode === 'create' && (
-            <div>
-              <label className="stat-label" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Tag size={14} /> Tag da Visita
-              </label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {visitTags.map(tag => (
-                  <button
-                    key={tag.id}
-                    type="button"
-                    onClick={() => setSelectedTag(tag.id)}
-                    style={{
-                      padding: '0.3rem 0.6rem',
-                      borderRadius: '100px',
-                      fontSize: '0.6rem',
-                      fontWeight: 700,
-                      border: '2px solid',
-                      borderColor: selectedTag === tag.id ? tag.color : 'var(--border-dim)',
-                      background: selectedTag === tag.id ? tag.color : 'var(--bg-deep)',
-                      color: selectedTag === tag.id ? '#fff' : 'var(--text-muted)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      letterSpacing: '0.03em'
-                    }}
-                  >
-                    {tag.label}
-                  </button>
-                ))}
               </div>
             </div>
           )}
