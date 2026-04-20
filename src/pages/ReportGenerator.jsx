@@ -846,6 +846,7 @@ const ReportGenerator = () => {
   }
 
   return (
+    <>
     <div className="laudo-editor-page reveal-staggered" style={{ display: 'flex', flexDirection: 'column' }}>
 
       {/* Header Toolbar */}
@@ -1204,12 +1205,13 @@ const ReportGenerator = () => {
          </div>
       </div>
 
-      <SignaturePadModal 
-        isOpen={isSignatureModalOpen} 
-        onClose={() => setIsSignatureModalOpen(false)} 
-        onSave={handleSignatureSave} 
-      />
     </div>
+    <SignaturePadModal
+      isOpen={isSignatureModalOpen}
+      onClose={() => setIsSignatureModalOpen(false)}
+      onSave={handleSignatureSave}
+    />
+    </>
   );
 };
 
