@@ -553,6 +553,7 @@ const ReportGenerator = () => {
   const [startedAt, setStartedAt] = useState(null);
   const [closedAt, setClosedAt] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [pdfProgress, setPdfProgress] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved' | 'error'
   const [nutritionSvg, setNutritionSvg] = useState('');
@@ -754,12 +755,15 @@ const ReportGenerator = () => {
     if (occurrences.length === 0) return alert("Adicione pelo menos uma ocorrência ao Canvas antes de gerar o PDF.");
     
     setIsGenerating(true);
+    setPdfProgress(10);
     try {
       // Gera o sumário IA antes de renderizar o PDF (se ainda não existir)
       await generateAISummary();
+      setPdfProgress(30);
 
       // Pequeno delay para o React renderizar o sumário no DOM oculto
       await new Promise(r => setTimeout(r, 300));
+      setPdfProgress(40);
 
       const element = document.getElementById('pdf-report-content');
       const opt = {
@@ -771,12 +775,27 @@ const ReportGenerator = () => {
         pagebreak:    { mode: ['css', 'legacy'], before: '.pdf-page-break' }
       };
 
+      // Simula o avanço do navegador engasgado no screenshot
+      let currentProgress = 40;
+      const progressInterval = setInterval(() => {
+        currentProgress += (90 - currentProgress) * 0.15;
+        setPdfProgress(currentProgress);
+      }, 500);
+
       await html2pdf().set(opt).from(element).save();
+      
+      clearInterval(progressInterval);
+      setPdfProgress(100);
+      
+      // Delay final pra exibir 100%
+      await new Promise(r => setTimeout(r, 600));
+
     } catch (e) {
       console.error('Falha ao gerar o PDF', e);
       alert('Houve uma falha ao renderizar o PDF. Tente novamente.');
     } finally {
       setIsGenerating(false);
+      setTimeout(() => setPdfProgress(0), 400);
     }
   };
 
@@ -1009,15 +1028,28 @@ const ReportGenerator = () => {
       )}
 
       {/* FOOTER ACTIONS (sticky at bottom) */}
-      <div className="laudo-footer-actions" style={{ flexShrink: 0, marginTop: '1rem', padding: '1rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', display: 'flex', gap: '0.75rem', flexWrap: 'wrap', touchAction: 'manipulation' }}>
-         <button onClick={handleSign} className="btn" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem', border: signature ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: signature ? 'var(--primary)' : 'var(--text-main)', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
-           {signature ? <CheckCircle2 size={16} /> : <PenTool size={16} />}
-           {signature ? 'ASSINADO' : 'ASSINAR'}
-         </button>
-         <button onClick={handleGeneratePDF} className="btn btn-primary" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }} disabled={isGenerating}>
-           {isGenerating ? <RefreshCcw size={14} className="spin" /> : <Download size={14} />}
-           GERAR PDF
-         </button>
+      <div className="laudo-footer-actions" style={{ flexShrink: 0, marginTop: '1rem', padding: '1rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '0.75rem', touchAction: 'manipulation' }}>
+         {isGenerating && (
+           <div style={{ width: '100%', padding: '0 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--primary)', fontWeight: 800 }}>
+                 <span>PROCESSANDO ARQUIVO...</span>
+                 <span>{Math.floor(pdfProgress)}%</span>
+              </div>
+              <div style={{ width: '100%', background: 'var(--border-dim)', borderRadius: '4px', height: '4px', overflow: 'hidden' }}>
+                 <div style={{ width: `${pdfProgress}%`, height: '100%', background: 'var(--primary)', transition: 'width 0.3s ease-out' }} />
+              </div>
+           </div>
+         )}
+         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+           <button onClick={handleSign} className="btn" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem', border: signature ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: signature ? 'var(--primary)' : 'var(--text-main)', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
+             {signature ? <CheckCircle2 size={16} /> : <PenTool size={16} />}
+             {signature ? 'ASSINADO' : 'ASSINAR'}
+           </button>
+           <button onClick={handleGeneratePDF} className="btn btn-primary" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }} disabled={isGenerating}>
+             {isGenerating ? <RefreshCcw size={14} className="spin" /> : <Download size={14} />}
+             {isGenerating ? 'AGUARDE...' : 'GERAR PDF'}
+           </button>
+         </div>
       </div>
 
       {/* HIDDEN PDF TEMPLATE */}
