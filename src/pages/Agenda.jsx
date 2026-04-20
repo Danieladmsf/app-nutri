@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Calendar, Clock, MapPin, X, FileText, FileCheck, ArrowRight, Building, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Clock, MapPin, X, FileText, FileCheck, ArrowRight, Building, Plus, Trash2 } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 
 // Map JS getDay() index to workDays keys
@@ -85,7 +85,7 @@ const parseDurationToMinutes = (durationStr) => {
   return mins;
 };
 
-import { subscribeToVisits } from '../services/firestore';
+import { subscribeToVisits, deleteVisit } from '../services/firestore';
 
 const Agenda = () => {
   const navigate = useNavigate();
@@ -110,6 +110,18 @@ const Agenda = () => {
        setSelectedVisits(selectedVisits.filter(v => v.id !== visit.id));
     } else {
        setSelectedVisits([...selectedVisits, visit]);
+    }
+  };
+
+  const handleDeleteVisit = async (visitId) => {
+    if (window.confirm("Certeza que deseja excluir este agendamento? Esta ação não pode ser desfeita.")) {
+       try {
+         await deleteVisit(visitId);
+         setSelectedVisit(null);
+       } catch (e) {
+         console.error(e);
+         alert("Erro ao excluir agendamento. Tente novamente.");
+       }
     }
   };
 
@@ -476,7 +488,10 @@ const Agenda = () => {
           <div className="card desktop-only reveal-staggered" style={{ width: '400px', display: 'flex', flexDirection: 'column', padding: 0, position: 'sticky', top: '100px' }}>
              {/* Header */}
              <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-dim)', background: 'rgba(27, 61, 47, 0.05)', position: 'relative' }}>
-                <button onClick={() => setSelectedVisit(null)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16}/></button>
+                <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.8rem' }}>
+                  <button onClick={() => handleDeleteVisit(selectedVisit.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--secondary)' }} title="Excluir"><Trash2 size={16}/></button>
+                  <button onClick={() => setSelectedVisit(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }} title="Fechar"><X size={16}/></button>
+                </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                   <div style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-minimal)', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>
                      {selectedVisit.client.charAt(0)}
@@ -565,7 +580,10 @@ const Agenda = () => {
           <div style={{ background: 'var(--bg-surface)', width: '100%', maxHeight: '85vh', borderTopLeftRadius: '20px', borderTopRightRadius: '20px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
              <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-dim)', background: 'rgba(27, 61, 47, 0.05)', position: 'relative', flexShrink: 0 }}>
                 <div style={{ width: '40px', height: '4px', background: 'var(--border-dim)', borderRadius: '2px', margin: '0 auto 1rem' }}></div>
-                <button onClick={() => setSelectedVisit(null)} style={{ position: 'absolute', top: '1.5rem', right: '1rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={20}/></button>
+                <div style={{ position: 'absolute', top: '1.5rem', right: '1rem', display: 'flex', gap: '1.2rem' }}>
+                  <button onClick={() => handleDeleteVisit(selectedVisit.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--secondary)' }} title="Excluir"><Trash2 size={20}/></button>
+                  <button onClick={() => setSelectedVisit(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }} title="Fechar"><X size={20}/></button>
+                </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                   <div style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-minimal)', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>
                      {selectedVisit.client.charAt(0)}
