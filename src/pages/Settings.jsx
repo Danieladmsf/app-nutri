@@ -672,7 +672,6 @@ const Settings = () => {
     { id: 'agenda', label: 'Agendamento & Rotina', icon: <Calendar size={16} /> },
     { id: 'perfil', label: 'Perfil do Usuário', icon: <User size={16} /> },
     { id: 'laudo', label: 'Laudo IA', icon: <Sparkles size={16} /> },
-    { id: 'admin', label: 'Administração', icon: <Database size={16} /> },
   ];
 
   if (isLoading) {
@@ -751,55 +750,7 @@ const Settings = () => {
             />
           )}
 
-          {activeTab === 'admin' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              <section>
-                <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.5rem', color: '#c0392b' }}>Migração Inicial de Dados</h3>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-                  Utilize esta ferramenta apenas uma vez após conectar ao Firebase para transferir os dados falsos de teste (Mock) para o Banco de Dados real (Firestore). Se já existirem dados, eles podem se misturar.
-                </p>
-                <button 
-                  onClick={async () => {
-                    if(!window.confirm('Atenção: Isso vai popular seu banco de dados na nuvem com clientes e visitas falsas de demonstração. Deseja continuar?')) return;
-                    try {
-                      let cCount = 0;
-                      let vCount = 0;
-                      // Sync clients
-                      for(let c of clientsMock) {
-                        const payload = { ...c,
-                          phone: c.whatsapp || c.phone || '',
-                          id: String(c.id),
-                        };
-                        // Campos de auditoria nao vao mais no seed — so sao preenchidos apos assinar um laudo real
-                        delete payload.lastVisitDate;
-                        delete payload.lastReportStatus;
-                        delete payload.historicIssues;
-                        await saveClient(payload);
-                        cCount++;
-                      }
-                      
-                      // Sync visits
-                      for(let date in visitsMock) {
-                        for(let v of visitsMock[date]) {
-                           const payload = { ...v, dateKey: date, id: String(v.id) };
-                           await saveVisit(payload);
-                           vCount++;
-                        }
-                      }
-                      alert(`Migração Completa! Enviados ${cCount} clientes e ${vCount} visitas para a Nuvem.`);
-                    } catch(err) {
-                      console.error(err);
-                      alert('Erro ao migrar dados: ' + err.message);
-                    }
-                  }}
-                  className="btn btn-primary" 
-                  style={{ background: '#c0392b', color: 'white', border: 'none', padding: '0.8rem 1.5rem' }}
-                >
-                  <Database size={16} /> Popular Banco de Dados com Dados Teste
-                </button>
-              </section>
-            </div>
-          )}
+
           {activeTab === 'perfil' && (
             <UserProfile profile={profile} setProfile={setProfile} />
           )}
