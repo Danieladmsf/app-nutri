@@ -117,6 +117,7 @@ const Agenda = () => {
   const [selectedVisits, setSelectedVisits] = useState([]);
   const [visitsData, setVisitsData] = useState({});
   const [clients, setClients] = useState([]);
+  const [fullNoteModal, setFullNoteModal] = useState(null);
 
   // Se hoje for dia de folga, avança para o próximo dia de trabalho
   useEffect(() => {
@@ -632,8 +633,13 @@ const Agenda = () => {
                              {liveData.lastReportStatus}
                            </span>
                          </div>
-                         <p style={{ fontSize: '0.7rem', lineHeight: '1.4', color: 'var(--text-muted)', margin: 0 }}>
-                            <strong>Foco:</strong> {liveData.historicIssues && liveData.historicIssues.length > 120 ? liveData.historicIssues.slice(0, 120) + '…' : liveData.historicIssues}
+                         <p 
+                           style={{ fontSize: '0.7rem', lineHeight: '1.4', color: 'var(--text-muted)', margin: 0, cursor: liveData.historicIssues?.length > 120 ? 'pointer' : 'default' }}
+                           onClick={() => { if (liveData.historicIssues?.length > 120) setFullNoteModal(liveData.historicIssues); }}
+                         >
+                            <strong>Foco:</strong> {liveData.historicIssues && liveData.historicIssues.length > 120 ? (
+                              <span>{liveData.historicIssues.slice(0, 120)}... <span style={{ color: 'var(--primary)', fontWeight: 600 }}>ler mais</span></span>
+                            ) : liveData.historicIssues}
                          </p>
                        </div>
                      )}
@@ -727,8 +733,13 @@ const Agenda = () => {
                               {liveData.lastReportStatus}
                             </span>
                           </div>
-                          <p style={{ fontSize: '0.7rem', lineHeight: '1.4', color: 'var(--text-muted)', margin: 0 }}>
-                             <strong>Foco:</strong> {liveData.historicIssues && liveData.historicIssues.length > 120 ? liveData.historicIssues.slice(0, 120) + '…' : liveData.historicIssues}
+                          <p 
+                            style={{ fontSize: '0.7rem', lineHeight: '1.4', color: 'var(--text-muted)', margin: 0, cursor: liveData.historicIssues?.length > 120 ? 'pointer' : 'default' }}
+                            onClick={() => { if (liveData.historicIssues?.length > 120) setFullNoteModal(liveData.historicIssues); }}
+                          >
+                             <strong>Foco:</strong> {liveData.historicIssues && liveData.historicIssues.length > 120 ? (
+                               <span>{liveData.historicIssues.slice(0, 120)}... <span style={{ color: 'var(--primary)', fontWeight: 600 }}>ler mais</span></span>
+                             ) : liveData.historicIssues}
                           </p>
                         </div>
                       )}     </div>
@@ -762,6 +773,26 @@ const Agenda = () => {
         </div>
       )}
       </>
+      )}
+
+      {/* Full Note Reading Modal */}
+      {fullNoteModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} className="reveal-staggered">
+           <div className="card" style={{ width: '100%', maxWidth: '500px', background: 'var(--bg-surface)', padding: 0, borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
+              <div style={{ padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-deep)' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <FileCheck size={18} color="var(--primary)" />
+                    <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>Histórico da Última Auditoria</h3>
+                 </div>
+                 <button onClick={() => setFullNoteModal(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20}/></button>
+              </div>
+              <div style={{ padding: '1.5rem', overflowY: 'auto' }}>
+                 <p style={{ fontSize: '0.85rem', lineHeight: '1.6', color: 'var(--text-main)', margin: 0, whiteSpace: 'pre-wrap' }}>
+                    {fullNoteModal}
+                 </p>
+              </div>
+           </div>
+        </div>
       )}
     </div>
   );
