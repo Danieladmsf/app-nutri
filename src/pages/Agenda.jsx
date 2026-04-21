@@ -155,10 +155,14 @@ const Agenda = () => {
 
   const handlePrevWeek = () => {
     setWeekStartObj(prev => shiftWeek(prev, -7));
+    setSelectedDate(prev => shiftWeek(prev, -7));
+    setSelectedVisit(null);
   }
 
   const handleNextWeek = () => {
     setWeekStartObj(prev => shiftWeek(prev, 7));
+    setSelectedDate(prev => shiftWeek(prev, 7));
+    setSelectedVisit(null);
   }
 
   return (
