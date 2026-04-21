@@ -195,7 +195,7 @@ const OccurrenceBlock = ({ occurrence, index, total, categories, updateOccurrenc
 
   const handleCategoryChange = (e) => {
     const catId = e.target.value;
-    updateOccurrence(occurrence.id, { categoryId: catId, itemId: '', text: '' });
+    updateOccurrence(occurrence.id, { categoryId: catId, itemId: '' });
   };
 
   const selectedCategory = categories.find(c => c.id === occurrence.categoryId);
