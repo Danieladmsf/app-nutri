@@ -444,6 +444,11 @@ h1, h2, h3, h4, .serif {
     overflow: hidden;
     zoom: 0.75;
   }
+  /* Header e info bar a 90% efetivo (0.75 × 1.2 = 0.9) */
+  .laudo-editor-page > header,
+  .laudo-editor-page > .laudo-info-bar {
+    zoom: 1.2;
+  }
 }
 .laudo-canvas-scroll {
   scrollbar-width: thin;
