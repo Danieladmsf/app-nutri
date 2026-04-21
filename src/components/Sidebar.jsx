@@ -61,21 +61,7 @@ const Sidebar = () => {
           </NavLink>
         </nav>
 
-        <div style={{ padding: '1rem' }}>
-           <div style={{ 
-             display: 'flex', 
-             alignItems: 'center', 
-             gap: '0.75rem', 
-             padding: '0.75rem 1rem', 
-             background: 'var(--bg-deep)', 
-             borderRadius: 'var(--radius-md)',
-             color: 'var(--text-muted)',
-             fontSize: '0.7rem',
-             cursor: 'pointer'
-           }}>
-             <Search size={14} /> <span>Pressione / para buscar</span>
-           </div>
-        </div>
+
 
         <div style={{ padding: '1rem', borderTop: '1px solid var(--border-dim)', marginTop: 'auto' }}>
           <button className="sidebar-link" style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer' }}>
