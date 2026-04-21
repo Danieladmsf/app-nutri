@@ -777,8 +777,8 @@ const Agenda = () => {
 
       {/* Full Note Reading Modal */}
       {fullNoteModal && (
-        <div onClick={() => setFullNoteModal(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', boxSizing: 'border-box' }} className="reveal-staggered">
-           <div onClick={(e) => e.stopPropagation()} className="card" style={{ width: 'calc(100% - 2rem)', maxWidth: '500px', background: 'var(--bg-surface)', padding: 0, borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '85vh', margin: '0 auto', boxSizing: 'border-box' }}>
+        <div onClick={() => setFullNoteModal(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2.5rem 1rem 1rem', boxSizing: 'border-box' }} className="reveal-staggered">
+           <div onClick={(e) => e.stopPropagation()} className="card" style={{ width: 'calc(100% - 2rem)', maxWidth: '500px', background: 'var(--bg-surface)', padding: 0, borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '70vh', margin: '0 auto', boxSizing: 'border-box' }}>
               <div style={{ padding: '1rem 1.2rem', borderBottom: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-deep)', flexShrink: 0 }}>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
                     <FileCheck size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
