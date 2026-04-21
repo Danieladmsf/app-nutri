@@ -90,14 +90,62 @@ import { subscribeToVisits, deleteVisit, subscribeToClients } from '../services/
 const Agenda = () => {
   const navigate = useNavigate();
   const { workDays, workStart, workEnd, laudos, visitTags } = useAppContext();
-  const [viewMode, setViewMode] = useState('diaria'); // 'diaria' | 'mensal'
-  const [weekStartObj, setWeekStartObj] = useState('2026-04-12'); // O domingo base
-  const [selectedDate, setSelectedDate] = useState('2026-04-15');
+
+  // Calcula a data de hoje e o domingo da semana atual
+  const getInitialDates = () => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() - today.getDay());
+
+    const fmt = (d) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${dd}`;
+    };
+
+    return { weekStart: fmt(sunday), today: fmt(today) };
+  };
+
+  const initialDates = getInitialDates();
+  const [viewMode, setViewMode] = useState('diaria');
+  const [weekStartObj, setWeekStartObj] = useState(initialDates.weekStart);
+  const [selectedDate, setSelectedDate] = useState(initialDates.today);
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedVisits, setSelectedVisits] = useState([]);
   const [visitsData, setVisitsData] = useState({});
   const [clients, setClients] = useState([]);
+
+  // Se hoje for dia de folga, avança para o próximo dia de trabalho
+  useEffect(() => {
+    const todayKey = DAY_KEY_MAP[new Date().getDay()];
+    if (workDays[todayKey] === false) {
+      const now = new Date();
+      const cursor = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+      for (let i = 1; i <= 7; i++) {
+        cursor.setDate(cursor.getDate() + 1);
+        const key = DAY_KEY_MAP[cursor.getDay()];
+        if (workDays[key] !== false) {
+          const y = cursor.getFullYear();
+          const m = String(cursor.getMonth() + 1).padStart(2, '0');
+          const d = String(cursor.getDate()).padStart(2, '0');
+          const nextWorkDate = `${y}-${m}-${d}`;
+          setSelectedDate(nextWorkDate);
+          // Se o próximo dia útil for em outra semana, ajustar a semana também
+          const sun = new Date(cursor);
+          sun.setDate(cursor.getDate() - cursor.getDay());
+          const sy = sun.getFullYear();
+          const sm = String(sun.getMonth() + 1).padStart(2, '0');
+          const sd = String(sun.getDate()).padStart(2, '0');
+          setWeekStartObj(`${sy}-${sm}-${sd}`);
+          break;
+        }
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const unsub = subscribeToVisits((data) => {
