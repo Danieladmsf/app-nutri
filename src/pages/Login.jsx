@@ -20,20 +20,27 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("[Login.jsx] Botão Pressionado! Modo Register?", isRegistering, "Email:", email);
+
     if (!email || !password) {
+      console.warn("[Login.jsx] Bloqueado: Falta preencher email ou senha");
       return setError('Preencha email e senha.');
     }
 
     try {
       setError('');
       setLoading(true);
+      console.log("[Login.jsx] Tentando chamar Contexto Auth...");
       if (isRegistering) {
         await register(email, password);
+        console.log("[Login.jsx] register() passou liso!");
       } else {
         await login(email, password);
+        console.log("[Login.jsx] login() passou liso!");
       }
     } catch (err) {
-      if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+      console.error("[Login.jsx] Pegou um erro no Try/Catch:", err.code, err.message);
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
         setError('Usuário ou senha inválidos.');
       } else if (err.code === 'auth/email-already-in-use') {
         setError('Este email já está cadastrado.');
@@ -43,6 +50,7 @@ const Login = () => {
         setError('Falha na autenticação: ' + err.message);
       }
     } finally {
+      console.log("[Login.jsx] Desligando botão de Loading...");
       setLoading(false);
     }
   };
@@ -123,10 +131,11 @@ const Login = () => {
             try {
               setError('');
               setLoading(true);
+              console.log("[Login.jsx] Botão Google Pressionado!");
               await loginWithGoogle();
             } catch (err) {
-              setError('Falha ao autenticar.');
-              console.error(err);
+              setError('Falha ao autenticar com o Google.');
+              console.error("[Login.jsx] Erro ao chamar loginWithGoogle:", err);
             } finally {
               setLoading(false);
             }
