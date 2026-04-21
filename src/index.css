@@ -442,11 +442,7 @@ h1, h2, h3, h4, .serif {
     height: calc(100vh - 4rem);
     max-height: calc(100vh - 4rem);
     overflow: hidden;
-  }
-  .laudo-editor-page > .laudo-editor-head,
-  .laudo-editor-page > .laudo-info-bar,
-  .laudo-editor-page > .laudo-footer-actions {
-    flex-shrink: 0;
+    zoom: 0.75;
   }
 }
 .laudo-canvas-scroll {
