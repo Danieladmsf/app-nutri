@@ -461,7 +461,11 @@ const Agenda = () => {
                  <div>
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                        {visit.client} 
-                       {linkedLaudo && <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.4rem', background: 'var(--primary)', color: 'white', borderRadius: '4px', fontWeight: 800, whiteSpace: 'nowrap' }}>AUDITADO</span>}
+                       {linkedLaudo && (linkedLaudo.clientSignatureImage || linkedLaudo.status === 'signed') ? (
+                         <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.4rem', background: 'var(--primary)', color: 'white', borderRadius: '4px', fontWeight: 800, whiteSpace: 'nowrap' }}>AUDITADO</span>
+                       ) : linkedLaudo ? (
+                         <span style={{ fontSize: '0.6rem', padding: '0.1rem 0.4rem', background: 'var(--secondary)', color: 'white', borderRadius: '4px', fontWeight: 800, whiteSpace: 'nowrap' }}>EM ANDAMENTO</span>
+                       ) : null}
                        {(() => {
                          const tagObj = visitTags?.find(t => t.id === visit.tag);
                          if (tagObj) {
@@ -524,7 +528,14 @@ const Agenda = () => {
                   <div>
                     <h4 style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedVisit.client}</h4>
                     <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
-                       {(laudos || []).find(l => l.visitId === selectedVisit.id) && <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--primary)', borderRadius: '4px', fontWeight: 800, color: 'white' }}>AUDITADO</span>}
+                       {(() => {
+                         const panelLaudo = (laudos || []).find(l => l.visitId === selectedVisit.id);
+                         if (!panelLaudo) return null;
+                         if (panelLaudo.clientSignatureImage || panelLaudo.status === 'signed') {
+                           return <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--primary)', borderRadius: '4px', fontWeight: 800, color: 'white' }}>AUDITADO</span>;
+                         }
+                         return <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--secondary)', borderRadius: '4px', fontWeight: 800, color: 'white' }}>EM ANDAMENTO</span>;
+                       })()}
                        <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--bg-deep)', borderRadius: '4px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedVisit.status.toUpperCase()}</span>
                        {(() => {
                          const tagObj = visitTags?.find(t => t.id === selectedVisit.tag);
@@ -594,7 +605,7 @@ const Agenda = () => {
                         className={linkedLaudo ? "btn" : "btn btn-primary"}
                         style={{ flex: 2, justifyContent: 'center', padding: '1rem', border: linkedLaudo ? '1px solid var(--primary)' : 'none', color: linkedLaudo ? 'var(--primary)' : 'white' }}
                       >
-                         <FileText size={16} /> {linkedLaudo ? 'Ver Laudo' : 'Auditar'}
+                         <FileText size={16} /> {(() => { const _s = linkedLaudo && (linkedLaudo.clientSignatureImage || linkedLaudo.status === 'signed'); if (_s) return 'Ver Laudo'; if (linkedLaudo) return 'Continuar Auditoria'; return 'Auditar'; })()}
                       </button>
                     );
                  })()}
@@ -622,7 +633,14 @@ const Agenda = () => {
                   <div>
                     <h4 style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedVisit.client}</h4>
                     <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
-                       {(laudos || []).find(l => l.visitId === selectedVisit.id) && <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--primary)', borderRadius: '4px', fontWeight: 800, color: 'white' }}>AUDITADO</span>}
+                       {(() => {
+                         const mobileLaudo = (laudos || []).find(l => l.visitId === selectedVisit.id);
+                         if (!mobileLaudo) return null;
+                         if (mobileLaudo.clientSignatureImage || mobileLaudo.status === 'signed') {
+                           return <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--primary)', borderRadius: '4px', fontWeight: 800, color: 'white' }}>AUDITADO</span>;
+                         }
+                         return <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--secondary)', borderRadius: '4px', fontWeight: 800, color: 'white' }}>EM ANDAMENTO</span>;
+                       })()}
                        <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: 'var(--bg-deep)', borderRadius: '4px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedVisit.status.toUpperCase()}</span>
                        <span style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: selectedVisit.isRecurring ? 'rgba(27,61,47,0.1)' : 'rgba(212,163,115,0.1)', color: selectedVisit.isRecurring ? 'var(--primary)' : 'var(--secondary)', borderRadius: '4px', fontWeight: 700 }}>
                           {selectedVisit.isRecurring ? 'ROTINA FIXA' : 'VISITA PONTUAL'}
@@ -681,7 +699,7 @@ const Agenda = () => {
                         className={linkedLaudo ? "btn" : "btn btn-primary"}
                         style={{ flex: 2, justifyContent: 'center', padding: '1rem', border: linkedLaudo ? '1px solid var(--primary)' : 'none', color: linkedLaudo ? 'var(--primary)' : 'white' }}
                       >
-                         <FileText size={16} /> {linkedLaudo ? 'Ver Laudo' : 'Auditar'}
+                         <FileText size={16} /> {(() => { const _s = linkedLaudo && (linkedLaudo.clientSignatureImage || linkedLaudo.status === 'signed'); if (_s) return 'Ver Laudo'; if (linkedLaudo) return 'Continuar Auditoria'; return 'Auditar'; })()}
                       </button>
                     );
                  })()}
