@@ -671,7 +671,7 @@ const Settings = () => {
   const tabs = [
     { id: 'agenda', label: 'Agendamento & Rotina', icon: <Calendar size={16} /> },
     { id: 'perfil', label: 'Perfil do Usuário', icon: <User size={16} /> },
-    { id: 'laudo', label: 'Laudo IA', icon: <Sparkles size={16} /> },
+    { id: 'laudo', label: 'Modelos de Laudo', icon: <Sparkles size={16} /> },
   ];
 
   if (isLoading) {

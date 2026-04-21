@@ -49,7 +49,7 @@ const Sidebar = () => {
             <Users size={16} /> Clientes
           </NavLink>
           <NavLink to="/laudos" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-            <FileText size={16} /> Laudos IA
+            <FileText size={16} /> Laudos
           </NavLink>
           <NavLink to="/indicadores" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
             <LayoutDashboard size={16} /> Indicadores Gerais
