@@ -953,7 +953,7 @@ const ReportGenerator = () => {
       </header>
 
       {/* Info Bar — linha única compacta */}
-      <div style={{ flexShrink: 0, background: 'var(--bg-surface)', padding: '0.5rem 0.75rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', marginBottom: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem 1.5rem', alignItems: 'center', fontSize: '0.7rem' }}>
+      <div className="laudo-info-bar" style={{ flexShrink: 0, background: 'var(--bg-surface)', padding: '0.5rem 0.75rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', marginBottom: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem 1.5rem', alignItems: 'center', fontSize: '0.7rem' }}>
          <span><strong style={{ color: 'var(--text-muted)', fontSize: '0.6rem', letterSpacing: '0.05em' }}>CLIENTE</strong> <span style={{ fontWeight: 700 }}>{client || '—'}</span></span>
          <span style={{ color: 'var(--border-dim)' }}>|</span>
          <span><strong style={{ color: 'var(--text-muted)', fontSize: '0.6rem', letterSpacing: '0.05em' }}>PROF.</strong> {profile?.name || 'Não cadastrado'}{profile?.crm ? ` · ${profile.crm}` : ''}</span>
