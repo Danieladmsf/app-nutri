@@ -934,36 +934,33 @@ const ReportGenerator = () => {
     <>
     <div className="laudo-editor-page reveal-staggered" style={{ display: 'flex', flexDirection: 'column' }}>
 
-      {/* Header Toolbar */}
-      <header className="laudo-editor-head" style={{ marginBottom: '1rem', borderBottom: '1px solid var(--border-dim)', paddingBottom: '1rem' }}>
-        <div className="flex-toolbar" style={{ gap: '1rem', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            {!hasEditorContext && (
-              <button onClick={() => setMode('list')} className="btn" style={{ padding: '0.4rem', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)' }}>
-                <ArrowLeft size={16} />
-              </button>
-            )}
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
-               Laudo em Edição
-            </h1>
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            {saveStatus === 'saving' && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><RefreshCcw size={12} className="spin" /> Salvando...</span>}
-            {saveStatus === 'saved' && <span style={{ fontSize: '0.75rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><CheckCircle2 size={14} /> Salvo</span>}
-          </div>
+      {/* Header Toolbar — compacto */}
+      <header style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {!hasEditorContext && (
+            <button onClick={() => setMode('list')} className="btn" style={{ padding: '0.3rem', border: '1px solid var(--border-dim)', background: 'var(--bg-deep)' }}>
+              <ArrowLeft size={14} />
+            </button>
+          )}
+          <h1 style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
+             Laudo em Edição
+          </h1>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {saveStatus === 'saving' && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><RefreshCcw size={11} className="spin" /> Salvando...</span>}
+          {saveStatus === 'saved' && <span style={{ fontSize: '0.7rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><CheckCircle2 size={12} /> Salvo</span>}
         </div>
       </header>
 
-      {/* Info Bar: Client + Professional + Timestamps */}
-      <div className="laudo-info-bar" style={{ flexShrink: 0, background: 'var(--bg-surface)', padding: '1rem 1.25rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', marginBottom: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem' }}>
-         <InfoField label="Estabelecimento" value={client} />
-         <InfoField label="Profissional" value={profile?.name ? `${profile.name}${profile.crm ? ` · CRN ${profile.crm}` : ''}` : 'Sem perfil cadastrado'} />
-         <InfoField label="Início" value={formatDateTime(startedAt)} />
-         <InfoField
-           label="Encerramento"
-           value={closedAt ? formatDateTime(closedAt) : 'Em aberto'}
-           highlight={closedAt ? 'var(--primary)' : 'var(--secondary)'}
-         />
+      {/* Info Bar — linha única compacta */}
+      <div style={{ flexShrink: 0, background: 'var(--bg-surface)', padding: '0.5rem 0.75rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', marginBottom: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem 1.5rem', alignItems: 'center', fontSize: '0.7rem' }}>
+         <span><strong style={{ color: 'var(--text-muted)', fontSize: '0.6rem', letterSpacing: '0.05em' }}>CLIENTE</strong> <span style={{ fontWeight: 700 }}>{client || '—'}</span></span>
+         <span style={{ color: 'var(--border-dim)' }}>|</span>
+         <span><strong style={{ color: 'var(--text-muted)', fontSize: '0.6rem', letterSpacing: '0.05em' }}>PROF.</strong> {profile?.name || 'Não cadastrado'}{profile?.crm ? ` · ${profile.crm}` : ''}</span>
+         <span style={{ color: 'var(--border-dim)' }}>|</span>
+         <span><strong style={{ color: 'var(--text-muted)', fontSize: '0.6rem', letterSpacing: '0.05em' }}>INÍCIO</strong> {formatDateTime(startedAt) || '—'}</span>
+         <span style={{ color: 'var(--border-dim)' }}>|</span>
+         <span style={{ color: closedAt ? 'var(--primary)' : 'var(--secondary)' }}><strong style={{ color: 'var(--text-muted)', fontSize: '0.6rem', letterSpacing: '0.05em' }}>FIM</strong> {closedAt ? formatDateTime(closedAt) : 'Em aberto'}</span>
       </div>
 
       {!stateClient && (
@@ -983,8 +980,8 @@ const ReportGenerator = () => {
       )}
 
       {signature && (
-        <div style={{ padding: '0.8rem 1rem', background: 'rgba(0, 255, 136, 0.05)', border: '1px solid rgba(0, 255, 136, 0.2)', color: 'var(--primary)', borderRadius: 'var(--radius-md)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', flexShrink: 0 }}>
-          <CheckCircle2 size={16} /> Documento validado e assinado eletronicamente por <strong>{signature}</strong>.
+        <div style={{ padding: '0.35rem 0.75rem', background: 'rgba(0, 255, 136, 0.05)', border: '1px solid rgba(0, 255, 136, 0.2)', color: 'var(--primary)', borderRadius: 'var(--radius-md)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.7rem', flexShrink: 0 }}>
+          <CheckCircle2 size={12} /> Assinado por <strong>{signature}</strong>
         </div>
       )}
 
@@ -1039,26 +1036,26 @@ const ReportGenerator = () => {
         </div>
       )}
 
-      {/* FOOTER ACTIONS (sticky at bottom) */}
-      <div className="laudo-footer-actions" style={{ flexShrink: 0, marginTop: '1rem', padding: '1rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '0.75rem', touchAction: 'manipulation' }}>
+      {/* FOOTER ACTIONS — compacto e sticky */}
+      <div style={{ flexShrink: 0, marginTop: '0.5rem', padding: '0.6rem 0.75rem', background: 'var(--bg-surface)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '0.5rem', touchAction: 'manipulation' }}>
          {isGenerating && (
-           <div style={{ width: '100%', padding: '0 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--primary)', fontWeight: 800 }}>
-                 <span>PROCESSANDO ARQUIVO...</span>
+           <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', color: 'var(--primary)', fontWeight: 800 }}>
+                 <span>PROCESSANDO...</span>
                  <span>{Math.floor(pdfProgress)}%</span>
               </div>
-              <div style={{ width: '100%', background: 'var(--border-dim)', borderRadius: '4px', height: '4px', overflow: 'hidden' }}>
+              <div style={{ width: '100%', background: 'var(--border-dim)', borderRadius: '4px', height: '3px', overflow: 'hidden' }}>
                  <div style={{ width: `${pdfProgress}%`, height: '100%', background: 'var(--primary)', transition: 'width 0.3s ease-out' }} />
               </div>
            </div>
          )}
-         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-           <button onClick={handleSign} className="btn" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem', border: signature ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: signature ? 'var(--primary)' : 'var(--text-main)', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
-             {signature ? <CheckCircle2 size={16} /> : <PenTool size={16} />}
+         <div style={{ display: 'flex', gap: '0.5rem' }}>
+           <button onClick={handleSign} className="btn" style={{ flex: 1, justifyContent: 'center', padding: '0.6rem', fontSize: '0.75rem', border: signature ? '1px solid var(--primary)' : '1px solid var(--border-dim)', color: signature ? 'var(--primary)' : 'var(--text-main)', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
+             {signature ? <CheckCircle2 size={14} /> : <PenTool size={14} />}
              {signature ? 'ASSINADO' : 'ASSINAR'}
            </button>
-           <button onClick={handleGeneratePDF} className="btn btn-primary" style={{ flex: 1, minWidth: '160px', justifyContent: 'center', padding: '0.9rem', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }} disabled={isGenerating}>
-             {isGenerating ? <RefreshCcw size={14} className="spin" /> : <Download size={14} />}
+           <button onClick={handleGeneratePDF} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '0.6rem', fontSize: '0.75rem', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }} disabled={isGenerating}>
+             {isGenerating ? <RefreshCcw size={12} className="spin" /> : <Download size={12} />}
              {isGenerating ? 'AGUARDE...' : 'GERAR PDF'}
            </button>
          </div>
