@@ -141,6 +141,14 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
     }
   };
 
+  const getDayOfWeek = (dateString) => {
+    if (!dateString) return '';
+    const parts = dateString.split('-');
+    const dt = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+    const days = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+    return days[dt.getDay()];
+  };
+
   const handleSave = () => {
     if (mode === 'create') handleCreate();
     else handleReschedule();
@@ -243,6 +251,22 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
                   ))}
                 </select>
               </div>
+              
+              {selectedTag && (
+                <div style={{ gridColumn: '1 / -1', marginTop: '0.2rem', padding: '0.8rem 1rem', background: 'rgba(212, 163, 115, 0.08)', borderRadius: '4px', border: '1px solid rgba(212, 163, 115, 0.2)', display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
+                   <Tag size={16} color="var(--secondary)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                   <div>
+                     <div style={{ fontSize: '0.75rem', color: 'var(--text-main)', marginBottom: '0.4rem', fontWeight: 600 }}>
+                        {visitTags.find(t => t.id === selectedTag)?.description}
+                     </div>
+                     {selectedTag === 'rotina_fixa' && date && timeSection && (
+                        <div style={{ fontSize: '0.7rem', color: 'var(--secondary)', lineHeight: '1.4' }}>
+                           Dessa forma, toda <strong>{getDayOfWeek(date)}</strong>, às <strong>{timeSection}</strong>, este agendamento será repetido e recriado automaticamente no seu calendário.
+                        </div>
+                     )}
+                   </div>
+                </div>
+              )}
             </div>
           )}
 

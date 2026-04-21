@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Camera, RefreshCcw, Download, Sparkles, ChevronLeft, ChevronUp, ChevronDown, Trash2, Plus, PenTool, Share2, AlertTriangle, CheckCircle2, FileText, Search, ArrowLeft, ImagePlus } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { useAppContext } from '../contexts/AppContext';
-import { saveLaudo, getLaudo, deleteLaudo, saveClient, findClientByName } from '../services/firestore';
+import { saveLaudo, getLaudo, deleteLaudo, saveClient, findClientByName, getLaudoByVisit } from '../services/firestore';
 import { uploadAuditPhoto, deleteAuditPhoto } from '../services/storage';
 import { db } from '../firebase';
 import { doc, collection } from 'firebase/firestore';
@@ -613,9 +613,15 @@ const ReportGenerator = () => {
     if (stateLaudoId) {
       getLaudo(stateLaudoId).then((laudo) => laudo ? apply(laudo) : blank());
     } else if (stateVisitId) {
-      const existing = laudos.find((l) => l.visitId === stateVisitId);
-      if (existing) apply(existing);
-      else blank();
+      const existingLocal = laudos.find((l) => l.visitId === stateVisitId);
+      if (existingLocal) {
+        apply(existingLocal);
+      } else {
+        getLaudoByVisit(stateVisitId).then((laudoRemote) => {
+          if (laudoRemote) apply(laudoRemote);
+          else blank();
+        });
+      }
     } else {
       blank();
     }
@@ -904,7 +910,19 @@ const ReportGenerator = () => {
         ) : (
            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
              {laudos.map(l => (
-               <div key={l.id} className="card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-dim)' }} onClick={() => { setLaudoId(l.id); setVisitId(l.visitId || null); setClient(l.client || ''); setMode('editor'); window.scrollTo(0, 0); }}>
+               <div key={l.id} className="card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-dim)' }} onClick={() => { 
+                 setLaudoId(l.id); 
+                 setVisitId(l.visitId || null); 
+                 setClient(l.client || ''); 
+                 setOccurrences(l.occurrences || []);
+                 setSignature(l.signature || null);
+                 setClientSignatureImage(l.clientSignatureImage || null);
+                 setAiSummary(l.aiSummary || '');
+                 setStartedAt(l.startedAt || new Date().toISOString());
+                 setClosedAt(l.closedAt || null);
+                 setMode('editor'); 
+                 window.scrollTo(0, 0); 
+               }}>
                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                    <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>{l.client || 'Sem Estabelecimento'}</div>
                    {l.status === 'signed' ? (

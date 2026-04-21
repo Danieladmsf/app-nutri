@@ -154,6 +154,15 @@ export const getLaudo = async (laudoId) => {
   return { id: snap.id, ...snap.data() };
 };
 
+export const getLaudoByVisit = async (visitId) => {
+  const userId = auth.currentUser?.uid;
+  if (!userId) return null;
+  const q = query(collection(db, collections.LAUDOS), where('userId', '==', userId), where('visitId', '==', String(visitId)));
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  return { id: snap.docs[0].id, ...snap.docs[0].data() };
+};
+
 export const saveLaudo = async (laudoData) => {
   const userId = auth.currentUser?.uid;
   if (!userId) throw new Error("Usuário não autenticado");
