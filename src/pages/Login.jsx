@@ -40,13 +40,13 @@ const Login = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-main)', padding: '20px' }}>
-      <div className="card reveal-staggered" style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', padding: '2.5rem' }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', background: 'var(--bg-main)', padding: '20px', overflowY: 'auto' }}>
+      <div className="card reveal-staggered" style={{ width: '100%', maxWidth: '400px', margin: 'auto', display: 'flex', flexDirection: 'column', padding: '1.5rem' }}>
         
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <div style={{ width: '60px', height: '60px', background: 'var(--primary)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', boxShadow: '0 8px 24px rgba(27,61,47,0.2)' }}>
-            <Lock size={28} color="white" />
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ width: '50px', height: '50px', background: 'var(--primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', boxShadow: '0 8px 24px rgba(27,61,47,0.2)' }}>
+            <Lock size={24} color="white" />
           </div>
           <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>NutriApp</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
@@ -104,7 +104,7 @@ const Login = () => {
           </button>
         </form>
 
-        <div style={{ display: 'flex', alignItems: 'center', margin: '2rem 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', margin: '1.2rem 0' }}>
           <div style={{ flex: 1, height: '1px', background: 'var(--border-dim)' }}></div>
           <span style={{ padding: '0 10px', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 }}>OU</span>
           <div style={{ flex: 1, height: '1px', background: 'var(--border-dim)' }}></div>
