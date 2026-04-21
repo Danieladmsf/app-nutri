@@ -4,8 +4,7 @@ import {
   signInWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   GoogleAuthProvider
 } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -53,26 +52,20 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Google Login
-  const loginWithGoogle = () => {
-    console.log("[AuthContext] Iniciando Redirecionamento Google OAuth...");
+  const loginWithGoogle = async () => {
+    console.log("[AuthContext] Iniciando Popup Google OAuth...");
     const provider = new GoogleAuthProvider();
-    return signInWithRedirect(auth, provider);
+    try {
+      const result = await signInWithPopup(auth, provider);
+      console.log("[AuthContext] Sucesso no Popup Google OAuth:", result.user);
+      return result;
+    } catch (err) {
+      console.error("[AuthContext] Erro ao abrir Popup Google OAuth:", err);
+      throw err;
+    }
   };
 
   useEffect(() => {
-    console.log("[AuthContext] useEffect carregado. Checando redirect anterior...");
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result) {
-          console.log("[AuthContext] Recebeu Credenciais do Google Redirect com SUCESSO!", result.user);
-        } else {
-          console.log("[AuthContext] Nenhum redirect do Google pendente.");
-        }
-      })
-      .catch((error) => {
-        console.error("[AuthContext] Erro FATAL no retorno do Google (getRedirectResult):", error);
-      });
-
     console.log("[AuthContext] Ligando onAuthStateChanged listener...");
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log("[AuthContext] State Mudou! Usuário Atual:", user ? `${user.email} (UID: ${user.uid})` : "Nenhum/Deslogado");
