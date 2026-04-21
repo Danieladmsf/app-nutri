@@ -439,8 +439,8 @@ h1, h2, h3, h4, .serif {
 /* Laudo editor: fixed header/footer, only canvas scrolls */
 @media (min-width: 1025px) {
   .laudo-editor-page {
-    height: calc(100vh - 4rem);
-    max-height: calc(100vh - 4rem);
+    height: calc(133.33vh - 5rem);
+    max-height: calc(133.33vh - 5rem);
     overflow: hidden;
     zoom: 0.75;
   }
