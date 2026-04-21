@@ -157,18 +157,29 @@ const Dashboard = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <section className="card">
             <h3 style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-               <FileText size={16} /> RECOMENDAÇÕES DA ROTA
+               <Sparkles size={16} /> INSIGHTS & AÇÕES
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                <div style={{ padding: '1rem', background: 'var(--bg-deep)', borderRadius: 'var(--radius-md)', borderLeft: '3px solid var(--primary)' }}>
-                  <p style={{ fontSize: '0.75rem', lineHeight: '1.5' }}>
-                    <strong>Alerta de Roteiro:</strong> Recomenda-se iniciar a auditoria na <em>Cozinha Matriz</em> focando nos EPIs devido ao histórico de não-conformidades.
-                  </p>
+                  {todayVisits.length === 0 ? (
+                    <p style={{ fontSize: '0.75rem', lineHeight: '1.5' }}>
+                      <strong>Sua agenda está livre!</strong><br />
+                      Cadastre novos clientes ou agende visitas para que o sistema possa gerar recomendações e alertas automáticos para sua rota.
+                    </p>
+                  ) : (
+                    <p style={{ fontSize: '0.75rem', lineHeight: '1.5' }}>
+                      <strong>Alerta de Roteiro:</strong> Você possui <strong>{todayVisits.length}</strong> visita(s) hoje. 
+                      Mantenha o foco em registrar todas as não-conformidades para gerar laudos cada vez mais precisos.
+                    </p>
+                  )}
                </div>
-               <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '0.8rem' }}>INICIAR AUDITORIA IA</button>
+               {todayVisits.length === 0 ? (
+                 <Link to="/clientes" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '0.8rem', textDecoration: 'none', display: 'flex', boxSizing: 'border-box' }}>GERENCIAR CLIENTES</Link>
+               ) : (
+                 <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '0.8rem' }}>ACOMPANHAR ROTA</button>
+               )}
             </div>
           </section>
-
         </div>
 
       </div>
