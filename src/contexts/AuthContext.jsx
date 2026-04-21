@@ -5,6 +5,7 @@ import {
   signOut, 
   onAuthStateChanged,
   signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider
 } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -41,6 +42,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    getRedirectResult(auth).catch((error) => {
+      console.error("Erro no retorno do login do Google:", error);
+    });
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
