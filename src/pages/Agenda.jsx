@@ -777,19 +777,24 @@ const Agenda = () => {
 
       {/* Full Note Reading Modal */}
       {fullNoteModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} className="reveal-staggered">
-           <div className="card" style={{ width: '100%', maxWidth: '500px', background: 'var(--bg-surface)', padding: 0, borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
-              <div style={{ padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-deep)' }}>
+        <div onClick={() => setFullNoteModal(null)} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} className="reveal-staggered">
+           <div onClick={(e) => e.stopPropagation()} className="card" style={{ width: '100%', maxWidth: '500px', background: 'var(--bg-surface)', padding: 0, borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '85vh' }}>
+              <div style={{ padding: '1rem 1.2rem', borderBottom: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-deep)', flexShrink: 0 }}>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <FileCheck size={18} color="var(--primary)" />
-                    <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>Histórico da Última Auditoria</h3>
+                    <FileCheck size={16} color="var(--primary)" />
+                    <h3 style={{ fontSize: '0.9rem', fontWeight: 800, margin: 0 }}>Histórico da Última Auditoria</h3>
                  </div>
-                 <button onClick={() => setFullNoteModal(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20}/></button>
+                 <button onClick={() => setFullNoteModal(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.3rem' }}><X size={20}/></button>
               </div>
-              <div style={{ padding: '1.5rem', overflowY: 'auto' }}>
-                 <p style={{ fontSize: '0.85rem', lineHeight: '1.6', color: 'var(--text-main)', margin: 0, whiteSpace: 'pre-wrap' }}>
-                    {fullNoteModal}
-                 </p>
+              <div style={{ padding: '1.2rem', overflowY: 'auto' }}>
+                 <div style={{ fontSize: '0.82rem', lineHeight: '1.7', color: 'var(--text-main)' }}
+                   dangerouslySetInnerHTML={{
+                     __html: fullNoteModal
+                       .replace(/\*\*(.+?)\*\*/g, '<strong style="display:block;margin-top:0.8rem;margin-bottom:0.3rem;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.03em;color:var(--primary)">$1</strong>')
+                       .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid var(--border-dim);margin:0.8rem 0" />')
+                       .replace(/\n/g, '<br/>')
+                   }}
+                 />
               </div>
            </div>
         </div>
