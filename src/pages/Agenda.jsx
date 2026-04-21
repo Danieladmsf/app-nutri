@@ -621,17 +621,19 @@ const Agenda = () => {
                        <div style={{ fontSize: '0.85rem' }}>{liveData?.contact}</div>
                      </div>
 
-                     {/* Historic Context — so aparece apos primeira auditoria real */}
+                     {/* Historic Context — compacto */}
                      {liveData?.hasRealAudit && (
-                       <div style={{ background: 'var(--bg-deep)', padding: '1rem', border: '1px solid var(--border-dim)' }}>
-                         <h5 className="stat-label" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <FileCheck size={14} /> ÚLTIMA AUDITORIA ({liveData.lastVisitDate})
-                         </h5>
-                         <div style={{ display: 'inline-block', padding: '0.2rem 0.6rem', fontSize: '0.65rem', fontWeight: 700, borderRadius: '4px', background: liveData.lastReportStatus === 'Conforme' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(212, 163, 115, 0.1)', color: liveData.lastReportStatus === 'Conforme' ? 'var(--primary)' : 'var(--secondary)', marginBottom: '0.8rem' }}>
-                            STATUS: {liveData.lastReportStatus}
+                       <div style={{ background: 'var(--bg-deep)', padding: '0.6rem 0.8rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
+                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                           <span className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.55rem' }}>
+                             <FileCheck size={11} /> ÚLTIMA AUDITORIA ({liveData.lastVisitDate})
+                           </span>
+                           <span style={{ fontSize: '0.55rem', fontWeight: 700, padding: '0.1rem 0.4rem', borderRadius: '3px', background: liveData.lastReportStatus === 'Conforme' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(212, 163, 115, 0.1)', color: liveData.lastReportStatus === 'Conforme' ? 'var(--primary)' : 'var(--secondary)' }}>
+                             {liveData.lastReportStatus}
+                           </span>
                          </div>
-                         <p style={{ fontSize: '0.8rem', lineHeight: '1.5', color: 'var(--text-muted)' }}>
-                            <strong>Foco de Atenção:</strong> {liveData.historicIssues}
+                         <p style={{ fontSize: '0.7rem', lineHeight: '1.4', color: 'var(--text-muted)', margin: 0 }}>
+                            <strong>Foco:</strong> {liveData.historicIssues && liveData.historicIssues.length > 120 ? liveData.historicIssues.slice(0, 120) + '…' : liveData.historicIssues}
                          </p>
                        </div>
                      )}
@@ -714,22 +716,22 @@ const Agenda = () => {
                      <div>
                        <h5 className="stat-label" style={{ marginBottom: '0.5rem' }}>CONTATO RESPONSÁVEL</h5>
                        <div style={{ fontSize: '0.85rem' }}>{liveData?.contact}</div>
-                     </div>
-
-                     {/* Historic Context — so aparece apos primeira auditoria real */}
-                     {liveData?.hasRealAudit && (
-                       <div style={{ background: 'var(--bg-deep)', padding: '1rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
-                         <h5 className="stat-label" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <FileCheck size={14} /> ÚLTIMA AUDITORIA ({liveData.lastVisitDate})
-                         </h5>
-                         <div style={{ display: 'inline-block', padding: '0.2rem 0.6rem', fontSize: '0.65rem', fontWeight: 700, borderRadius: '4px', background: liveData.lastReportStatus === 'Conforme' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(212, 163, 115, 0.1)', color: liveData.lastReportStatus === 'Conforme' ? 'var(--primary)' : 'var(--secondary)', marginBottom: '0.8rem' }}>
-                            STATUS: {liveData.lastReportStatus}
-                         </div>
-                         <p style={{ fontSize: '0.8rem', lineHeight: '1.5', color: 'var(--text-muted)' }}>
-                            <strong>Foco de Atenção:</strong> {liveData.historicIssues}
-                         </p>
-                       </div>
-                     )}
+                        {/* Historic Context — compacto */}
+                      {liveData?.hasRealAudit && (
+                        <div style={{ background: 'var(--bg-deep)', padding: '0.6rem 0.8rem', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                            <span className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.55rem' }}>
+                              <FileCheck size={11} /> ÚLTIMA AUDITORIA ({liveData.lastVisitDate})
+                            </span>
+                            <span style={{ fontSize: '0.55rem', fontWeight: 700, padding: '0.1rem 0.4rem', borderRadius: '3px', background: liveData.lastReportStatus === 'Conforme' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(212, 163, 115, 0.1)', color: liveData.lastReportStatus === 'Conforme' ? 'var(--primary)' : 'var(--secondary)' }}>
+                              {liveData.lastReportStatus}
+                            </span>
+                          </div>
+                          <p style={{ fontSize: '0.7rem', lineHeight: '1.4', color: 'var(--text-muted)', margin: 0 }}>
+                             <strong>Foco:</strong> {liveData.historicIssues && liveData.historicIssues.length > 120 ? liveData.historicIssues.slice(0, 120) + '…' : liveData.historicIssues}
+                          </p>
+                        </div>
+                      )}     </div>
                    </>
                  );
                })()}
