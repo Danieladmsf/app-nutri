@@ -66,7 +66,6 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
 
     setSaving(true);
     try {
-      // Dados de auditoria so entram no snapshot se ja houve uma auditoria real assinada
       const clientData = {
         contact: selectedClient.contactRole || selectedClient.contact || 'Contato',
       };
@@ -77,19 +76,37 @@ const ScheduleModal = ({ isOpen, onClose, initialData }) => {
         clientData.historicIssues = selectedClient.historicIssues;
       }
 
-      await saveVisit({
-        dateKey: date,
+      const isRecurring = (selectedTag || 'pontual') === 'rotina_fixa';
+      const visitPayload = {
         time: timeSection,
         duration: duration,
         client: selectedClient.name,
         clientId: selectedClient.id,
         address: selectedClient.address || '',
         status: 'Em aberto',
-        isRecurring: (selectedTag || 'pontual') === 'rotina_fixa',
+        isRecurring: isRecurring,
         visitType: visitTags.find(t => t.id === selectedTag)?.label || 'Visita / Auditoria',
         tag: selectedTag,
         clientData,
-      });
+      };
+
+      if (isRecurring) {
+        // Criar a visita para as próximas 24 semanas (aprox 6 meses)
+        const parts = date.split('-');
+        let currentDate = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+        for (let i = 0; i < 24; i++) {
+           const y = currentDate.getFullYear();
+           const m = String(currentDate.getMonth() + 1).padStart(2, '0');
+           const d = String(currentDate.getDate()).padStart(2, '0');
+           const nextKey = `${y}-${m}-${d}`;
+
+           await saveVisit({ ...visitPayload, dateKey: nextKey });
+           
+           currentDate.setDate(currentDate.getDate() + 7);
+        }
+      } else {
+        await saveVisit({ ...visitPayload, dateKey: date });
+      }
       onClose();
     } catch (err) {
       console.error('Erro ao salvar visita:', err);
