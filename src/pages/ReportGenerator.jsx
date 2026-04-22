@@ -561,6 +561,12 @@ const ReportGenerator = () => {
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const isHydratingRef = useRef(true);
   const lastSummaryHashRef = useRef('');
+  
+  // Ref para evitar duplicação em race conditions do auto-save
+  const laudoIdRef = useRef(stateLaudoId);
+  useEffect(() => {
+    laudoIdRef.current = laudoId;
+  }, [laudoId]);
 
   // Carrega o símbolo da nutrição inline (necessário para o html2canvas renderizar no PDF)
   useEffect(() => {
@@ -575,11 +581,13 @@ const ReportGenerator = () => {
 
   // Garante que o laudo tenha um ID no Firestore (necessário para uploads de fotos)
   const ensureLaudoId = async () => {
-    if (laudoId && !laudoId.startsWith('_temp_')) return laudoId;
+    let currentId = laudoIdRef.current;
+    if (currentId && !currentId.startsWith('_temp_')) return currentId;
     const newRef = doc(collection(db, 'laudos'));
-    const id = newRef.id;
-    setLaudoId(id);
-    return id;
+    currentId = newRef.id;
+    laudoIdRef.current = currentId;
+    setLaudoId(currentId);
+    return currentId;
   };
 
   // Hydrate editor state from Firestore / route state when entering editor mode.
@@ -640,8 +648,9 @@ const ReportGenerator = () => {
     setSaveStatus('saving');
     const timeout = setTimeout(async () => {
       try {
+        const idToSave = await ensureLaudoId();
         const payload = {
-          id: laudoId,
+          id: idToSave,
           visitId,
           client,
           occurrences: sanitizeOccurrences(occurrences),
@@ -654,8 +663,7 @@ const ReportGenerator = () => {
           professional: profile ? { name: profile.name || '', crm: profile.crm || '' } : null,
           dateKey: startedAt ? String(startedAt).slice(0, 10) : null
         };
-        const newId = await saveLaudo(payload);
-        if (!laudoId) setLaudoId(newId);
+        await saveLaudo(payload);
         setSaveStatus('saved');
       } catch (e) {
         console.error('Falha ao salvar laudo:', e);
